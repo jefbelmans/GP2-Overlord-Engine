@@ -19,7 +19,7 @@
 #ifdef W3
 #include "Scenes/Week 3/MinionScene.h"
 #include "Scenes/Week 3/RigidBodyTestScene.h"
-//#include "Scenes/Week 3/PongScene.h"
+#include "Scenes/Week 3/W3_PongScene.h"
 #endif
 
 #ifdef W4
@@ -95,8 +95,8 @@ void MainGame::Initialize()
 
 #ifdef W3
 	//SceneManager::Get()->AddGameScene(new MinionScene());
-	SceneManager::Get()->AddGameScene(new RigidBodyTestScene());
-	//SceneManager::Get()->AddGameScene(new PongScene());
+	//SceneManager::Get()->AddGameScene(new RigidBodyTestScene());
+	SceneManager::Get()->AddGameScene(new W3_PongScene());
 #endif
 
 #ifdef W4
