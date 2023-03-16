@@ -20,7 +20,7 @@ float gSpikeLength
 
 RasterizerState FrontCulling 
 { 
-	CullMode = FRONT; 
+	CullMode = BACK; 
 };
 
 //**********
@@ -41,17 +41,9 @@ struct GS_DATA
 //****************
 // VERTEX SHADER *
 //****************
-GS_DATA MainVS(VS_DATA vsData)
+VS_DATA MainVS(VS_DATA vsData)
 {
-	//Step 1.
-	//Delete this transformation code and just return the VS_DATA parameter (vsData)
-	//Don't forget to change the return type!
-
-    GS_DATA temp = (GS_DATA) 0;
-    temp.Position = mul(float4(vsData.Position, 1), m_MatrixWorldViewProj);
-    temp.Normal = mul(vsData.Normal, (float3x3) m_MatrixWorld);
-
-    return temp;
+    return vsData;
 }
 
 //******************
@@ -60,41 +52,58 @@ GS_DATA MainVS(VS_DATA vsData)
 void CreateVertex(inout TriangleStream<GS_DATA> triStream, float3 pos, float3 normal, float2 texCoord)
 {
 	//Step 1. Create a GS_DATA object
+	GS_DATA data = (GS_DATA)0;
 	//Step 2. Transform the position using the WVP Matrix and assign it to (GS_DATA object).Position (Keep in mind: float3 -> float4)
+	data.Position = mul(float4(pos, 1.f), m_MatrixWorldViewProj);
 	//Step 3. Transform the normal using the World Matrix and assign it to (GS_DATA object).Normal (Only Rotation, No translation!)
+	data.Normal = mul(normal, (float3x3)m_MatrixWorld);
 	//Step 4. Append (GS_DATA object) to the TriangleStream parameter (TriangleStream::Append(...))
+	triStream.Append(data);
 }
 
-[maxvertexcount(6)]
+[maxvertexcount(9)]
 void SpikeGenerator(triangle VS_DATA vertices[3], inout TriangleStream<GS_DATA> triStream)
 {
 	//Use these variable names
     float3 basePoint, top, left, right, spikeNormal;
 
 	//Step 1. Calculate CENTER_POINT
+	basePoint = mul(vertices[0].Position + vertices[1].Position + vertices[2].Position, 0.333333f);
 	//Step 2. Calculate Face Normal (Original Triangle)
+	spikeNormal = normalize(mul(vertices[0].Normal + vertices[1].Normal + vertices[2].Normal, 0.333333f));
 	//Step 3. Offset CENTER_POINT (use gSpikeLength)
+	basePoint += mul(spikeNormal, gSpikeLength);
+	
 	//Step 4 + 5. Calculate Individual Face Normals (Cross Product of Face Edges) & Create Vertices for every face
 
-        //FACE 1
-        //faceNormal1 = ...
-        //CreateVertex(triStream, ...)
-        //CreateVertex(triStream, ...)
-        //CreateVertex(triStream, ...)
+    //FACE 1
+	left = vertices[1].Position;
+	right = vertices[0].Position;
+	float3 faceNormal = cross((right - basePoint), (right - left));
+	CreateVertex(triStream, left, faceNormal, float2(0.f, 0.f));
+	CreateVertex(triStream, right, faceNormal, float2(0.f, 0.f));
+	CreateVertex(triStream, basePoint, faceNormal, float2(0.f, 0.f));
+		
+    //Restart Strip! >> We want to start a new triangle (= interrupt trianglestrip)
+	triStream.RestartStrip();
 
-        //Restart Strip! >> We want to start a new triangle (= interrupt trianglestrip)
-        //(TriangleStream::RestartStrip())
+    //FACE 2
+    left = vertices[2].Position;
+	right = vertices[1].Position;
+	faceNormal = cross((right - basePoint), (right - left));
+	CreateVertex(triStream, left, faceNormal, float2(0.f, 0.f));
+	CreateVertex(triStream, right, faceNormal, float2(0.f, 0.f));
+	CreateVertex(triStream, basePoint, faceNormal, float2(0.f, 0.f));
 
-        //FACE 2
-        //...
-
-        //...
-
-        //Face 3
-        //...
-
-    //Step 6. Complete code in CreateVertex(...)
-    //Step 7. Bind this Geometry Shader function to the effect pass (See Technique Struct)
+	triStream.RestartStrip();
+	
+    //Face 3
+	left = vertices[0].Position;
+	right = vertices[2].Position;
+	faceNormal = cross((right - basePoint), (right - left));
+	CreateVertex(triStream, left, faceNormal, float2(0.f, 0.f));
+	CreateVertex(triStream, right, faceNormal, float2(0.f, 0.f));
+	CreateVertex(triStream, basePoint, faceNormal, float2(0.f, 0.f));
 }
 
 //***************
@@ -110,13 +119,13 @@ float4 MainPS(GS_DATA input) : SV_TARGET
 //*************
 // TECHNIQUES *
 //*************
-technique11 Default //FXComposer >> Rename to "technique10 Default"
+technique11 Default
 {
     pass p0
     {
         SetRasterizerState(FrontCulling);
         SetVertexShader(CompileShader(vs_4_0, MainVS()));
-        SetGeometryShader(NULL);
+        SetGeometryShader(CompileShader(gs_4_0, SpikeGenerator()));
         SetPixelShader(CompileShader(ps_4_0, MainPS()));
     }
 }
