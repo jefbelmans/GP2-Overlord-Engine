@@ -93,6 +93,8 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Materials\DiffuseMaterial.cpp" />
+    <ClCompile Include="Scenes\Week 4\ModelTestScene.cpp" />
     <ClCompile Include="Prefabs\CubePrefab.cpp" />
     <ClCompile Include="Prefabs\SpherePrefab.cpp" />
     <ClCompile Include="Prefabs\TorusPrefab.cpp" />
@@ -115,6 +117,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Scenes\Week 3\W3_PongScene.cpp" />
+    <ClCompile Include="Scenes\Week 4\UberMaterialScene.cpp" />
+    <ClCompile Include="Materials\UberMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OverlordEngine\OverlordEngine.vcxproj">
@@ -122,6 +126,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Materials\DiffuseMaterial.h" />
+    <ClInclude Include="Scenes\Week 4\ModelTestScene.h" />
     <ClInclude Include="Prefabs\CubePrefab.h" />
     <ClInclude Include="Prefabs\SpherePrefab.h" />
     <ClInclude Include="Prefabs\TorusPrefab.h" />
@@ -131,6 +137,8 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="MainGame.h" />
     <ClInclude Include="Scenes\Week 3\W3_PongScene.h" />
+    <ClInclude Include="Scenes\Week 4\UberMaterialScene.h" />
+    <ClInclude Include="Materials\UberMaterial.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
