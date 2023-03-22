@@ -61,11 +61,11 @@ void CreateVertex(inout TriangleStream<GS_DATA> triStream, float3 pos, float4 co
 		//Transform to origin
 		//Rotate
 		//Retransform to initial position
-        float2 origPos = pos.xy + offset + pivotOffset;
         pos.xy -= offset - pivotOffset;
-        pos.x = (origPos.x * rotCosSin.x) - (origPos.y - rotCosSin.y);
-        pos.y = (origPos.y * rotCosSin.x) + (origPos.x - rotCosSin.y);
-        pos.xy += offset + pivotOffset;
+        float2 origPos = pos.xy;
+        pos.x = (origPos.x * rotCosSin.x) - (origPos.y * rotCosSin.y);
+        pos.y = (origPos.y * rotCosSin.x) + (origPos.x * rotCosSin.y);
+        pos.xy += offset;
     }
     else
     {
@@ -107,8 +107,6 @@ void MainGS(point VS_DATA vertex[1], inout TriangleStream<GS_DATA> triStream)
 	// LB----------RB
 
 	//VERTEX 1 [LT]
-    
-    position.xy = offset;
     CreateVertex(triStream, position, float4(1, 1, 1, 1), texCoord, rotation, rotCosSin, offset, pivotOffset); //Change the color data too!
 
 	//VERTEX 2 [RT]
