@@ -61,12 +61,18 @@ void CreateVertex(inout TriangleStream<GS_DATA> triStream, float3 pos, float4 co
 		//Transform to origin
 		//Rotate
 		//Retransform to initial position
+        float2 origPos = pos.xy + offset + pivotOffset;
+        pos.xy -= offset - pivotOffset;
+        pos.x = (origPos.x * rotCosSin.x) - (origPos.y - rotCosSin.y);
+        pos.y = (origPos.y * rotCosSin.x) + (origPos.x - rotCosSin.y);
+        pos.xy += offset + pivotOffset;
     }
     else
     {
 		//Step 2.
 		//No rotation calculations (no need to do the rotation calculations if there is no rotation applied > redundant operations)
 		//Just apply the pivot offset
+        pos += float3(pivotOffset, 0.f);
     }
 
 	//Geometry Vertex Output
@@ -81,13 +87,16 @@ void CreateVertex(inout TriangleStream<GS_DATA> triStream, float3 pos, float4 co
 void MainGS(point VS_DATA vertex[1], inout TriangleStream<GS_DATA> triStream)
 {
 	//Given Data (Vertex Data)
-    float3 position = float3(0, 0, 0); //Extract the position data from the VS_DATA vertex struct
-    float2 offset = float2(0, 0); //Extract the offset data from the VS_DATA vertex struct (initial X and Y position)
-    float rotation = 0; //Extract the rotation data from the VS_DATA vertex struct
-    float2 pivot = float2(0, 0); //Extract the pivot data from the VS_DATA vertex struct
-    float2 scale = float2(0, 0); //Extract the scale data from the VS_DATA vertex struct
+    float3 position = vertex[0].TransformData.xyz; //Extract the position data from the VS_DATA vertex struct
+    float2 offset = vertex[0].TransformData.xy; //Extract the offset data from the VS_DATA vertex struct (initial X and Y position)
+    float rotation = vertex[0].TransformData.w; //Extract the rotation data from the VS_DATA vertex struct
+    float2 pivot = vertex[0].TransformData2.xy; //Extract the pivot data from the VS_DATA vertex struct
+    float2 scale = vertex[0].TransformData2.zw; //Extract the scale data from the VS_DATA vertex struct
     float2 texCoord = float2(0, 0); //Initial Texture Coordinate
 	
+    float2 pivotOffset = -pivot * gTextureSize * scale;
+    float2 rotCosSin = float2(cos(rotation), sin(rotation));
+    
 	//...
 
 	// LT----------RT //TringleStrip (LT > RT > LB, LB > RB > RT)
@@ -98,16 +107,27 @@ void MainGS(point VS_DATA vertex[1], inout TriangleStream<GS_DATA> triStream)
 	// LB----------RB
 
 	//VERTEX 1 [LT]
-    CreateVertex(triStream, position, float4(1, 1, 1, 1), texCoord, rotation, float2(0, 0), offset, float2(0, 0)); //Change the color data too!
+    
+    position.xy = offset;
+    CreateVertex(triStream, position, float4(1, 1, 1, 1), texCoord, rotation, rotCosSin, offset, pivotOffset); //Change the color data too!
 
 	//VERTEX 2 [RT]
-    CreateVertex(triStream, position, float4(1, 1, 1, 1), texCoord, rotation, float2(0, 0), offset, float2(0, 0)); //Change the color data too!
+    position.x = offset.x + gTextureSize.x * scale.x;
+    position.y = offset.y;
+    texCoord = position.xy;
+    texCoord = float2(1, 0);
+    CreateVertex(triStream, position, float4(1, 1, 1, 1), texCoord, rotation, rotCosSin, offset, pivotOffset); //Change the color data too!
 
 	//VERTEX 3 [LB]
-    CreateVertex(triStream, position, float4(1, 1, 1, 1), texCoord, rotation, float2(0, 0), offset, float2(0, 0)); //Change the color data too!
+    position.x = offset.x;
+    position.y = offset.y + gTextureSize.y * scale.y;
+    texCoord = float2(0, 1);
+    CreateVertex(triStream, position, float4(1, 1, 1, 1), texCoord, rotation, rotCosSin, offset, pivotOffset); //Change the color data too!
 
 	//VERTEX 4 [RB]
-    CreateVertex(triStream, position, float4(1, 1, 1, 1), texCoord, rotation, float2(0, 0), offset, float2(0, 0)); //Change the color data too!
+    position.xy = offset + gTextureSize.xy * scale;
+    texCoord = float2(1, 1);
+    CreateVertex(triStream, position, float4(1, 1, 1, 1), texCoord, rotation, rotCosSin, offset, pivotOffset); //Change the color data too!
 }
 
 //PIXEL SHADER
@@ -118,7 +138,7 @@ float4 MainPS(GS_DATA input) : SV_TARGET
 }
 
 // Default Technique
-technique11 Default
+technique10 Default
 {
     pass p0
     {
