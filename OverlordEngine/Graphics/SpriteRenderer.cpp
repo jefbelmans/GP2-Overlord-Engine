@@ -16,6 +16,14 @@ void SpriteRenderer::Initialize()
 	const float scaleX = (m_GameContext.windowWidth > 0) ? 2.0f / float(m_GameContext.windowWidth) : 0;
 	const float scaleY = (m_GameContext.windowHeight > 0) ? 2.0f / float(m_GameContext.windowHeight) : 0;
 
+	// VERTEX BUFFER
+	ZeroMemory(&m_DescVertexBuffer, sizeof(m_DescVertexBuffer));
+	m_DescVertexBuffer.Usage = D3D11_USAGE_DYNAMIC;
+	m_DescVertexBuffer.ByteWidth = sizeof(VertexSprite);
+	m_DescVertexBuffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	m_DescVertexBuffer.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	m_DescVertexBuffer.MiscFlags = 0;
+
 	m_Transform = XMFLOAT4X4{
 		scaleX, 0,       0, 0,
 		0,      -scaleY, 0 ,0,
@@ -44,10 +52,8 @@ SpriteRenderer::~SpriteRenderer()
 	m_Textures.clear();
 }
 
-void SpriteRenderer::UpdateBuffer(const SceneContext& /*sceneContext*/)
+void SpriteRenderer::UpdateBuffer(const SceneContext& sceneContext)
 {
-	TODO_W4(L"Complete UpdateBuffer")
-
 	if (!m_pVertexBuffer || m_Sprites.size() > m_BufferSize)
 	{
 		// if the vertex buffer does not exists, or the number of sprites is bigger then the buffer size
@@ -58,7 +64,11 @@ void SpriteRenderer::UpdateBuffer(const SceneContext& /*sceneContext*/)
 		//
 		//		Finally create the buffer (sceneContext.d3dContext.pDevice). Be sure to log the HResult! (HANDLE_ERROR)
 
+		if (m_pVertexBuffer) m_pVertexBuffer->Release();
+		if (m_Sprites.size() != m_BufferSize) m_BufferSize = static_cast<UINT>(m_Sprites.size() * sizeof(VertexSprite));
+		m_DescVertexBuffer.ByteWidth = m_BufferSize;
 
+		HANDLE_ERROR(sceneContext.d3dContext.pDevice->CreateBuffer(&m_DescVertexBuffer, nullptr, &m_pVertexBuffer));
 		ASSERT_NULL_(m_pVertexBuffer);
 	}
 
@@ -90,6 +100,10 @@ void SpriteRenderer::UpdateBuffer(const SceneContext& /*sceneContext*/)
 		// Next you will need to use the device context to map the vertex buffer to the mapped resource
 		// use memcpy to copy all our sprite vertices (m_Sprites) to the mapped resource (D3D11_MAPPED_SUBRESOURCE::pData)
 		// unmap the vertex buffer
+		D3D11_MAPPED_SUBRESOURCE resource;
+		sceneContext.d3dContext.pDeviceContext->Map(m_pVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+		memcpy(resource.pData, &m_Sprites, m_BufferSize);
+		sceneContext.d3dContext.pDeviceContext->Unmap(m_pVertexBuffer, 0);
 	}
 }
 

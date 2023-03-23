@@ -18,13 +18,24 @@ void SpriteComponent::SetTexture(const std::wstring& spriteAsset)
 	m_pTexture = ContentManager::Load<TextureData>(m_SpriteAsset);
 }
 
-void SpriteComponent::Draw(const SceneContext& /*sceneContext*/)
+void SpriteComponent::Draw(const SceneContext& sceneContext)
 {
 	if (!m_pTexture)
 		return;
 
-	TODO_W4(L"Draw the sprite with SpriteRenderer::Draw")
+	TransformComponent* pTransform{ GetGameObject()->GetComponent<TransformComponent>() };
+	const XMFLOAT3& position{ pTransform->GetWorldPosition() };
+	const XMFLOAT3& scale{ pTransform->GetWorldScale() };
 
+	/*SpriteRenderer::Get()->AppendSprite(m_pTexture, XMFLOAT2{ position.x, position.y }, m_Color,
+		m_Pivot, XMFLOAT2{ scale.x, scale.y }, MathHelper::QuaternionToEuler(pTransform->GetWorldRotation()).z, pTransform->GetPosition().z);
+	SpriteRenderer::Get()->Draw(sceneContext);*/
+
+	SpriteRenderer::Get()->DrawImmediate(
+		sceneContext.d3dContext, m_pTexture->GetShaderResourceView(),
+		XMFLOAT2{ position.x, position.y }, m_Color,
+		m_Pivot, XMFLOAT2{ scale.x, scale.y },
+		MathHelper::QuaternionToEuler(pTransform->GetWorldRotation()).z);
 	//Here you need to draw the SpriteComponent using the Draw of the sprite renderer
 	// The sprite renderer is a singleton
 	// you will need to position (X&Y should be in screenspace, Z contains the depth between [0,1]), the rotation and the scale from the owning GameObject

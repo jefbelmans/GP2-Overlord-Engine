@@ -32,6 +32,7 @@ private:
 	ID3DX11EffectTechnique* m_pTechnique{};
 	ID3D11InputLayout* m_pInputLayout{};
 
+	D3D11_BUFFER_DESC m_DescVertexBuffer{};
 	ID3D11Buffer* m_pVertexBuffer{}, * m_pImmediateVertexBuffer{};
 	VertexSprite m_ImmediateVertex{};
 
