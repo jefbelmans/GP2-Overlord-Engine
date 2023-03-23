@@ -15,10 +15,10 @@ void SpriteTestScene::Initialize()
 	m_pSprite->GetTransform()->Scale(1.f, 1.f, 1.f);
 }
 
+
 void SpriteTestScene::Update()
 {
 	m_pSprite->GetTransform()->Rotate(0.f, 0.f, m_TotalRotation);
-
 	if (m_AutoRotate)
 	{
 		m_TotalRotation += 30.f * m_SceneContext.pGameTime->GetElapsed();

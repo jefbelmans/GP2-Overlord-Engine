@@ -64,6 +64,7 @@ void SpriteRenderer::UpdateBuffer(const SceneContext& sceneContext)
 		//
 		//		Finally create the buffer (sceneContext.d3dContext.pDevice). Be sure to log the HResult! (HANDLE_ERROR)
 
+
 		if (m_pVertexBuffer) m_pVertexBuffer->Release();
 		if (m_Sprites.size() != m_BufferSize) m_BufferSize = static_cast<UINT>(m_Sprites.size() * sizeof(VertexSprite));
 		m_DescVertexBuffer.ByteWidth = m_BufferSize;
