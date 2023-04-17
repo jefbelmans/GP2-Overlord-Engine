@@ -77,9 +77,9 @@ GameObject* CameraComponent::Pick(CollisionGroup ignoreGroups) const
 	const auto ndcf = DirectX::XMFLOAT4{ ndc.x, ndc.y, 1.0f, 0.0f };
 
 	XMFLOAT4 nearPoint;
-	DirectX::XMStoreFloat4(&nearPoint, DirectX::XMVector4Transform(DirectX::XMLoadFloat4(&ndcn), DirectX::XMLoadFloat4x4(&m_ViewProjectionInverse)));
+	DirectX::XMStoreFloat4(&nearPoint, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat4(&ndcn), DirectX::XMLoadFloat4x4(&m_ViewProjectionInverse)));
 	XMFLOAT4 farPoint;
-	DirectX::XMStoreFloat4(&farPoint, DirectX::XMVector4Transform(DirectX::XMLoadFloat4(&ndcf), DirectX::XMLoadFloat4x4(&m_ViewProjectionInverse)));
+	DirectX::XMStoreFloat4(&farPoint, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat4(&ndcf), DirectX::XMLoadFloat4x4(&m_ViewProjectionInverse)));
 
 	// RAYCAST
 	PxQueryFilterData filterData{};
