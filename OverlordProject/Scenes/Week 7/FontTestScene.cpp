@@ -7,7 +7,7 @@ void FontTestScene::Initialize()
 	m_SceneContext.settings.drawGrid = false;
 	m_SceneContext.settings.clearColor = XMFLOAT4{ 0.f,0.f,0.f,0.f };
 
-	m_pFont = ContentManager::Load<SpriteFont>(L"SpriteFonts/Consolas_32.fnt");
+	m_pFont = ContentManager::Load<SpriteFont>(L"SpriteFonts/Bahnschrift_32.fnt");
 }
 
 void FontTestScene::Update()
