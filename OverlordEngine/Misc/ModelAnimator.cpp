@@ -27,12 +27,17 @@ void ModelAnimator::Update(const SceneContext& sceneContext)
 		//	Add passedTicks to m_TickCount
 		//	if m_TickCount is bigger than the clip duration, subtract the duration from m_TickCount
 		if (m_Reversed)
+		{
 			m_TickCount -= passedTicks;
+			if (m_TickCount < 0)
+				m_TickCount += m_CurrentClip.duration;
+		}
 		else
+		{
 			m_TickCount += passedTicks;
-
-		m_TickCount = fmod(m_TickCount, m_CurrentClip.duration);
-
+			if(m_TickCount > m_CurrentClip.duration)
+				m_TickCount -= m_CurrentClip.duration;
+		}
 
 		//3.
 		//Find the enclosing keys
