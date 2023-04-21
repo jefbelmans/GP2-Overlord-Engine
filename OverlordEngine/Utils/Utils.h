@@ -66,5 +66,15 @@ namespace ConvertUtil
 	{
 		return reinterpret_cast<float*>(const_cast<XMFLOAT4*>(&v));
 	}
+
+	inline PxVec3 ToPxVec3(const XMFLOAT3& v)
+	{
+		return PxVec3{ v.x, v.y, v.z };
+	}
+
+	inline PxExtendedVec3 ToPxExtendedVec3(const XMFLOAT3& v)
+	{
+		return PxExtendedVec3{ v.x, v.y, v.z };
+	}
 }
 

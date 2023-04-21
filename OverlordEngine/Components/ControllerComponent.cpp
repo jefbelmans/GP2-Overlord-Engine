@@ -10,7 +10,12 @@ void ControllerComponent::Initialize(const SceneContext& /*sceneContext*/)
 {
 	if(!m_IsInitialized)
 	{
-		TODO_W7(L"Complete the ControllerComponent Intialization")
+		m_ControllerDesc.position = ConvertUtil::ToPxExtendedVec3(GetTransform()->GetWorldPosition());
+		m_ControllerDesc.userData = this;
+		ASSERT_NULL_(m_pController = m_pScene->GetPhysxProxy()->GetControllerManager()->createController(m_ControllerDesc));
+		m_pController->getActor()->userData = this;
+		SetCollisionGroup(static_cast<CollisionGroup>(m_CollisionGroups.word0));
+		SetCollisionIgnoreGroup(static_cast<CollisionGroup>(m_CollisionGroups.word1));
 	}
 }
 

@@ -13,12 +13,12 @@ struct CharacterDesc
 	}
 
 	float maxMoveSpeed{ 15.f };
-	float maxFallSpeed{ 15.f };
+	float maxFallSpeed{ 150.f };
 
-	float JumpSpeed{ 15.f };
+	float JumpSpeed{ 300.f };
 
 	float moveAccelerationTime{ .3f };
-	float fallAccelerationTime{ .3f };
+	float fallAccelerationTime{ .4f };
 
 	PxCapsuleControllerDesc controller{};
 

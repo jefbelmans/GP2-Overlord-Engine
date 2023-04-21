@@ -93,9 +93,6 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\..\Users\watwa\Downloads\GP2_W7_Resources\W7_LabFiles\OverlordProject\Scenes\Week 7\CharacterScene.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\..\Users\watwa\Downloads\GP2_W7_Resources\W7_LabFiles\OverlordProject\Scenes\Week 7\FontTestScene.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\..\Users\watwa\Downloads\GP2_W7_Resources\W7_LabFiles\OverlordProject\Scenes\Week 7\PickingScene.cpp" />
     <ClCompile Include="Materials\DiffuseMaterial_Skinned.cpp" />
     <ClCompile Include="Prefabs\BoneObject.cpp" />
     <ClCompile Include="Materials\DiffuseMaterial.cpp" />
@@ -142,9 +139,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\..\Users\watwa\Downloads\GP2_W7_Resources\W7_LabFiles\OverlordProject\Scenes\Week 7\CharacterScene.h" />
-    <ClInclude Include="..\..\..\..\..\..\..\Users\watwa\Downloads\GP2_W7_Resources\W7_LabFiles\OverlordProject\Scenes\Week 7\FontTestScene.h" />
-    <ClInclude Include="..\..\..\..\..\..\..\Users\watwa\Downloads\GP2_W7_Resources\W7_LabFiles\OverlordProject\Scenes\Week 7\PickingScene.h" />
     <ClInclude Include="Materials\DiffuseMaterial_Skinned.h" />
     <ClInclude Include="Prefabs\BoneObject.h" />
     <ClInclude Include="Materials\DiffuseMaterial.h" />
