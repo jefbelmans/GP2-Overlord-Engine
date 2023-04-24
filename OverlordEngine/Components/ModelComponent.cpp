@@ -99,16 +99,18 @@ void ModelComponent::Draw(const SceneContext& sceneContext)
 	}
 }
 
-void ModelComponent::ShadowMapDraw(const SceneContext& /*sceneContext*/)
+void ModelComponent::ShadowMapDraw(const SceneContext& sceneContext)
 {
 	//We only draw this Mesh to the ShadowMap if it casts shadows
 	if (!m_CastShadows)return;
 
-	TODO_W8(L"Draw Mesh to ShadowMapRenderer (Static/Skinned)")
 	//This function is only called during the ShadowPass (and if m_enableShadowMapDraw is true)
 	//Here we want to Draw this Mesh to the ShadowMap, using the ShadowMapRenderer::DrawMesh function
-
 	//1. Call ShadowMapRenderer::DrawMesh with the required function arguments BUT boneTransforms are only required for skinned meshes of course..
+	if(m_pMeshFilter->HasAnimations())
+		ShadowMapRenderer::Get()->DrawMesh(sceneContext, m_pMeshFilter, GetTransform()->GetWorld(), m_pAnimator->GetBoneTransforms());
+	else
+		ShadowMapRenderer::Get()->DrawMesh(sceneContext, m_pMeshFilter, GetTransform()->GetWorld());
 }
 
 void ModelComponent::SetMaterial(BaseMaterial* pMaterial, UINT8 submeshId)

@@ -37,11 +37,11 @@ void DiffuseMaterial_Shadow_Skinned::OnUpdateModelVariables(const SceneContext& 
 	XMFLOAT4X4 lWvp;
 	XMStoreFloat4x4(&lWvp,
 		XMMatrixMultiply(
-			XMLoadFloat4x4(&pShadowMapRenderer->GetLightVP()),
-			XMLoadFloat4x4(&pModel->GetTransform()->GetWorld())
+			XMLoadFloat4x4(&pModel->GetTransform()->GetWorld()),
+			XMLoadFloat4x4(&pShadowMapRenderer->GetLightVP())
 		));
 
-	SetVariable_Matrix(L"gWorldViewProj_Light", lWvp);
+	SetVariable_Matrix(L"gWorldViewProj_Light", reinterpret_cast<const float*>(&lWvp));
 	SetVariable_Texture(L"gShadowMap", pShadowMapRenderer->GetShadowMap());
 	SetVariable_Vector(L"gLightDirection", sceneContext.pLights->GetDirectionalLight().direction);
 
