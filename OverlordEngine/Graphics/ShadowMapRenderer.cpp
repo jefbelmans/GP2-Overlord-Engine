@@ -23,12 +23,12 @@ void ShadowMapRenderer::Initialize()
 void ShadowMapRenderer::UpdateMeshFilter(const SceneContext& /*sceneContext*/, MeshFilter* /*pMeshFilter*/) const
 {
 	TODO_W8(L"Implement UpdateMeshFilter")
-	//Here we want to Update the MeshFilter of ModelComponents that need to be rendered to the ShadowMap
-	//Updating the MeshFilter means that we want to create a corresponding VertexBuffer for our ShadowGenerator material
+		//Here we want to Update the MeshFilter of ModelComponents that need to be rendered to the ShadowMap
+		//Updating the MeshFilter means that we want to create a corresponding VertexBuffer for our ShadowGenerator material
 
-	//1. Figure out the correct ShadowGeneratorType (either Static, or Skinned) with information from the incoming MeshFilter
-	//2. Retrieve the corresponding TechniqueContext from m_GeneratorTechniqueContexts array (Static/Skinned)
-	//3. Build a corresponding VertexBuffer with data from the relevant TechniqueContext you retrieved in Step2 (MeshFilter::BuildVertexBuffer)
+		//1. Figure out the correct ShadowGeneratorType (either Static, or Skinned) with information from the incoming MeshFilter
+		//2. Retrieve the corresponding TechniqueContext from m_GeneratorTechniqueContexts array (Static/Skinned)
+		//3. Build a corresponding VertexBuffer with data from the relevant TechniqueContext you retrieved in Step2 (MeshFilter::BuildVertexBuffer)
 }
 
 void ShadowMapRenderer::Begin(const SceneContext& /*sceneContext*/)

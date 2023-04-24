@@ -42,11 +42,8 @@ void ModelComponent::Initialize(const SceneContext& sceneContext)
 
 	if(m_CastShadows) //Only if we cast a shadow of course..
 	{
-		TODO_W8(L"Update MeshFilter for ShadowMapGenerator")
-		//1. Use ShadowMapRenderer::UpdateMeshFilter to update this MeshFilter for ShadowMap Rendering
-
-		TODO_W8(L"Enable ShadowMapDraw function call (m_enableShadowMapDraw = true)")
-		//2. Make sure to set m_enableShadowMapDraw to true, otherwise BaseComponent::ShadowMapDraw is not called
+		ShadowMapRenderer::Get()->UpdateMeshFilter(sceneContext, m_pMeshFilter);
+		m_enableShadowMapDraw = true;
 	}
 }
 
