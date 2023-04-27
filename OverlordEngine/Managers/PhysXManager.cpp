@@ -1,8 +1,13 @@
 #include "stdafx.h"
 #include "PhysXManager.h"
 
+#include "PhysX/Vehicle/PhysXWheelCCDContactModifyCallback.hpp"
+#include "PhysX/Vehicle/PhysXWheelContactModifyCallback.hpp"
+
 #define PVD_HOST "127.0.0.1"
 #define PVD_PORT 5425
+
+using namespace vehicle;
 
 void PhysXManager::Initialize()
 {
@@ -85,20 +90,122 @@ PhysXManager::~PhysXManager()
 	SafeDelete(m_pDefaultErrorCallback);
 }
 
-PxScene* PhysXManager::CreateScene(GameScene* pScene) const
+void PhysXManager::InitializeVehicleDescription(const PxFilterData& chassisSimFilterData, const PxFilterData& wheelSimFilterData)
+{
+	//Set up the chassis mass, dimensions, moment of inertia, and center of mass offset.
+	//The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
+	//Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
+	const PxF32 chassisMass = 850.f;
+	const PxVec3 chassisDims(2.09f, 1.38f, 6.37f);
+	const PxVec3 chassisMOI
+	((chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 12.0f,
+		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 0.8f * chassisMass / 12.0f,
+		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * chassisMass / 12.0f);
+	const PxVec3 chassisCMOffset(0.0f, -chassisDims.y * 0.5f + 0.65f, 0.25f);
+
+	//Set up the wheel mass, radius, width, moment of inertia, and number of wheels.
+	//Moment of inertia is just the moment of inertia of a cylinder.
+	const PxF32 wheelMass = 20.0f;
+	const PxF32 wheelRadius = 0.422f;
+	const PxF32 wheelWidth = 0.45f;
+	const PxF32 wheelMOI = 0.5f * wheelMass * wheelRadius * wheelRadius;
+	const PxU32 nbWheels = 4;
+
+	m_VehicleDesc.chassisMass = chassisMass;
+	m_VehicleDesc.chassisDims = chassisDims;
+	m_VehicleDesc.chassisMOI = chassisMOI;
+	m_VehicleDesc.chassisCMOffset = chassisCMOffset;
+	m_VehicleDesc.chassisMaterial = m_pDefaultMaterial;
+	m_VehicleDesc.chassisSimFilterData = chassisSimFilterData;
+
+	m_VehicleDesc.wheelMass = wheelMass;
+	m_VehicleDesc.wheelRadius = wheelRadius;
+	m_VehicleDesc.wheelWidth = wheelWidth;
+	m_VehicleDesc.wheelMOI = wheelMOI;
+	m_VehicleDesc.numWheels = nbWheels;
+	m_VehicleDesc.wheelMaterial = m_pDefaultMaterial;
+	m_VehicleDesc.chassisSimFilterData = wheelSimFilterData;
+
+	m_VehicleDesc.actorUserData = &m_ActorUserData;
+	m_VehicleDesc.shapeUserDatas = &m_ShapeUserData;
+
+}
+
+PxScene* PhysXManager::CreateScene(GameScene* pScene)
 {
 	auto sceneDesc = PxSceneDesc(m_pPhysics->getTolerancesScale());
 	sceneDesc.setToDefault(m_pPhysics->getTolerancesScale());
 	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
 	sceneDesc.cpuDispatcher = m_pDefaultCpuDispatcher;
 	sceneDesc.cudaContextManager = m_pCudaContextManager;
-	sceneDesc.filterShader = OverlordSimulationFilterShader;
+	sceneDesc.filterShader = vehicle::VehicleFilterShader;
 	sceneDesc.userData = pScene;
+	// sceneDesc.contactModifyCallback = &gWheelContactModifyCallback;
+	// sceneDesc.ccdContactModifyCallback = &gWheelCCDContactModifyCallback;
+	// sceneDesc.flags |= PxSceneFlag::eENABLE_CCD;
 
 	const auto physxScene = m_pPhysics->createScene(sceneDesc);
 	ASSERT_IF(physxScene == nullptr, L"Scene creation failed!")
 
+		if (m_pVehicleScene == nullptr)
+			m_pVehicleScene = physxScene;
+
 	return physxScene;
+}
+
+PxVehicleDrive4W* PhysXManager::InitializeVehicleSDK()
+{
+	PxInitVehicleSDK(*m_pPhysics);
+	PxVehicleSetBasisVectors(PxVec3(0, 1, 0), PxVec3(0, 0, 1));
+	PxVehicleSetUpdateMode(PxVehicleUpdateMode::eVELOCITY_CHANGE);
+#define BLOCKING_SWEEPS
+	//Create the batched scene queries for the suspension sweeps.
+	//Use the post-filter shader to reject hit shapes that overlap the swept wheel at the start pose of the sweep.
+	PxQueryHitType::Enum(*sceneQueryPreFilter)(PxFilterData, PxFilterData, const void*, PxU32, PxHitFlags&);
+	PxQueryHitType::Enum(*sceneQueryPostFilter)(PxFilterData, PxFilterData, const void*, PxU32, const PxQueryHit&);
+#ifdef BLOCKING_SWEEPS
+	sceneQueryPreFilter = &WheelSceneQueryPreFilterBlocking;
+	sceneQueryPostFilter = &WheelSceneQueryPostFilterBlocking;
+#else
+	sceneQueryPreFilter = &WheelSceneQueryPreFilterNonBlocking;
+	sceneQueryPostFilter = &WheelSceneQueryPostFilterNonBlocking;
+#endif 
+
+	//Create the batched scene queries for the suspension raycasts.
+	m_pVehicleSceneQueryData = VehicleSceneQueryData::allocate(m_NrOfVehicles, PX_MAX_NB_WHEELS, 1, m_NrOfVehicles, sceneQueryPreFilter, sceneQueryPostFilter, *m_pDefaultAllocator);
+	m_pBatchQuery = VehicleSceneQueryData::setUpBatchedSceneQuery(0, *m_pVehicleSceneQueryData, m_pVehicleScene);
+
+	//Create the friction table for each combination of tire and surface type.
+	m_pDefaultMaterial = m_pPhysics->createMaterial(0.5f, 0.5f, 0.1f);
+	m_pFrictionPairs = createFrictionPairs(m_pDefaultMaterial);
+
+	//Create a plane to drive on.
+	PxFilterData groundPlaneSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
+	auto drivePlane = createDrivablePlane(groundPlaneSimFilterData, m_pDefaultMaterial, m_pPhysics);
+	m_pVehicleScene->addActor(*drivePlane);
+
+	//Create a vehicle that will drive on the plane.
+	PxFilterData chassisSimFilterData(COLLISION_FLAG_CHASSIS, COLLISION_FLAG_GROUND, 0, 0);
+	PxFilterData wheelSimFilterData(COLLISION_FLAG_WHEEL, COLLISION_FLAG_WHEEL, PxPairFlag::eDETECT_CCD_CONTACT | PxPairFlag::eMODIFY_CONTACTS, 0);
+	InitializeVehicleDescription(chassisSimFilterData, wheelSimFilterData);
+	
+	const auto pWheelMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Wheel.ovpc");
+	const auto pChassisMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Car.ovpc");
+
+	PxVehicleDrive4W* vehicleReference = createVehicle4W(m_VehicleDesc, m_pPhysics, pWheelMesh, pChassisMesh);
+	PxTransform startTransform(PxVec3(0, (m_VehicleDesc.chassisDims.y * 0.5f + m_VehicleDesc.wheelRadius + 1.0f) + 10.f, 0), PxQuat(PxIdentity));
+	vehicleReference->getRigidDynamicActor()->setGlobalPose(startTransform);
+	vehicleReference->getRigidDynamicActor()->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_CCD, true);
+	m_pVehicleScene->addActor(*vehicleReference->getRigidDynamicActor());
+
+	//Set the vehicle to rest in first gear.
+	//Set the vehicle to use auto-gears.
+	vehicleReference->setToRestState();
+	vehicleReference->mDriveDynData.forceGearChange(PxVehicleGearsData::eFIRST);
+	vehicleReference->mDriveDynData.setUseAutoGears(true);
+
+	//Return the reference to the car that was created
+	return vehicleReference;
 }
 
 bool PhysXManager::ToggleVisualDebuggerConnection() const

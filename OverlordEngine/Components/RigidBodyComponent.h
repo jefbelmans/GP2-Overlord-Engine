@@ -60,7 +60,8 @@ public:
 	void PutToSleep() const;
 	void WakeUp() const;
 
-	PxRigidActor* GetPxRigidActor() const { return m_pActor; };
+	PxRigidActor* GetPxRigidActor() { return m_pActor; };
+	void SetPxRigidActor(PxRigidActor* pActor) { m_pActor = pActor; };
 	void AddForce(const XMFLOAT3& force, PxForceMode::Enum mode = PxForceMode::eFORCE, bool autowake = true) const;
 	void AddTorque(const XMFLOAT3& torque, PxForceMode::Enum mode = PxForceMode::eFORCE, bool autowake = true) const;
 	void ClearForce(PxForceMode::Enum mode = PxForceMode::eFORCE) const;

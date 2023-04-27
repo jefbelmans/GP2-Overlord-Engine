@@ -54,6 +54,11 @@
     <ClCompile Include="Managers\LightManager.cpp" />
     <ClCompile Include="Graphics\ShadowMapRenderer.cpp" />
     <ClCompile Include="Components\ParticleEmitterComponent.cpp" />
+    <ClCompile Include="PhysX\Vehicle\PhysXVehicleCreate.cpp" />
+    <ClCompile Include="PhysX\Vehicle\PhysXVehicleCreate4W.cpp" />
+    <ClCompile Include="PhysX\Vehicle\PhysXVehicleFilterShader.cpp" />
+    <ClCompile Include="PhysX\Vehicle\PhysXVehicleSceneQuery.cpp" />
+    <ClCompile Include="PhysX\Vehicle\PhysXVehicleTireFriction.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -119,5 +124,11 @@
     <ClInclude Include="Managers\LightManager.h" />
     <ClInclude Include="Graphics\ShadowMapRenderer.h" />
     <ClInclude Include="Components\ParticleEmitterComponent.h" />
+    <ClInclude Include="PhysX\Vehicle\PhysXVehicleCreate.hpp" />
+    <ClInclude Include="PhysX\Vehicle\PhysXVehicleFilterShader.hpp" />
+    <ClInclude Include="PhysX\Vehicle\PhysXVehicleSceneQuery.hpp" />
+    <ClInclude Include="PhysX\Vehicle\PhysXVehicleTireFriction.hpp" />
+    <ClInclude Include="PhysX\Vehicle\PhysXWheelCCDContactModifyCallback.hpp" />
+    <ClInclude Include="PhysX\Vehicle\PhysXWheelContactModifyCallback.hpp" />
   </ItemGroup>
 </Project>

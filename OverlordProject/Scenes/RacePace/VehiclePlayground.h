@@ -17,13 +17,21 @@ protected:
 	void OnGUI() override;
 
 private:
-	const PxU32 m_NrWheels{ 4 };
+	enum InputIds
+	{
+		SteerLeft,
+		SteerRight,
+		Accelerate,
+		Deaccelerate,
+		HandBrake
+	};
+
 	GameObject* m_pChassis{ nullptr };
 
-	bool m_IsVehicleInAir{ false };
-
-	PxVehicleDrive4W* m_pVehicle4W{ nullptr };
+	PxVehicleDrive4W* m_pVehicle{ nullptr };
 	PxVehicleDrive4WRawInputData* m_pVehicleInputData{ nullptr };
+	bool m_IsVehicleInAir{ false };
+	bool m_IsDigitalControl{ false };
 
 	PxFixedSizeLookupTable<8>			m_SteerVsForwardSpeedTable;
 	PxVehicleKeySmoothingData			m_keySmoothingData =
@@ -43,7 +51,6 @@ private:
 			5.0f	//fall rate eANALOG_INPUT_STEER_RIGHT
 		}
 	};
-
 	PxVehiclePadSmoothingData			m_padSmoothingData =
 	{
 		{
@@ -61,5 +68,17 @@ private:
 			5.0f	//fall rate eANALOG_INPUT_STEER_RIGHT
 		}
 	};
+
+	void UpdateInput();
+	void UpdateVehicle();
+
+	void AccelerateForward(float analogAcc = 0.f);
+	void AccelerateReverse(float analogAcc = 0.f);
+	void Brake();
+
+	void Steer(float analogSteer = 0.f);
+	void Handbrake();
+
+	void ReleaseAllControls();
 };
 
