@@ -90,6 +90,10 @@ using namespace physx;
 #pragma comment(lib, "PhysXPvdSDK_static_64.lib")
 #pragma comment(lib, "PhysXCharacterKinematic_static_64.lib")
 
+// VEHICLE SDK
+#pragma comment(lib, "PhysXVehicle_static_64.lib")
+#pragma comment(lib, "SceneQuery_static_64.lib")
+
 #pragma endregion
 
 #pragma region FMOD

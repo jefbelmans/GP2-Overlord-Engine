@@ -1,4 +1,6 @@
 #pragma once
+#include "PxPhysicsAPI.h"
+
 class VehiclePlayground final : public GameScene
 {
 public:
@@ -18,21 +20,46 @@ private:
 	const PxU32 m_NrWheels{ 4 };
 	GameObject* m_pChassis{ nullptr };
 
-	PxVehicleWheelsSimData* m_pWheelsSimData{ nullptr };
-	PxVehicleDriveSimData4W* m_pDriveSimData{ nullptr };
+	bool m_IsVehicleInAir{ false };
 
-	void setupWheelsSimulationData
-		(const PxF32 wheelMass, const PxF32 wheelMOI,
-		const PxF32 wheelRadius, const PxF32 wheelWidth, const PxU32 numWheels,
-		const PxVec3* wheelCenterActorOffsets, const PxVec3& chassisCMOffset,
-		const PxF32 chassisMass, PxVehicleWheelsSimData* wheelsSimData);
+	PxVehicleDrive4W* m_pVehicle4W{ nullptr };
+	PxVehicleDrive4WRawInputData* m_pVehicleInputData{ nullptr };
 
-	PxRigidDynamic* createVehicleActor
-		(const PxVehicleChassisData& chassisData,
-		PxMaterial** wheelMaterials, PxConvexMesh** wheelConvexMeshes,
-		const PxU32 numWheels, const PxFilterData& wheelSimFilterData, PxMaterial** chassisMaterials,
-		PxConvexMesh** chassisConvexMeshes, const PxU32 numChassisMeshes, const PxFilterData& chassisSimFilterData, PxPhysics& physics);
+	PxFixedSizeLookupTable<8>			m_SteerVsForwardSpeedTable;
+	PxVehicleKeySmoothingData			m_keySmoothingData =
+	{
+		{
+			6.0f,	//rise rate eANALOG_INPUT_ACCEL
+			6.0f,	//rise rate eANALOG_INPUT_BRAKE		
+			6.0f,	//rise rate eANALOG_INPUT_HANDBRAKE	
+			2.5f,	//rise rate eANALOG_INPUT_STEER_LEFT
+			2.5f,	//rise rate eANALOG_INPUT_STEER_RIGHT
+		},
+		{
+			10.0f,	//fall rate eANALOG_INPUT_ACCEL
+			10.0f,	//fall rate eANALOG_INPUT_BRAKE		
+			10.0f,	//fall rate eANALOG_INPUT_HANDBRAKE	
+			5.0f,	//fall rate eANALOG_INPUT_STEER_LEFT
+			5.0f	//fall rate eANALOG_INPUT_STEER_RIGHT
+		}
+	};
 
-	void setupDriveSimData();
+	PxVehiclePadSmoothingData			m_padSmoothingData =
+	{
+		{
+			6.0f,	//rise rate eANALOG_INPUT_ACCEL
+			6.0f,	//rise rate eANALOG_INPUT_BRAKE		
+			6.0f,	//rise rate eANALOG_INPUT_HANDBRAKE	
+			2.5f,	//rise rate eANALOG_INPUT_STEER_LEFT
+			2.5f,	//rise rate eANALOG_INPUT_STEER_RIGHT
+		},
+		{
+			10.0f,	//fall rate eANALOG_INPUT_ACCEL
+			10.0f,	//fall rate eANALOG_INPUT_BRAKE		
+			10.0f,	//fall rate eANALOG_INPUT_HANDBRAKE	
+			5.0f,	//fall rate eANALOG_INPUT_STEER_LEFT
+			5.0f	//fall rate eANALOG_INPUT_STEER_RIGHT
+		}
+	};
 };
 
