@@ -117,6 +117,7 @@ using namespace physx;
 #include <imgui.h>
 #include <imgui_impl_win32.h>
 #include <imgui_impl_dx11.h>
+#include <implot.h>
 
 #pragma comment(lib, "ImGui_x64.lib")
 #pragma endregion

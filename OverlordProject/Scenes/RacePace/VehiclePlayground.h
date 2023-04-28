@@ -26,12 +26,17 @@ private:
 		HandBrake
 	};
 
+	float m_CameraSmoothing{ 0.35f };
+	FollowCamera* m_pCamera{ nullptr };
+
 	GameObject* m_pChassis{ nullptr };
 
 	PxVehicleDrive4W* m_pVehicle{ nullptr };
 	PxVehicleDrive4WRawInputData* m_pVehicleInputData{ nullptr };
+	PxVehicleTelemetryData* m_pVehicleTelemetryData{ nullptr };
+
 	bool m_IsVehicleInAir{ false };
-	bool m_IsDigitalControl{ false };
+	bool m_IsDigitalControl{ true };
 
 	PxFixedSizeLookupTable<8>			m_SteerVsForwardSpeedTable;
 	PxVehicleKeySmoothingData			m_keySmoothingData =
@@ -68,6 +73,8 @@ private:
 			5.0f	//fall rate eANALOG_INPUT_STEER_RIGHT
 		}
 	};
+
+	void SetupTelemetryData();
 
 	void UpdateInput();
 	void UpdateVehicle();

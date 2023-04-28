@@ -59,6 +59,7 @@
     <ClCompile Include="PhysX\Vehicle\PhysXVehicleFilterShader.cpp" />
     <ClCompile Include="PhysX\Vehicle\PhysXVehicleSceneQuery.cpp" />
     <ClCompile Include="PhysX\Vehicle\PhysXVehicleTireFriction.cpp" />
+    <ClCompile Include="Prefabs\FollowCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -130,5 +131,6 @@
     <ClInclude Include="PhysX\Vehicle\PhysXVehicleTireFriction.hpp" />
     <ClInclude Include="PhysX\Vehicle\PhysXWheelCCDContactModifyCallback.hpp" />
     <ClInclude Include="PhysX\Vehicle\PhysXWheelContactModifyCallback.hpp" />
+    <ClInclude Include="Prefabs\FollowCamera.h" />
   </ItemGroup>
 </Project>

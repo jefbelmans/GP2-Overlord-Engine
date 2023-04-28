@@ -70,3 +70,4 @@
 
 #include "Prefabs/FixedCamera.h"
 #include "Prefabs/FreeCamera.h"
+#include "Prefabs/FollowCamera.h"

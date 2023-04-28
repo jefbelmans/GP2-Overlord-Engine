@@ -71,6 +71,7 @@
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PostBuildEvent>
       <Command>
@@ -100,10 +101,14 @@
       <Command>
       </Command>
     </PostBuildEvent>
+    <Lib>
+      <AdditionalLibraryDirectories>C:\DAE\Second Year\Sem 4\Graphics Programming 2\GP2_Libs\imgui\include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Components\ControllerComponent.h" />
     <ClInclude Include="Components\ParticleEmitterComponent.h" />
+    <ClInclude Include="Prefabs\FollowCamera.h" />
     <ClInclude Include="Graphics\ShadowMapRenderer.h" />
     <ClInclude Include="Lab_Todos.h" />
     <ClInclude Include="Managers\LightManager.h" />
@@ -180,6 +185,7 @@
   <ItemGroup>
     <ClCompile Include="Components\ControllerComponent.cpp" />
     <ClCompile Include="Components\ParticleEmitterComponent.cpp" />
+    <ClCompile Include="Prefabs\FollowCamera.cpp" />
     <ClCompile Include="Graphics\ShadowMapRenderer.cpp" />
     <ClCompile Include="Managers\LightManager.cpp" />
     <ClCompile Include="Misc\ModelAnimator.cpp" />

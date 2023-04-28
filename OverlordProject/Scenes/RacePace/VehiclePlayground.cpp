@@ -19,6 +19,7 @@ void VehiclePlayground::Initialize()
 {
 	// SCENE SETTINGS
 	m_SceneContext.settings.drawGrid = false;
+	m_SceneContext.settings.enableOnGUI = true;
 
 	// MATERIALS
 	DiffuseMaterial* pMaterial = MaterialManager::Get()->CreateMaterial<DiffuseMaterial>();
@@ -26,6 +27,10 @@ void VehiclePlayground::Initialize()
 
 	//// GROUND PLANE
 	//GameSceneExt::CreatePhysXGroundPlane(*this, PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 1.f));
+
+	// PHYSX DEBUG RENDERING
+	GetPhysxProxy()->EnablePhysxDebugRendering(true);
+	GetPhysxProxy()->GetPhysxScene()->setVisualizationParameter(PxVisualizationParameter::eBODY_LIN_VELOCITY, 1.f);
 
 	// CHASIS
 	m_pChassis = new GameObject();
@@ -45,11 +50,13 @@ void VehiclePlayground::Initialize()
 	// SET VEHICLE RIGID ACTOR TO RB RIGID ACTOR
 	pRb->SetPxRigidActor(m_pVehicle->getRigidDynamicActor());
 
-	const auto pCamera = AddChild(new FixedCamera());
-	pCamera->GetTransform()->Translate(0.f, 30.f, -30.f);
-	pCamera->GetTransform()->Rotate(40.f, 0.f, 0.f);
-	auto cameraComponent = pCamera->GetComponent<CameraComponent>();
-	cameraComponent->SetActive(true);
+	SetupTelemetryData();
+
+	// CAMERA
+	m_pCamera = AddChild(new FollowCamera(m_pChassis, m_pVehicleTelemetryData, XMFLOAT3{0.f, 20.f, -30.f}));
+	m_pCamera->GetComponent<CameraComponent>()->SetActive(true);
+	m_pCamera->GetTransform()->Rotate(35.f, 0.f, 0.f);
+	m_pCamera->SetSmoothing(m_CameraSmoothing);
 
 	//Input
 	auto inputAction = InputAction(SteerLeft, InputState::down, VK_LEFT);
@@ -81,7 +88,51 @@ void VehiclePlayground::Update()
 
 void VehiclePlayground::OnGUI()
 {
+	float xy[2 * PxVehicleGraph::eMAX_NB_SAMPLES];
+	PxVec3 color[PxVehicleGraph::eMAX_NB_SAMPLES];
+	char title[PxVehicleGraph::eMAX_NB_TITLE_CHARS];
+
+	if (ImGui::CollapsingHeader("Camera Settings"))
+	{
+		ImGui::SliderFloat("Camera Smoothing", &m_CameraSmoothing, 0.f, 1.f);
+		m_pCamera->SetSmoothing(m_CameraSmoothing);
+	}
+
+	m_pVehicleTelemetryData->getEngineGraph().computeGraphChannel(PxVehicleDriveGraphChannel::eENGINE_REVS,
+		xy, color, title);
+
+	std::vector<ImVec2> data;
+	for (int i{ 0 }; i < 2 * PxVehicleGraph::eMAX_NB_SAMPLES; i += 2)
+	{
+		data.push_back(ImVec2(xy[i], xy[i + 1]));
+	}
+
+	
+	{
+		ImGui::PlotLines(title, &data[0].x, (int)data.size(), 0, 0, 0.f, 1.f);
+	}
 }
+
+void VehiclePlayground::SetupTelemetryData()
+{
+	m_pVehicleTelemetryData = PxVehicleTelemetryData::allocate(4);
+
+	const PxF32 graphSizeX = 0.25f;
+	const PxF32 graphSizeY = 0.25f;
+	const PxF32 engineGraphPosX = 0.5f;
+	const PxF32 engineGraphPosY = 0.5f;
+	const PxF32 wheelGraphPosX[4] = { 0.75f,0.25f,0.75f,0.25f };
+	const PxF32 wheelGraphPosY[4] = { 0.75f,0.75f,0.25f,0.25f };
+	const PxVec3 backgroundColor(255, 255, 255);
+	const PxVec3 lineColorHigh(255, 0, 0);
+	const PxVec3 lineColorLow(0, 0, 0);
+	m_pVehicleTelemetryData->setup
+	(graphSizeX, graphSizeY,
+		engineGraphPosX, engineGraphPosY,
+		wheelGraphPosX, wheelGraphPosY,
+		backgroundColor, lineColorHigh, lineColorLow);
+}
+
 void VehiclePlayground::UpdateInput()
 {
 	ReleaseAllControls();
@@ -114,19 +165,18 @@ void VehiclePlayground::UpdateInput()
 	if (input->IsActionTriggered(Accelerate))
 		AccelerateForward(1.f);
 	else if (input->IsActionTriggered(Deaccelerate))
-		AccelerateReverse(1.f);
+		Brake();
 }
 
 void VehiclePlayground::UpdateVehicle()
 {
-	vehicle::VehicleSceneQueryData* vehicleSceneQueryData = PhysXManager::Get()->GetVehicleSceneQueryData();
-	PxScene* scene = GetPhysxProxy()->GetPhysxScene();
-	PxBatchQuery* batchQuery = PhysXManager::Get()->GetBatchQuery();
-	PxVehicleDrivableSurfaceToTireFrictionPairs* tireFrictionPairs = PhysXManager::Get()->GetFrictionPairs();
-
 	if (m_pVehicle == nullptr) return;
 
-	//Update the control inputs for the vehicle.
+	vehicle::VehicleSceneQueryData* vehicleSceneQueryData = PhysXManager::Get()->GetVehicleSceneQueryData();
+	PxBatchQuery* batchQuery = PhysXManager::Get()->GetBatchQuery();
+	auto tireFrictionPairs = PhysXManager::Get()->GetFrictionPairs();
+
+	//Update the control inputs for the vehicle
 	if (m_IsDigitalControl)
 		PxVehicleDrive4WSmoothDigitalRawInputsAndSetAnalogInputs(m_keySmoothingData, m_SteerVsForwardSpeedTable,
 			*m_pVehicleInputData, m_SceneContext.pGameTime->GetElapsed(), m_IsVehicleInAir, *m_pVehicle);
@@ -134,24 +184,24 @@ void VehiclePlayground::UpdateVehicle()
 		PxVehicleDrive4WSmoothAnalogRawInputsAndSetAnalogInputs(m_padSmoothingData, m_SteerVsForwardSpeedTable,
 			*m_pVehicleInputData, m_SceneContext.pGameTime->GetElapsed(), m_IsVehicleInAir, *m_pVehicle);
 
-	//Raycasts.
+	//Raycasts
 	PxVehicleWheels* vehicleWheels[6] = { m_pVehicle };
 	PxRaycastQueryResult* raycastResults = vehicleSceneQueryData->getRaycastQueryResultBuffer(0);
 	const PxU32 raycastResultsSize = vehicleSceneQueryData->getQueryResultBufferSize();
 	PxVehicleSuspensionRaycasts(batchQuery, 1, vehicleWheels, raycastResultsSize, raycastResults);
 
-	//Vehicle update.
-	const PxVec3 grav = scene->getGravity();
+	//Vehicle update
+	const PxVec3 grav = GetPhysxProxy()->GetPhysxScene()->getGravity();
 	PxWheelQueryResult wheelQueryResults[PX_MAX_NB_WHEELS];
 	PxVehicleWheelQueryResult vehicleQueryResults[1] = { {wheelQueryResults, m_pVehicle->mWheelsSimData.getNbWheels()} };
-	int numVehicles = 1;
-	PxVehicleUpdates(m_SceneContext.pGameTime->GetElapsed(), grav, *tireFrictionPairs, numVehicles, vehicleWheels, vehicleQueryResults);
+	
+	PxVehicleUpdateSingleVehicleAndStoreTelemetryData(m_SceneContext.pGameTime->GetElapsed(), grav,
+		*tireFrictionPairs, m_pVehicle, vehicleQueryResults, *m_pVehicleTelemetryData);
 
 	//Work out if the vehicle is in the air.
 	m_IsVehicleInAir = m_pVehicle->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]);
 }
 
-//------------------------------------------------------------------------------------------------------------------------------
 void VehiclePlayground::AccelerateForward(float analogAcc)
 {
 	//If I am going reverse, change to first gear
@@ -170,7 +220,6 @@ void VehiclePlayground::AccelerateForward(float analogAcc)
 	}
 }
 
-//------------------------------------------------------------------------------------------------------------------------------
 void VehiclePlayground::AccelerateReverse(float analogAcc /*= 0.f*/)
 {
 	//Force gear change to reverse
@@ -186,7 +235,6 @@ void VehiclePlayground::AccelerateReverse(float analogAcc /*= 0.f*/)
 	}
 }
 
-//------------------------------------------------------------------------------------------------------------------------------
 void VehiclePlayground::Brake()
 {
 	if (m_IsDigitalControl)
@@ -199,7 +247,6 @@ void VehiclePlayground::Brake()
 	}
 }
 
-//------------------------------------------------------------------------------------------------------------------------------
 void VehiclePlayground::Steer(float analogSteer /*= 0.f*/)
 {
 	if (m_IsDigitalControl)
@@ -215,7 +262,6 @@ void VehiclePlayground::Steer(float analogSteer /*= 0.f*/)
 	}
 }
 
-//------------------------------------------------------------------------------------------------------------------------------
 void VehiclePlayground::Handbrake()
 {
 	if (m_IsDigitalControl)
@@ -228,7 +274,6 @@ void VehiclePlayground::Handbrake()
 	}
 }
 
-//------------------------------------------------------------------------------------------------------------------------------
 void VehiclePlayground::ReleaseAllControls()
 {
 	if (m_IsDigitalControl)
