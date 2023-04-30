@@ -2,7 +2,7 @@
 class FollowCamera final : public GameObject
 {
 public:
-	FollowCamera(GameObject* pTarget, PxVehicleTelemetryData* pTelemetryData, const XMFLOAT3& offset);
+	FollowCamera(GameObject* pTarget, PxVehicleDrive4W* pVehicle, const XMFLOAT3& offsetDir);
 	~FollowCamera() override = default;
 	FollowCamera(const FollowCamera& other) = delete;
 	FollowCamera(FollowCamera&& other) noexcept = delete;
@@ -10,6 +10,7 @@ public:
 	FollowCamera& operator=(FollowCamera&& other) noexcept = delete;
 
 	void SetSmoothing(const float smoothing) { m_Smoothing = smoothing; }
+	void SetLookAhead(const float lookAhead) { m_MaxLookAhead = lookAhead; }
 
 protected:
 	void Initialize(const SceneContext& sceneContext) override;
@@ -17,10 +18,11 @@ protected:
 
 private:
 	GameObject* m_pTarget{ nullptr };
-	PxVehicleTelemetryData* m_pTelemetryData{ nullptr };
+	PxVehicleDrive4W* m_pVehicle{ nullptr };
 	CameraComponent* m_pCamera{ nullptr };
 
 	float m_Smoothing{ 0.25f };
 	float m_MaxLookAhead{ 10.f };
-	XMFLOAT3 m_Offset{ 0.f, 0.f, 0.f };
+	float m_OffsetDistance{ 30.f };
+	XMFLOAT3 m_OffsetDir{ 0.f, 0.f, 0.f };
 };

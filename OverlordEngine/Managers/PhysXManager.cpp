@@ -158,6 +158,7 @@ PxVehicleDrive4W* PhysXManager::InitializeVehicleSDK()
 	PxInitVehicleSDK(*m_pPhysics);
 	PxVehicleSetBasisVectors(PxVec3(0, 1, 0), PxVec3(0, 0, 1));
 	PxVehicleSetUpdateMode(PxVehicleUpdateMode::eVELOCITY_CHANGE);
+
 #define BLOCKING_SWEEPS
 	//Create the batched scene queries for the suspension sweeps.
 	//Use the post-filter shader to reject hit shapes that overlap the swept wheel at the start pose of the sweep.

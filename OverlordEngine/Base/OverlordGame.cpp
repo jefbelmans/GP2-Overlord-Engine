@@ -473,8 +473,6 @@ void OverlordGame::GameLoop() const
 
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-
-
 	//*******
 	//PRESENT
 	m_pSwapchain->Present(activeSceneSettings.vSyncEnabled ? 1 : 0, 0);

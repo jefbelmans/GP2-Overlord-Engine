@@ -53,9 +53,9 @@ void VehiclePlayground::Initialize()
 	SetupTelemetryData();
 
 	// CAMERA
-	m_pCamera = AddChild(new FollowCamera(m_pChassis, m_pVehicleTelemetryData, XMFLOAT3{0.f, 20.f, -30.f}));
+	m_pCamera = AddChild(new FollowCamera(m_pChassis, m_pVehicle, XMFLOAT3{0.f, 20.f, -30.f}));
 	m_pCamera->GetComponent<CameraComponent>()->SetActive(true);
-	m_pCamera->GetTransform()->Rotate(35.f, 0.f, 0.f);
+	m_pCamera->GetTransform()->Rotate(30.f, 0.f, 0.f);
 	m_pCamera->SetSmoothing(m_CameraSmoothing);
 
 	//Input
@@ -96,20 +96,17 @@ void VehiclePlayground::OnGUI()
 	{
 		ImGui::SliderFloat("Camera Smoothing", &m_CameraSmoothing, 0.f, 1.f);
 		m_pCamera->SetSmoothing(m_CameraSmoothing);
+
+		ImGui::SliderFloat("Camera LookAhead", &m_CameraLookAhead, 0.f, 100.f);
+		m_pCamera->SetLookAhead(m_CameraLookAhead);
 	}
 
 	m_pVehicleTelemetryData->getEngineGraph().computeGraphChannel(PxVehicleDriveGraphChannel::eENGINE_REVS,
 		xy, color, title);
 
-	std::vector<ImVec2> data;
-	for (int i{ 0 }; i < 2 * PxVehicleGraph::eMAX_NB_SAMPLES; i += 2)
+	if (ImGui::CollapsingHeader("Car Telemetry"))
 	{
-		data.push_back(ImVec2(xy[i], xy[i + 1]));
-	}
-
-	
-	{
-		ImGui::PlotLines(title, &data[0].x, (int)data.size(), 0, 0, 0.f, 1.f);
+		ImGui::Text("Speed: %f", m_pVehicle->computeForwardSpeed());
 	}
 }
 

@@ -42,6 +42,7 @@ namespace vehicle
 
 		void computeWheelCenterActorOffsets4W(const PxF32 wheelFrontZ, const PxF32 wheelRearZ, const PxVec3& chassisDims, const PxF32 wheelWidth, const PxF32 wheelRadius, const PxU32 numWheels, PxVec3* wheelCentreOffsets)
 		{
+
 			const PxF32 numLeftWheels = numWheels / 2.0f;
 			const PxF32 deltaZ = (wheelFrontZ - wheelRearZ) / (numLeftWheels - 1.0f);
 
@@ -103,8 +104,8 @@ namespace vehicle
 				//Set the suspension data.
 				for (PxU32 i = 0; i < numWheels; i++)
 				{
-					suspensions[i].mMaxCompression = 0.3f;
-					suspensions[i].mMaxDroop = 0.1f;
+					suspensions[i].mMaxCompression = 0.1f;
+					suspensions[i].mMaxDroop = 0.2f;
 					suspensions[i].mSpringStrength = 35000.0f;
 					suspensions[i].mSpringDamperRate = 4500.0f;
 					suspensions[i].mSprungMass = suspSprungMasses[i];
@@ -263,13 +264,13 @@ namespace vehicle
 
 			//Engine
 			PxVehicleEngineData engine;
-			engine.mPeakTorque = 500.0f;
-			engine.mMaxOmega = 600.0f;//approx 6000 rpm
+			engine.mPeakTorque = 1000.0f;
+			engine.mMaxOmega = 1000.0f;//approx 6000 rpm
 			driveSimData.setEngineData(engine);
 
 			//Gears
 			PxVehicleGearsData gears;
-			gears.mSwitchTime = 0.5f;
+			gears.mSwitchTime = 0.0f;
 			driveSimData.setGearsData(gears);
 
 			//Clutch

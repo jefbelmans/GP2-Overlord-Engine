@@ -26,7 +26,8 @@ private:
 		HandBrake
 	};
 
-	float m_CameraSmoothing{ 0.35f };
+	float m_CameraSmoothing{ 1.f };
+	float m_CameraLookAhead{ 10.f };
 	FollowCamera* m_pCamera{ nullptr };
 
 	GameObject* m_pChassis{ nullptr };
