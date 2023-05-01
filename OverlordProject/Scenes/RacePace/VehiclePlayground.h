@@ -28,6 +28,8 @@ private:
 
 	float m_CameraSmoothing{ 1.f };
 	float m_CameraLookAhead{ 10.f };
+	float m_CameraDistance{ 30.f };
+	float m_CameraPitch{ 45.f };
 	FollowCamera* m_pCamera{ nullptr };
 
 	GameObject* m_pChassis{ nullptr };
@@ -37,7 +39,7 @@ private:
 	PxVehicleTelemetryData* m_pVehicleTelemetryData{ nullptr };
 
 	bool m_IsVehicleInAir{ false };
-	bool m_IsDigitalControl{ true };
+	bool m_IsDigitalControl{ false };
 
 	PxFixedSizeLookupTable<8>			m_SteerVsForwardSpeedTable;
 	PxVehicleKeySmoothingData			m_keySmoothingData =

@@ -40,20 +40,17 @@ namespace vehicle
 	namespace fourwheel
 	{
 
-		void computeWheelCenterActorOffsets4W(const PxF32 wheelFrontZ, const PxF32 wheelRearZ, const PxVec3& chassisDims, const PxF32 wheelWidth, const PxF32 wheelRadius, const PxU32 numWheels, PxVec3* wheelCentreOffsets)
+		void computeWheelCenterActorOffsets4W(const PxF32 wheelFrontZ, const PxF32 wheelRearZ, const PxVec3& chassisDims, const PxF32 /*wheelWidth*/, const PxF32 wheelRadius, PxVec3* wheelCentreOffsets)
 		{
 
-			const PxF32 numLeftWheels = numWheels / 2.0f;
-			const PxF32 deltaZ = (wheelFrontZ - wheelRearZ) / (numLeftWheels - 1.0f);
-
 			wheelCentreOffsets[PxVehicleDrive4WWheelOrder::eREAR_LEFT]
-				= PxVec3((-chassisDims.x) * 0.5f, wheelRadius, wheelRearZ + 0.05f);
+				= PxVec3((-chassisDims.x) * .5f , wheelRadius, wheelRearZ + .05f);
 			wheelCentreOffsets[PxVehicleDrive4WWheelOrder::eREAR_RIGHT]
-				= PxVec3((+chassisDims.x + wheelWidth) * 0.5f, wheelRadius, wheelRearZ + 0.05f);
+				= PxVec3((chassisDims.x) * .5f, wheelRadius, wheelRearZ + .05f);
 			wheelCentreOffsets[PxVehicleDrive4WWheelOrder::eFRONT_LEFT]
-				= PxVec3((-chassisDims.x) * 0.5f, wheelRadius, wheelRearZ + (numLeftWheels - 1) * deltaZ + 0.3f);
+				= PxVec3((-chassisDims.x) * .5f, wheelRadius, wheelFrontZ + .3f);
 			wheelCentreOffsets[PxVehicleDrive4WWheelOrder::eFRONT_RIGHT]
-				= PxVec3((+chassisDims.x + wheelWidth) * 0.5f, wheelRadius, wheelRearZ + (numLeftWheels - 1)*deltaZ + 0.3f);
+				= PxVec3((chassisDims.x) * .5f, wheelRadius, wheelFrontZ + .3f);
 		}
 
 		void setupWheelsSimulationData
@@ -104,8 +101,8 @@ namespace vehicle
 				//Set the suspension data.
 				for (PxU32 i = 0; i < numWheels; i++)
 				{
-					suspensions[i].mMaxCompression = 0.1f;
-					suspensions[i].mMaxDroop = 0.2f;
+					suspensions[i].mMaxCompression = 0.2f;
+					suspensions[i].mMaxDroop = 0.1f;
 					suspensions[i].mSpringStrength = 35000.0f;
 					suspensions[i].mSpringDamperRate = 4500.0f;
 					suspensions[i].mSprungMass = suspSprungMasses[i];
@@ -113,8 +110,8 @@ namespace vehicle
 
 				//Set the camber angles.
 				const PxF32 camberAngleAtRest = 0.f;
-				const PxF32 camberAngleAtMaxDroop = 0.01f;
-				const PxF32 camberAngleAtMaxCompression = -0.01f;
+				const PxF32 camberAngleAtMaxDroop = 0.f;
+				const PxF32 camberAngleAtMaxCompression = 0.f;
 				for (PxU32 i = 0; i < numWheels; i += 2)
 				{
 					suspensions[i + 0].mCamberAtRest = camberAngleAtRest;
@@ -242,9 +239,9 @@ namespace vehicle
 		{
 			//Compute the wheel center offsets from the origin.
 			PxVec3 wheelCenterActorOffsets[PX_MAX_NB_WHEELS];
-			const PxF32 frontZ = chassisDims.z*0.3f;
-			const PxF32 rearZ = -chassisDims.z*0.3f;
-			fourwheel::computeWheelCenterActorOffsets4W(frontZ, rearZ, chassisDims, wheelWidth, wheelRadius, numWheels, wheelCenterActorOffsets);
+			const PxF32 frontZ = chassisDims.z * 0.3f;
+			const PxF32 rearZ = -chassisDims.z * 0.3f;
+			fourwheel::computeWheelCenterActorOffsets4W(frontZ, rearZ, chassisDims, wheelWidth, wheelRadius, wheelCenterActorOffsets);
 
 			//Set up the simulation data for all wheels.
 			fourwheel::setupWheelsSimulationData
@@ -265,7 +262,7 @@ namespace vehicle
 			//Engine
 			PxVehicleEngineData engine;
 			engine.mPeakTorque = 1000.0f;
-			engine.mMaxOmega = 1000.0f;//approx 6000 rpm
+			engine.mMaxOmega = 800.0f;//approx 6000 rpm
 			driveSimData.setEngineData(engine);
 
 			//Gears

@@ -53,10 +53,11 @@ void VehiclePlayground::Initialize()
 	SetupTelemetryData();
 
 	// CAMERA
-	m_pCamera = AddChild(new FollowCamera(m_pChassis, m_pVehicle, XMFLOAT3{0.f, 20.f, -30.f}));
+	m_pCamera = AddChild(new FollowCamera(m_pChassis, m_pVehicle, m_CameraPitch));
 	m_pCamera->GetComponent<CameraComponent>()->SetActive(true);
-	m_pCamera->GetTransform()->Rotate(30.f, 0.f, 0.f);
 	m_pCamera->SetSmoothing(m_CameraSmoothing);
+	m_pCamera->SetLookAhead(m_CameraLookAhead);
+	m_pCamera->SetOffsetDistance(m_CameraDistance);
 
 	//Input
 	auto inputAction = InputAction(SteerLeft, InputState::down, VK_LEFT);
@@ -92,20 +93,29 @@ void VehiclePlayground::OnGUI()
 	PxVec3 color[PxVehicleGraph::eMAX_NB_SAMPLES];
 	char title[PxVehicleGraph::eMAX_NB_TITLE_CHARS];
 
-	if (ImGui::CollapsingHeader("Camera Settings"))
+	// CAMERA SETTINGS
+	if(ImGui::CollapsingHeader("Camera Settings"))
 	{
-		ImGui::SliderFloat("Camera Smoothing", &m_CameraSmoothing, 0.f, 1.f);
+		ImGui::SliderFloat("Pitch", &m_CameraPitch, 0.f, 90.f);
+		// m_pCamera->SetPitch(m_CameraPitch);
+
+		ImGui::SliderFloat("Smoothing", &m_CameraSmoothing, 0.f, 1.f);
 		m_pCamera->SetSmoothing(m_CameraSmoothing);
 
-		ImGui::SliderFloat("Camera LookAhead", &m_CameraLookAhead, 0.f, 100.f);
+		ImGui::SliderFloat("LookAhead", &m_CameraLookAhead, 0.f, 100.f);
 		m_pCamera->SetLookAhead(m_CameraLookAhead);
+
+		ImGui::SliderFloat("Offset Distance", &m_CameraDistance, 0.f, 100.f);
+		m_pCamera->SetOffsetDistance(m_CameraDistance);
 	}
 
 	m_pVehicleTelemetryData->getEngineGraph().computeGraphChannel(PxVehicleDriveGraphChannel::eENGINE_REVS,
 		xy, color, title);
 
-	if (ImGui::CollapsingHeader("Car Telemetry"))
+	
+	// CAR TELEMETRY
 	{
+		ImGui::Text("Car Telemetry");
 		ImGui::Text("Speed: %f", m_pVehicle->computeForwardSpeed());
 	}
 }
@@ -140,7 +150,7 @@ void VehiclePlayground::UpdateInput()
 	float throtleInput = input->GetTriggerPressure(false);
 	float reverseThrotleInput = input->GetTriggerPressure(true);
 
-	if (steerInput != 0.f && !m_IsDigitalControl)
+	if (steerInput != 0.f)
 		Steer(steerInput);
 
 	if(throtleInput != 0.f)
@@ -152,8 +162,6 @@ void VehiclePlayground::UpdateInput()
 	if (input->IsActionTriggered(HandBrake))
 		Handbrake();
 
-	if (!m_IsDigitalControl) return;
-
 	if (input->IsActionTriggered(SteerLeft))
 		Steer(-1.f);
 	else if (input->IsActionTriggered(SteerRight))
@@ -162,7 +170,7 @@ void VehiclePlayground::UpdateInput()
 	if (input->IsActionTriggered(Accelerate))
 		AccelerateForward(1.f);
 	else if (input->IsActionTriggered(Deaccelerate))
-		Brake();
+		AccelerateReverse(1.f);
 }
 
 void VehiclePlayground::UpdateVehicle()
@@ -228,7 +236,7 @@ void VehiclePlayground::AccelerateReverse(float analogAcc /*= 0.f*/)
 	}
 	else
 	{
-		m_pVehicleInputData->setAnalogBrake(analogAcc);
+		m_pVehicleInputData->setAnalogAccel(analogAcc);
 	}
 }
 
