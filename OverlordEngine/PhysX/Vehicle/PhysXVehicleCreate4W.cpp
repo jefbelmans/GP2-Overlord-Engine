@@ -37,7 +37,7 @@ namespace vehicle
 
 	using namespace physx;
 
-	namespace fourwheel
+	namespace FourWD
 	{
 
 		void computeWheelCenterActorOffsets4W(const PxF32 wheelFrontZ, const PxF32 wheelRearZ, const PxVec3& chassisDims, const PxF32 /*wheelWidth*/, const PxF32 wheelRadius, PxVec3* wheelCentreOffsets)
@@ -241,10 +241,10 @@ namespace vehicle
 			PxVec3 wheelCenterActorOffsets[PX_MAX_NB_WHEELS];
 			const PxF32 frontZ = chassisDims.z * 0.3f;
 			const PxF32 rearZ = -chassisDims.z * 0.3f;
-			fourwheel::computeWheelCenterActorOffsets4W(frontZ, rearZ, chassisDims, wheelWidth, wheelRadius, wheelCenterActorOffsets);
+			FourWD::computeWheelCenterActorOffsets4W(frontZ, rearZ, chassisDims, wheelWidth, wheelRadius, wheelCenterActorOffsets);
 
 			//Set up the simulation data for all wheels.
-			fourwheel::setupWheelsSimulationData
+			FourWD::setupWheelsSimulationData
 			(vehicle4WDesc.wheelMass, vehicle4WDesc.wheelMOI, wheelRadius, wheelWidth,
 				numWheels, wheelCenterActorOffsets,
 				vehicle4WDesc.chassisCMOffset, vehicle4WDesc.chassisMass,

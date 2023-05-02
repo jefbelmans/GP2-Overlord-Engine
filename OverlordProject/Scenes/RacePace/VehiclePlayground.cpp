@@ -42,13 +42,20 @@ void VehiclePlayground::Initialize()
 
 	auto pRb = m_pChassis->AddComponent(new RigidBodyComponent());
 
+	// WHEEL FL
+	m_pWheelFL = new GameObject();
+	AddChild(m_pWheelFL);
+	m_pWheelFL->AddComponent(new ModelComponent(L"Meshes/F1_Wheel.ovm"))->SetMaterial(pMaterial);
+
 	// INIT VEHICLE SDK
 	m_pVehicle = PhysXManager::Get()->InitializeVehicleSDK();
 	m_pVehicleInputData = new PxVehicleDrive4WRawInputData();
 	m_SteerVsForwardSpeedTable = PxFixedSizeLookupTable<8>(gSteerVsForwardSpeedData, 4);
 
+	auto vehicleRB{ m_pVehicle->getRigidDynamicActor() };
 	// SET VEHICLE RIGID ACTOR TO RB RIGID ACTOR
-	pRb->SetPxRigidActor(m_pVehicle->getRigidDynamicActor());
+	pRb->SetPxRigidActor(vehicleRB);
+	
 
 	SetupTelemetryData();
 
@@ -199,12 +206,28 @@ void VehiclePlayground::UpdateVehicle()
 	const PxVec3 grav = GetPhysxProxy()->GetPhysxScene()->getGravity();
 	PxWheelQueryResult wheelQueryResults[PX_MAX_NB_WHEELS];
 	PxVehicleWheelQueryResult vehicleQueryResults[1] = { {wheelQueryResults, m_pVehicle->mWheelsSimData.getNbWheels()} };
-	
+
 	PxVehicleUpdateSingleVehicleAndStoreTelemetryData(m_SceneContext.pGameTime->GetElapsed(), grav,
 		*tireFrictionPairs, m_pVehicle, vehicleQueryResults, *m_pVehicleTelemetryData);
 
 	//Work out if the vehicle is in the air.
 	m_IsVehicleInAir = m_pVehicle->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]);
+
+
+	PxShape* shapes[5];
+	m_pVehicle->getRigidDynamicActor()->getShapes(shapes, 5);
+
+	auto rot = m_pVehicle->getRigidDynamicActor()->getGlobalPose().q;
+	auto angle = rot.getAngle();
+
+	auto localPos = shapes[0]->getLocalPose().p;
+	auto pos = m_pVehicle->getRigidDynamicActor()->getGlobalPose().p + PxVec3(localPos.x * cosf(angle), localPos.y, localPos.z * sinf(angle));
+	m_pWheelFL->GetTransform()->Translate(pos.x, pos.y, pos.z);
+	
+	rot = shapes[0]->getLocalPose().q;
+	m_pWheelFL->GetTransform()->Rotate(XMVectorSet(rot.x, rot.y, rot.z, rot.w));
+
+	
 }
 
 void VehiclePlayground::AccelerateForward(float analogAcc)

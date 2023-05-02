@@ -33,6 +33,7 @@ private:
 	FollowCamera* m_pCamera{ nullptr };
 
 	GameObject* m_pChassis{ nullptr };
+	GameObject* m_pWheelFL{ nullptr };
 
 	PxVehicleDrive4W* m_pVehicle{ nullptr };
 	PxVehicleDrive4WRawInputData* m_pVehicleInputData{ nullptr };
