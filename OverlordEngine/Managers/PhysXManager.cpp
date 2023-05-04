@@ -95,17 +95,17 @@ void PhysXManager::InitializeVehicleDescription(const PxFilterData& chassisSimFi
 	//Set up the chassis mass, dimensions, moment of inertia, and center of mass offset.
 	//The moment of inertia is just the moment of inertia of a cuboid but modified for easier steering.
 	//Center of mass offset is 0.65m above the base of the chassis and 0.25m towards the front.
-	const PxF32 chassisMass = 850.f;
+	const PxF32 chassisMass = 950.f;
 	const PxVec3 chassisDims(2.09f, 1.38f, 6.37f);
 	const PxVec3 chassisMOI
 	((chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 0.8f * chassisMass / 12.0f,
 		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * chassisMass / 12.0f);
-	const PxVec3 chassisCMOffset(0.0f, 0.f, 0.f);
+	const PxVec3 chassisCMOffset(0.0f, 0.0f, 0.0f);
 
 	//Set up the wheel mass, radius, width, moment of inertia, and number of wheels.
 	//Moment of inertia is just the moment of inertia of a cylinder.
-	const PxF32 wheelMass = 20.0f;
+	const PxF32 wheelMass = 30.0f;
 	const PxF32 wheelRadius = 0.422f;
 	const PxF32 wheelWidth = 0.45f;
 	const PxF32 wheelMOI = 0.5f * wheelMass * wheelRadius * wheelRadius;
@@ -194,7 +194,7 @@ PxVehicleDrive4W* PhysXManager::InitializeVehicleSDK()
 	const auto pChassisMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Car.ovpc");
 
 	PxVehicleDrive4W* vehicleReference = createVehicle4W(m_VehicleDesc, m_pPhysics, pWheelMesh, pChassisMesh);
-	PxTransform startTransform(PxVec3(0, (m_VehicleDesc.chassisDims.y * 0.5f + m_VehicleDesc.wheelRadius + 1.0f) + 10.f, 0), PxQuat(PxIdentity));
+	PxTransform startTransform(PxVec3(0, (m_VehicleDesc.chassisDims.y * 0.5f + m_VehicleDesc.wheelRadius + 1.0f), 0), PxQuat(PxIdentity));
 	vehicleReference->getRigidDynamicActor()->setGlobalPose(startTransform);
 	vehicleReference->getRigidDynamicActor()->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_CCD, true);
 	m_pVehicleScene->addActor(*vehicleReference->getRigidDynamicActor());

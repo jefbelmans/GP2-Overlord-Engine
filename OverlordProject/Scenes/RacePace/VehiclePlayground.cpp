@@ -5,10 +5,10 @@
 float gSteerVsForwardSpeedData[2 * 8] =
 {
 	//SteerAmount	to	Forward Speed
-	0.0f,		0.75f,
-	5.0f,		0.75f,
-	30.0f,		0.125f,
-	120.0f,		0.1f,
+	0.0f,		1.f,
+	5.0f,		0.55f,
+	30.0f,		0.2f,
+	120.0f,		0.12f,
 	PX_MAX_F32, PX_MAX_F32,
 	PX_MAX_F32, PX_MAX_F32,
 	PX_MAX_F32, PX_MAX_F32,
@@ -22,11 +22,15 @@ void VehiclePlayground::Initialize()
 	m_SceneContext.settings.enableOnGUI = true;
 
 	// MATERIALS
-	DiffuseMaterial* pMaterial = MaterialManager::Get()->CreateMaterial<DiffuseMaterial>();
-	pMaterial->SetDiffuseTexture(L"Textures/F1_Car.png");
+	DiffuseMaterial* pVehicleMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial>();
+	pVehicleMat->SetDiffuseTexture(L"Textures/F1_Car.png");
+
+	DiffuseMaterial* pTrackMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial>();
+	pTrackMat->SetDiffuseTexture(L"Textures/F1_Track.png");
 
 	//// GROUND PLANE
 	//GameSceneExt::CreatePhysXGroundPlane(*this, PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 1.f));
+
 
 	// PHYSX DEBUG RENDERING
 	GetPhysxProxy()->EnablePhysxDebugRendering(true);
@@ -37,26 +41,32 @@ void VehiclePlayground::Initialize()
 	AddChild(m_pChassis);
 
 	m_pChassis->GetTransform()->Translate(XMFLOAT3{ 0.f, 4.f, 0.f });
-	auto pModel = m_pChassis->AddComponent(new ModelComponent(L"Meshes/F1_Car.ovm"));
-	pModel->SetMaterial(pMaterial);
+	m_pChassis->AddComponent(new ModelComponent(L"Meshes/F1_Car.ovm"))->SetMaterial(pVehicleMat);
 
 	auto pRb = m_pChassis->AddComponent(new RigidBodyComponent());
 
-	// WHEEL FL
-	m_pWheelFL = new GameObject();
-	AddChild(m_pWheelFL);
-	m_pWheelFL->AddComponent(new ModelComponent(L"Meshes/F1_Wheel.ovm"))->SetMaterial(pMaterial);
+	// WHEELS
+	for (int i = 0; i < 4; i++)
+	{
+		m_pWheels[i] = new GameObject();
+		AddChild(m_pWheels[i]);
+		m_pWheels[i]->AddComponent(new ModelComponent(L"Meshes/F1_Wheel.ovm"))->SetMaterial(pVehicleMat);
+	}
+	
+	// TRACK
+	m_pTrack = new GameObject();
+	m_pTrack->AddComponent(new ModelComponent(L"Meshes/F1_Track.ovm"))->SetMaterial(pTrackMat);
+	m_pTrack->GetTransform()->Translate(0.f, -1.f, 0.f);
+	AddChild(m_pTrack);
 
 	// INIT VEHICLE SDK
 	m_pVehicle = PhysXManager::Get()->InitializeVehicleSDK();
 	m_pVehicleInputData = new PxVehicleDrive4WRawInputData();
 	m_SteerVsForwardSpeedTable = PxFixedSizeLookupTable<8>(gSteerVsForwardSpeedData, 4);
 
-	auto vehicleRB{ m_pVehicle->getRigidDynamicActor() };
 	// SET VEHICLE RIGID ACTOR TO RB RIGID ACTOR
-	pRb->SetPxRigidActor(vehicleRB);
+	pRb->SetPxRigidActor(m_pVehicle->getRigidDynamicActor());
 	
-
 	SetupTelemetryData();
 
 	// CAMERA
@@ -96,10 +106,6 @@ void VehiclePlayground::Update()
 
 void VehiclePlayground::OnGUI()
 {
-	float xy[2 * PxVehicleGraph::eMAX_NB_SAMPLES];
-	PxVec3 color[PxVehicleGraph::eMAX_NB_SAMPLES];
-	char title[PxVehicleGraph::eMAX_NB_TITLE_CHARS];
-
 	// CAMERA SETTINGS
 	if(ImGui::CollapsingHeader("Camera Settings"))
 	{
@@ -116,6 +122,9 @@ void VehiclePlayground::OnGUI()
 		m_pCamera->SetOffsetDistance(m_CameraDistance);
 	}
 
+	float xy[2 * PxVehicleGraph::eMAX_NB_SAMPLES];
+	PxVec3 color[PxVehicleGraph::eMAX_NB_SAMPLES];
+	char title[PxVehicleGraph::eMAX_NB_TITLE_CHARS];
 	m_pVehicleTelemetryData->getEngineGraph().computeGraphChannel(PxVehicleDriveGraphChannel::eENGINE_REVS,
 		xy, color, title);
 
@@ -213,21 +222,32 @@ void VehiclePlayground::UpdateVehicle()
 	//Work out if the vehicle is in the air.
 	m_IsVehicleInAir = m_pVehicle->getRigidDynamicActor()->isSleeping() ? false : PxVehicleIsInAir(vehicleQueryResults[0]);
 
-
 	PxShape* shapes[5];
 	m_pVehicle->getRigidDynamicActor()->getShapes(shapes, 5);
 
-	auto rot = m_pVehicle->getRigidDynamicActor()->getGlobalPose().q;
-	auto angle = rot.getAngle();
+	// Translate and rotate m_pWheelFL gameobject to match with shape of the wheel attached to rigid body of m_pVehicle
+	for (int i = 0; i < 4; i++)
+	{
+		PxTransform localTm = shapes[i]->getLocalPose();
+		PxMat44 shapePose = PxMat44(localTm);
+		PxMat44 vehiclePose = PxMat44(m_pVehicle->getRigidDynamicActor()->getGlobalPose());
+		PxMat44 wheelPose = vehiclePose * shapePose;
 
-	auto localPos = shapes[0]->getLocalPose().p;
-	auto pos = m_pVehicle->getRigidDynamicActor()->getGlobalPose().p + PxVec3(localPos.x * cosf(angle), localPos.y, localPos.z * sinf(angle));
-	m_pWheelFL->GetTransform()->Translate(pos.x, pos.y, pos.z);
-	
-	rot = shapes[0]->getLocalPose().q;
-	m_pWheelFL->GetTransform()->Rotate(XMVectorSet(rot.x, rot.y, rot.z, rot.w));
+		auto wheelPos = wheelPose.getPosition();
+		m_pWheels[i]->GetTransform()->Translate(wheelPos.x, wheelPos.y, wheelPos.z);
 
-	
+		auto wheelRot = PxQuat(PxMat33(wheelPose.getBasis(0), wheelPose.getBasis(1), wheelPose.getBasis(2)));
+
+		// Left wheels are facing inwards, rotate them 180 degrees
+		if (i == 0 || i == 2)
+		{
+			PxQuat rotate180(PxPi, PxVec3(0, 1, 0));
+			wheelRot = wheelRot * rotate180;
+		}
+
+		m_pWheels[i]->GetTransform()->Rotate(XMVectorSet(wheelRot.x, wheelRot.y, wheelRot.z, wheelRot.w));
+	}
+
 }
 
 void VehiclePlayground::AccelerateForward(float analogAcc)

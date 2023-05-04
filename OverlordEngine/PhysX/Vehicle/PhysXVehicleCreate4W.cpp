@@ -75,8 +75,8 @@ namespace vehicle
 				wheels[PxVehicleDrive4WWheelOrder::eREAR_LEFT].mMaxHandBrakeTorque = 4000.0f;
 				wheels[PxVehicleDrive4WWheelOrder::eREAR_RIGHT].mMaxHandBrakeTorque = 4000.0f;
 				//Enable steering for the front wheels only.
-				wheels[PxVehicleDrive4WWheelOrder::eFRONT_LEFT].mMaxSteer = 0.675959f;
-				wheels[PxVehicleDrive4WWheelOrder::eFRONT_RIGHT].mMaxSteer = 0.675959f;
+				wheels[PxVehicleDrive4WWheelOrder::eFRONT_LEFT].mMaxSteer = PxPi * 0.35f;
+				wheels[PxVehicleDrive4WWheelOrder::eFRONT_RIGHT].mMaxSteer = PxPi * 0.35f;
 			}
 
 			//Set up the tires.
@@ -102,7 +102,7 @@ namespace vehicle
 				for (PxU32 i = 0; i < numWheels; i++)
 				{
 					suspensions[i].mMaxCompression = 0.2f;
-					suspensions[i].mMaxDroop = 0.1f;
+					suspensions[i].mMaxDroop = 0.2f;
 					suspensions[i].mSpringStrength = 35000.0f;
 					suspensions[i].mSpringDamperRate = 4500.0f;
 					suspensions[i].mSprungMass = suspSprungMasses[i];
@@ -256,13 +256,14 @@ namespace vehicle
 		{
 			//Diff
 			PxVehicleDifferential4WData diff;
-			diff.mType = PxVehicleDifferential4WData::eDIFF_TYPE_LS_REARWD;
+			diff.mType = PxVehicleDifferential4WData::eDIFF_TYPE_LS_4WD;
 			driveSimData.setDiffData(diff);
 
 			//Engine
 			PxVehicleEngineData engine;
-			engine.mPeakTorque = 1000.0f;
-			engine.mMaxOmega = 800.0f;//approx 6000 rpm
+			engine.mPeakTorque = 600.0f;
+			engine.mMaxOmega = 700.0f;//approx 6000 rpm
+			engine.mDampingRateFullThrottle = 0.1f;
 			driveSimData.setEngineData(engine);
 
 			//Gears

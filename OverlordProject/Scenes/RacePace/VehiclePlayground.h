@@ -27,13 +27,15 @@ private:
 	};
 
 	float m_CameraSmoothing{ 1.f };
-	float m_CameraLookAhead{ 10.f };
+	float m_CameraLookAhead{ 40.f };
 	float m_CameraDistance{ 30.f };
-	float m_CameraPitch{ 45.f };
+	float m_CameraPitch{ 40.f };
 	FollowCamera* m_pCamera{ nullptr };
 
 	GameObject* m_pChassis{ nullptr };
-	GameObject* m_pWheelFL{ nullptr };
+	GameObject* m_pWheels[4]{ nullptr };
+
+	GameObject* m_pTrack{ nullptr };
 
 	PxVehicleDrive4W* m_pVehicle{ nullptr };
 	PxVehicleDrive4WRawInputData* m_pVehicleInputData{ nullptr };
