@@ -27,8 +27,8 @@ private:
 	};
 
 	float m_CameraSmoothing{ 1.f };
-	float m_CameraLookAhead{ 40.f };
-	float m_CameraDistance{ 30.f };
+	float m_CameraLookAhead{ 45.f };
+	float m_CameraDistance{ 40.f };
 	float m_CameraPitch{ 40.f };
 	FollowCamera* m_pCamera{ nullptr };
 
@@ -40,6 +40,8 @@ private:
 	PxVehicleDrive4W* m_pVehicle{ nullptr };
 	PxVehicleDrive4WRawInputData* m_pVehicleInputData{ nullptr };
 	PxVehicleTelemetryData* m_pVehicleTelemetryData{ nullptr };
+
+	PxWheelQueryResult m_WheelQueryResults[PX_MAX_NB_WHEELS];
 
 	bool m_IsVehicleInAir{ false };
 	bool m_IsDigitalControl{ false };

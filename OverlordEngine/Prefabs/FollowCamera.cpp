@@ -47,10 +47,8 @@ void FollowCamera::Update(const SceneContext& /*sceneContext*/)
 				offset
 			)
 		};
-
-		const auto currPos = XMLoadFloat3(&GetTransform()->GetPosition());
-		const auto smoothPos = XMVectorLerp(currPos, finalPos, m_Smoothing);
-		GetTransform()->Translate(smoothPos);
+		GetTransform()->Translate(finalPos);
+		
 	}
 }
 

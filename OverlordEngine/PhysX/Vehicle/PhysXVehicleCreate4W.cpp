@@ -75,8 +75,8 @@ namespace vehicle
 				wheels[PxVehicleDrive4WWheelOrder::eREAR_LEFT].mMaxHandBrakeTorque = 4000.0f;
 				wheels[PxVehicleDrive4WWheelOrder::eREAR_RIGHT].mMaxHandBrakeTorque = 4000.0f;
 				//Enable steering for the front wheels only.
-				wheels[PxVehicleDrive4WWheelOrder::eFRONT_LEFT].mMaxSteer = PxPi * 0.35f;
-				wheels[PxVehicleDrive4WWheelOrder::eFRONT_RIGHT].mMaxSteer = PxPi * 0.35f;
+				wheels[PxVehicleDrive4WWheelOrder::eFRONT_LEFT].mMaxSteer = PxPi * 0.25f;
+				wheels[PxVehicleDrive4WWheelOrder::eFRONT_RIGHT].mMaxSteer = PxPi * 0.25f;
 			}
 
 			//Set up the tires.
@@ -102,8 +102,8 @@ namespace vehicle
 				for (PxU32 i = 0; i < numWheels; i++)
 				{
 					suspensions[i].mMaxCompression = 0.2f;
-					suspensions[i].mMaxDroop = 0.2f;
-					suspensions[i].mSpringStrength = 35000.0f;
+					suspensions[i].mMaxDroop = 0.3f;
+					suspensions[i].mSpringStrength = 45000.0f;
 					suspensions[i].mSpringDamperRate = 4500.0f;
 					suspensions[i].mSprungMass = suspSprungMasses[i];
 				}
@@ -111,7 +111,7 @@ namespace vehicle
 				//Set the camber angles.
 				const PxF32 camberAngleAtRest = 0.f;
 				const PxF32 camberAngleAtMaxDroop = 0.f;
-				const PxF32 camberAngleAtMaxCompression = 0.f;
+				const PxF32 camberAngleAtMaxCompression = -0.f;
 				for (PxU32 i = 0; i < numWheels; i += 2)
 				{
 					suspensions[i + 0].mCamberAtRest = camberAngleAtRest;
@@ -175,12 +175,12 @@ namespace vehicle
 			PxVehicleAntiRollBarData barFront;
 			barFront.mWheel0 = PxVehicleDrive4WWheelOrder::eFRONT_LEFT;
 			barFront.mWheel1 = PxVehicleDrive4WWheelOrder::eFRONT_RIGHT;
-			barFront.mStiffness = 10000.0f;
+			barFront.mStiffness = 25000.0f;
 			wheelsSimData->addAntiRollBarData(barFront);
 			PxVehicleAntiRollBarData barRear;
 			barRear.mWheel0 = PxVehicleDrive4WWheelOrder::eREAR_LEFT;
 			barRear.mWheel1 = PxVehicleDrive4WWheelOrder::eREAR_RIGHT;
-			barRear.mStiffness = 10000.0f;
+			barRear.mStiffness = 25000.0f;
 			wheelsSimData->addAntiRollBarData(barRear);
 		}
 
@@ -261,8 +261,8 @@ namespace vehicle
 
 			//Engine
 			PxVehicleEngineData engine;
-			engine.mPeakTorque = 600.0f;
-			engine.mMaxOmega = 700.0f;//approx 6000 rpm
+			engine.mPeakTorque = 1000.0f;
+			engine.mMaxOmega = 1000.0f;//approx 6000 rpm
 			engine.mDampingRateFullThrottle = 0.1f;
 			driveSimData.setEngineData(engine);
 
@@ -273,7 +273,7 @@ namespace vehicle
 
 			//Clutch
 			PxVehicleClutchData clutch;
-			clutch.mStrength = 10.0f;
+			clutch.mStrength = 200.0f;
 			driveSimData.setClutchData(clutch);
 
 			//Ackermann steer accuracy

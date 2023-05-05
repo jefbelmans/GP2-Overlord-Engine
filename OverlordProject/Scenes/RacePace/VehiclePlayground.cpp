@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include <numeric>
+
 #include "VehiclePlayground.h"
 #include "Materials/DiffuseMaterial.h"
 
@@ -6,13 +8,13 @@ float gSteerVsForwardSpeedData[2 * 8] =
 {
 	//SteerAmount	to	Forward Speed
 	0.0f,		1.f,
-	5.0f,		0.55f,
-	30.0f,		0.2f,
-	120.0f,		0.12f,
-	PX_MAX_F32, PX_MAX_F32,
-	PX_MAX_F32, PX_MAX_F32,
-	PX_MAX_F32, PX_MAX_F32,
-	PX_MAX_F32, PX_MAX_F32
+	5.f,		0.8f,
+	10.f,		0.6f,
+	15.f,		0.5f,
+	22.5f,		0.38f,
+	30.f,		0.24f,
+	PX_MAX_F32,		PX_MAX_F32,
+	PX_MAX_F32,		PX_MAX_F32
 };
 
 void VehiclePlayground::Initialize()
@@ -62,7 +64,7 @@ void VehiclePlayground::Initialize()
 	// INIT VEHICLE SDK
 	m_pVehicle = PhysXManager::Get()->InitializeVehicleSDK();
 	m_pVehicleInputData = new PxVehicleDrive4WRawInputData();
-	m_SteerVsForwardSpeedTable = PxFixedSizeLookupTable<8>(gSteerVsForwardSpeedData, 4);
+	m_SteerVsForwardSpeedTable = PxFixedSizeLookupTable<8>(gSteerVsForwardSpeedData, 6);
 
 	// SET VEHICLE RIGID ACTOR TO RB RIGID ACTOR
 	pRb->SetPxRigidActor(m_pVehicle->getRigidDynamicActor());
@@ -133,6 +135,11 @@ void VehiclePlayground::OnGUI()
 	{
 		ImGui::Text("Car Telemetry");
 		ImGui::Text("Speed: %f", m_pVehicle->computeForwardSpeed());
+		ImGui::Text("Lateral Slip: %f %f %f %f", 
+			m_WheelQueryResults[0].lateralSlip,
+			m_WheelQueryResults[1].lateralSlip,
+			m_WheelQueryResults[2].lateralSlip,
+			m_WheelQueryResults[3].lateralSlip);
 	}
 }
 
@@ -161,6 +168,14 @@ void VehiclePlayground::UpdateInput()
 	ReleaseAllControls();
 
 	auto input{ m_SceneContext.pInput };
+	
+	// Vibrations
+	const float avgLateralSlip = std::accumulate(m_WheelQueryResults, m_WheelQueryResults + 4, 0.0f,
+		[](float sum, const physx::PxWheelQueryResult& wheelQueryResult) {
+			return sum + std::abs(wheelQueryResult.lateralSlip);
+		}) / 4.f;
+
+	input->SetVibration(avgLateralSlip * 0.03f, avgLateralSlip * 0.085f);
 
 	float steerInput = input->GetThumbstickPosition(true).x;
 	float throtleInput = input->GetTriggerPressure(false);
@@ -213,8 +228,7 @@ void VehiclePlayground::UpdateVehicle()
 
 	//Vehicle update
 	const PxVec3 grav = GetPhysxProxy()->GetPhysxScene()->getGravity();
-	PxWheelQueryResult wheelQueryResults[PX_MAX_NB_WHEELS];
-	PxVehicleWheelQueryResult vehicleQueryResults[1] = { {wheelQueryResults, m_pVehicle->mWheelsSimData.getNbWheels()} };
+	PxVehicleWheelQueryResult vehicleQueryResults[1] = { {m_WheelQueryResults, m_pVehicle->mWheelsSimData.getNbWheels()} };
 
 	PxVehicleUpdateSingleVehicleAndStoreTelemetryData(m_SceneContext.pGameTime->GetElapsed(), grav,
 		*tireFrictionPairs, m_pVehicle, vehicleQueryResults, *m_pVehicleTelemetryData);

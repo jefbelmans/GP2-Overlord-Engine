@@ -23,11 +23,13 @@ private:
 	PxVehicleDrive4W* m_pVehicle{ nullptr };
 	CameraComponent* m_pCamera{ nullptr };
 
+	float m_ShakeTimer{ 5.f };
 	float m_Pitch{ 45.f };
 	float m_Smoothing{ 0.25f };
 	float m_MaxLookAhead{ 10.f };
 	float m_OffsetDistance{ 30.f };
 	XMFLOAT3 m_OffsetDir{ 0.f, 0.f, 0.f };
+	XMFLOAT3 m_ShakeOffset{ 1.f, 1.f, 1.f };
 
 	void CalculateOffsetDirection();
 };

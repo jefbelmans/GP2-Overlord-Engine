@@ -99,13 +99,13 @@ void PhysXManager::InitializeVehicleDescription(const PxFilterData& chassisSimFi
 	const PxVec3 chassisDims(2.09f, 1.38f, 6.37f);
 	const PxVec3 chassisMOI
 	((chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 12.0f,
-		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 0.8f * chassisMass / 12.0f,
-		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * chassisMass / 12.0f);
-	const PxVec3 chassisCMOffset(0.0f, 0.0f, 0.0f);
+		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 1.2f * chassisMass / 12.0f,
+		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * chassisMass / 12.f);
+	const PxVec3 chassisCMOffset(0.0f, 0.0f, 0.5f);
 
 	//Set up the wheel mass, radius, width, moment of inertia, and number of wheels.
 	//Moment of inertia is just the moment of inertia of a cylinder.
-	const PxF32 wheelMass = 30.0f;
+	const PxF32 wheelMass = 20.0f;
 	const PxF32 wheelRadius = 0.422f;
 	const PxF32 wheelWidth = 0.45f;
 	const PxF32 wheelMOI = 0.5f * wheelMass * wheelRadius * wheelRadius;
