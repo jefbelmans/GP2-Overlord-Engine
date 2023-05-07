@@ -124,7 +124,7 @@ void PhysXManager::InitializeVehicleDescription(const PxFilterData& chassisSimFi
 	m_VehicleDesc.wheelMOI = wheelMOI;
 	m_VehicleDesc.numWheels = nbWheels;
 	m_VehicleDesc.wheelMaterial = m_pDefaultMaterial;
-	m_VehicleDesc.chassisSimFilterData = wheelSimFilterData;
+	m_VehicleDesc.wheelSimFilterData = wheelSimFilterData;
 
 	m_VehicleDesc.actorUserData = &m_ActorUserData;
 	m_VehicleDesc.shapeUserDatas = &m_ShapeUserData;
@@ -138,7 +138,7 @@ PxScene* PhysXManager::CreateScene(GameScene* pScene)
 	sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
 	sceneDesc.cpuDispatcher = m_pDefaultCpuDispatcher;
 	sceneDesc.cudaContextManager = m_pCudaContextManager;
-	sceneDesc.filterShader = vehicle::VehicleFilterShader;
+	sceneDesc.filterShader = OverlordSimulationFilterShader;
 	sceneDesc.userData = pScene;
 	// sceneDesc.contactModifyCallback = &gWheelContactModifyCallback;
 	// sceneDesc.ccdContactModifyCallback = &gWheelCCDContactModifyCallback;

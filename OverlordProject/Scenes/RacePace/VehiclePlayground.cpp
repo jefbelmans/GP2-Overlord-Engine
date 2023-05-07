@@ -30,30 +30,12 @@ void VehiclePlayground::Initialize()
 	DiffuseMaterial* pTrackMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial>();
 	pTrackMat->SetDiffuseTexture(L"Textures/F1_Track.png");
 
-	//// GROUND PLANE
-	//GameSceneExt::CreatePhysXGroundPlane(*this, PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 1.f));
-
+	// GROUND PLANE
+	// GameSceneExt::CreatePhysXGroundPlane(*this, PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 0.f));
 
 	// PHYSX DEBUG RENDERING
 	GetPhysxProxy()->EnablePhysxDebugRendering(true);
 	GetPhysxProxy()->GetPhysxScene()->setVisualizationParameter(PxVisualizationParameter::eBODY_LIN_VELOCITY, 1.f);
-
-	// CHASIS
-	m_pChassis = new GameObject();
-	AddChild(m_pChassis);
-
-	m_pChassis->GetTransform()->Translate(XMFLOAT3{ 0.f, 4.f, 0.f });
-	m_pChassis->AddComponent(new ModelComponent(L"Meshes/F1_Car.ovm"))->SetMaterial(pVehicleMat);
-
-	auto pRb = m_pChassis->AddComponent(new RigidBodyComponent());
-
-	// WHEELS
-	for (int i = 0; i < 4; i++)
-	{
-		m_pWheels[i] = new GameObject();
-		AddChild(m_pWheels[i]);
-		m_pWheels[i]->AddComponent(new ModelComponent(L"Meshes/F1_Wheel.ovm"))->SetMaterial(pVehicleMat);
-	}
 	
 	// TRACK
 	m_pTrack = new GameObject();
@@ -66,9 +48,31 @@ void VehiclePlayground::Initialize()
 	m_pVehicleInputData = new PxVehicleDrive4WRawInputData();
 	m_SteerVsForwardSpeedTable = PxFixedSizeLookupTable<8>(gSteerVsForwardSpeedData, 6);
 
+	// CHASIS
+	m_pChassis = new GameObject();
+	AddChild(m_pChassis);
+
+	m_pChassis->GetTransform()->Translate(XMFLOAT3{ 0.f, 4.f, 0.f });
+	m_pChassis->AddComponent(new ModelComponent(L"Meshes/F1_Car.ovm"))->SetMaterial(pVehicleMat);
+
+	auto pRb = m_pChassis->AddComponent(new RigidBodyComponent());
 	// SET VEHICLE RIGID ACTOR TO RB RIGID ACTOR
 	pRb->SetPxRigidActor(m_pVehicle->getRigidDynamicActor());
-	
+
+	// WHEELS
+	for (int i = 0; i < 4; i++)
+	{
+		m_pWheels[i] = new GameObject();
+		AddChild(m_pWheels[i]);
+		m_pWheels[i]->AddComponent(new ModelComponent(L"Meshes/F1_Wheel.ovm"))->SetMaterial(pVehicleMat);
+	}
+
+	auto testBox = new GameObject();
+	pRb = testBox->AddComponent(new RigidBodyComponent());
+	pRb->AddCollider(PxBoxGeometry{ 1.f,1.f,1.f }, *PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 1.f));
+	testBox->GetTransform()->Translate(0.f, 10.f, 2.f);
+	AddChild(testBox);
+
 	SetupTelemetryData();
 
 	// CAMERA
