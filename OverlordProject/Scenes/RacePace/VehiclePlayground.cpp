@@ -31,7 +31,7 @@ void VehiclePlayground::Initialize()
 	pTrackMat->SetDiffuseTexture(L"Textures/F1_Track.png");
 
 	// GROUND PLANE
-	// GameSceneExt::CreatePhysXGroundPlane(*this, PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 0.f));
+	GameSceneExt::CreatePhysXGroundPlane(*this, PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 0.f));
 
 	// PHYSX DEBUG RENDERING
 	GetPhysxProxy()->EnablePhysxDebugRendering(true);
@@ -66,12 +66,6 @@ void VehiclePlayground::Initialize()
 		AddChild(m_pWheels[i]);
 		m_pWheels[i]->AddComponent(new ModelComponent(L"Meshes/F1_Wheel.ovm"))->SetMaterial(pVehicleMat);
 	}
-
-	auto testBox = new GameObject();
-	pRb = testBox->AddComponent(new RigidBodyComponent());
-	pRb->AddCollider(PxBoxGeometry{ 1.f,1.f,1.f }, *PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 1.f));
-	testBox->GetTransform()->Translate(0.f, 10.f, 2.f);
-	AddChild(testBox);
 
 	SetupTelemetryData();
 

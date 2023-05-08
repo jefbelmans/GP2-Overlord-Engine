@@ -6,11 +6,13 @@ inline PxFilterFlags OverlordSimulationFilterShader(
 	PxFilterObjectAttributes attribute1, PxFilterData filterData1,
 	PxPairFlags& pairFlags, const void* pConstantBlock, PxU32 blockSize)
 {
-	//If word3 is not set use default filter_shader (means one of the actors is not a Overlord RigidBody)
-	if(filterData0.word3 == 0 || filterData1.word3 == 0)
-	{
-		return vehicle::VehicleFilterShader(attribute0, filterData0, attribute1, filterData1, pairFlags, pConstantBlock, blockSize);
-	}
+	PX_UNUSED(pConstantBlock);
+	PX_UNUSED(blockSize);
+	//if (filterData0.word3 == 0 || filterData1.word3 == 0)
+	//{
+	//	return physx::PxDefaultSimulationFilterShader(attribute0, filterData0, attribute1, filterData1, pairFlags, pConstantBlock, blockSize);
+	//	//return vehicle::VehicleFilterShader(attribute0, filterData0, attribute1, filterData1, pairFlags, pConstantBlock, blockSize);
+	//}
 
 	if ((0 == (filterData0.word0 & filterData1.word1)) && (0 == (filterData1.word0 & filterData0.word1)))
 		return PxFilterFlag::eSUPPRESS;

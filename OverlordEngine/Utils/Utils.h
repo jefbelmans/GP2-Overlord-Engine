@@ -1,6 +1,8 @@
 #pragma once
 #include "PhysX/PhysxProxy.h"
 #include "Scenegraph/GameScene.h"
+#include "PhysX/Vehicle/PhysXVehicleSceneQuery.hpp"
+#include "Base/Enumerations.h"
 
 namespace GameSceneExt
 {
@@ -8,7 +10,13 @@ namespace GameSceneExt
 	{
 		const auto pActor = PxGetPhysics().createRigidStatic(PxTransform{ PxQuat{PxPiDivTwo, PxVec3{0.f,0.f,1.f}} });
 		if (!pMaterial) pMaterial = PxGetPhysics().createMaterial(.5f, .5f, .5f);
-		PxRigidActorExt::createExclusiveShape(*pActor, PxPlaneGeometry{}, *pMaterial);
+		auto pShape = PxRigidActorExt::createExclusiveShape(*pActor, PxPlaneGeometry{}, *pMaterial);
+
+		//Set the query filter data of the ground plane so that the vehicle raycasts can hit the ground.
+		PxFilterData groundPlaneSimFilterData((PxU32)CollisionGroup::Group0, (PxU32)CollisionGroup::Group0, 0, 0);
+		vehicle::setupDrivableSurface(groundPlaneSimFilterData);
+		pShape->setQueryFilterData(groundPlaneSimFilterData);
+		pShape->setSimulationFilterData(groundPlaneSimFilterData);
 
 		scene.GetPhysxProxy()->AddActor(*pActor);
 	}

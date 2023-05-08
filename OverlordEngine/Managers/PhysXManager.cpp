@@ -180,10 +180,19 @@ PxVehicleDrive4W* PhysXManager::InitializeVehicleSDK()
 	m_pDefaultMaterial = m_pPhysics->createMaterial(0.5f, 0.5f, 0.1f);
 	m_pFrictionPairs = createFrictionPairs(m_pDefaultMaterial);
 
-	//Create a plane to drive on.
-	PxFilterData groundPlaneSimFilterData(COLLISION_FLAG_GROUND, COLLISION_FLAG_GROUND_AGAINST, 0, 0);
-	auto drivePlane = createDrivablePlane(groundPlaneSimFilterData, m_pDefaultMaterial, m_pPhysics);
-	m_pVehicleScene->addActor(*drivePlane);
+	////Create a plane to drive on.
+	//auto drivePlane = createDrivablePlane(groundPlaneSimFilterData, m_pDefaultMaterial, m_pPhysics);
+	//PxShape* shapes[1];
+	//drivePlane->getShapes(shapes, 1);
+
+	////Set the query filter data of the ground plane so that the vehicle raycasts can hit the ground.
+	//PxFilterData qryFilterData;
+	//qryFilterData = shapes[0]->getQueryFilterData();
+	//qryFilterData.word0 = (PxU32)CollisionGroup::Group0;
+	//qryFilterData.word1 = 0;
+	//shapes[0]->setQueryFilterData(qryFilterData);
+
+	//m_pVehicleScene->addActor(*drivePlane);
 
 	//Create a vehicle that will drive on the plane.
 	PxFilterData chassisSimFilterData(COLLISION_FLAG_CHASSIS, COLLISION_FLAG_GROUND, 0, 0);
