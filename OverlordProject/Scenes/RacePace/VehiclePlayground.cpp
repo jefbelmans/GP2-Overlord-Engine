@@ -23,6 +23,9 @@ void VehiclePlayground::Initialize()
 	m_SceneContext.settings.drawGrid = false;
 	m_SceneContext.settings.enableOnGUI = true;
 
+	// PHYSX
+	auto pDefaultMaterial = PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 0.f);
+
 	// MATERIALS
 	DiffuseMaterial* pVehicleMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial>();
 	pVehicleMat->SetDiffuseTexture(L"Textures/F1_Car.png");
@@ -31,7 +34,7 @@ void VehiclePlayground::Initialize()
 	pTrackMat->SetDiffuseTexture(L"Textures/F1_Track.png");
 
 	// GROUND PLANE
-	GameSceneExt::CreatePhysXGroundPlane(*this, PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 0.f));
+	GameSceneExt::CreatePhysXGroundPlane(*this, pDefaultMaterial);
 
 	// PHYSX DEBUG RENDERING
 	GetPhysxProxy()->EnablePhysxDebugRendering(true);
@@ -66,8 +69,19 @@ void VehiclePlayground::Initialize()
 		AddChild(m_pWheels[i]);
 		m_pWheels[i]->AddComponent(new ModelComponent(L"Meshes/F1_Wheel.ovm"))->SetMaterial(pVehicleMat);
 	}
-
 	SetupTelemetryData();
+
+	// CHECKPOINTS
+	auto checkpoint = new GameObject();
+	checkpoint->GetTransform()->Translate(0.f, 3.f, 0.f);
+	pRb = checkpoint->AddComponent(new RigidBodyComponent());
+	pRb->SetKinematic(true);
+
+	pRb->AddCollider(PxBoxGeometry{ 2.f, 3.f, 0.5f }, *pDefaultMaterial, true);
+	checkpoint->SetOnTriggerCallBack([&](GameObject* pTrigger, GameObject* pOther, PxTriggerAction action){
+			OnTriggerCallback(pTrigger, pOther, action);
+		});
+	AddChild(checkpoint);
 
 	// CAMERA
 	m_pCamera = AddChild(new FollowCamera(m_pChassis, m_pVehicle, m_CameraPitch));
@@ -260,6 +274,15 @@ void VehiclePlayground::UpdateVehicle()
 		m_pWheels[i]->GetTransform()->Rotate(XMVectorSet(wheelRot.x, wheelRot.y, wheelRot.z, wheelRot.w));
 	}
 
+}
+
+void VehiclePlayground::OnTriggerCallback(GameObject* /*trigger*/, GameObject* /*other*/, PxTriggerAction action)
+{
+	if (action == PxTriggerAction::ENTER)
+	{
+		// TODO: add code to handle passing checkpoint
+		Logger::LogInfo(L"Checkpoint passed");
+	}
 }
 
 void VehiclePlayground::AccelerateForward(float analogAcc)

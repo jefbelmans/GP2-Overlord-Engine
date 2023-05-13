@@ -87,6 +87,8 @@ private:
 	void UpdateInput();
 	void UpdateVehicle();
 
+	void OnTriggerCallback(GameObject* trigger, GameObject* other, PxTriggerAction action);
+
 	void AccelerateForward(float analogAcc = 0.f);
 	void AccelerateReverse(float analogAcc = 0.f);
 	void Brake();
