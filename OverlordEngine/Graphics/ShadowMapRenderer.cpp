@@ -73,7 +73,7 @@ void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 	//		*focusPosition: Calculate using the Direction Light position and direction
 	//- Use the Projection & View Matrix to calculate the ViewProjection of this Light, store in m_LightVP
 
-    const XMMATRIX projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * 100.0f, 100.f, 0.1f, 500.f);
+    const XMMATRIX projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * 400.0f, 400.0f, 1.f, 450.f);
 
 	const Light& dirLight = sceneContext.pLights->GetDirectionalLight();
 	const auto lightDir = XMLoadFloat4(&dirLight.direction);

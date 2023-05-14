@@ -14,6 +14,7 @@ public:
 protected:
 	void Initialize() override;
 	void Update() override;
+	void PostDraw() override;
 	void OnGUI() override;
 
 private:
@@ -25,6 +26,8 @@ private:
 		Deaccelerate,
 		HandBrake
 	};
+
+	float m_ShadowMapScale{ 0.3f };
 
 	float m_CameraSmoothing{ 1.f };
 	float m_CameraLookAhead{ 45.f };

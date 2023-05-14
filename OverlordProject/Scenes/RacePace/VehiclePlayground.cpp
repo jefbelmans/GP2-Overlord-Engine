@@ -3,6 +3,7 @@
 
 #include "VehiclePlayground.h"
 #include "Materials/DiffuseMaterial.h"
+#include "Materials/Shadow/DiffuseMaterial_Shadow.h"
 
 float gSteerVsForwardSpeedData[2 * 8] =
 {
@@ -23,15 +24,24 @@ void VehiclePlayground::Initialize()
 	m_SceneContext.settings.drawGrid = false;
 	m_SceneContext.settings.enableOnGUI = true;
 
+	m_SceneContext.pLights->SetDirectionalLight({ -150.f ,150.f, -50.f }, { 0.6f, -0.76f, 0.5f });
+
 	// PHYSX
 	auto pDefaultMaterial = PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 0.f);
+	auto pConeMaterial = PhysXManager::Get()->GetPhysics()->createMaterial(0.7f, 0.7f, 0.4f);
 
 	// MATERIALS
-	DiffuseMaterial* pVehicleMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial>();
+	auto pVehicleMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow>();
 	pVehicleMat->SetDiffuseTexture(L"Textures/F1_Car.png");
 
-	DiffuseMaterial* pTrackMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial>();
+	auto pTrackMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow>();
 	pTrackMat->SetDiffuseTexture(L"Textures/F1_Track.png");
+
+	auto pBuildingMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow>();
+	pBuildingMat->SetDiffuseTexture(L"Textures/F1_Building.png");
+
+	auto pGroundMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow>();
+	pGroundMat->SetDiffuseTexture(L"Textures/F1_Ground.png");
 
 	// GROUND PLANE
 	GameSceneExt::CreatePhysXGroundPlane(*this, pDefaultMaterial);
@@ -43,8 +53,129 @@ void VehiclePlayground::Initialize()
 	// TRACK
 	m_pTrack = new GameObject();
 	m_pTrack->AddComponent(new ModelComponent(L"Meshes/F1_Track.ovm"))->SetMaterial(pTrackMat);
-	m_pTrack->GetTransform()->Translate(0.f, -1.f, 0.f);
+	m_pTrack->GetTransform()->Translate(0.f, 0.f, 0.f);
 	AddChild(m_pTrack);
+
+	// FENCE01
+	auto go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_Fence01.ovm"))->SetMaterial(pTrackMat);
+
+	auto pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Fence01.ovpc");
+	auto pRb = go->AddComponent(new RigidBodyComponent(true));
+	pRb->SetCollisionGroup(CollisionGroup::Group0 | CollisionGroup::Group1);
+	pRb->AddCollider(PxConvexMeshGeometry{ pConvexMesh }, *pDefaultMaterial);
+	AddChild(go);
+
+	// FENCE02
+	go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_Fence02.ovm"))->SetMaterial(pTrackMat);
+
+	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Fence02.ovpc");
+	pRb = go->AddComponent(new RigidBodyComponent(true));
+	pRb->SetCollisionGroup(CollisionGroup::Group0 | CollisionGroup::Group1);
+	pRb->AddCollider(PxConvexMeshGeometry{ pConvexMesh }, *pDefaultMaterial);
+	AddChild(go);
+
+	// FENCE03
+	go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_Fence03.ovm"))->SetMaterial(pTrackMat);
+
+	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Fence03.ovpc");
+	pRb = go->AddComponent(new RigidBodyComponent(true));
+	pRb->SetCollisionGroup(CollisionGroup::Group0 | CollisionGroup::Group1);
+	pRb->AddCollider(PxConvexMeshGeometry{ pConvexMesh }, *pDefaultMaterial);
+	AddChild(go);
+
+	// FENCE04
+	go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_Fence04.ovm"))->SetMaterial(pTrackMat);
+
+	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Fence04.ovpc");
+	pRb = go->AddComponent(new RigidBodyComponent(true));
+	pRb->SetCollisionGroup(CollisionGroup::Group0 | CollisionGroup::Group1);
+	pRb->AddCollider(PxConvexMeshGeometry{ pConvexMesh }, *pDefaultMaterial);
+	AddChild(go);
+	
+	// FENCE05
+	go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_Fence05.ovm"))->SetMaterial(pTrackMat);
+
+	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Fence05.ovpc");
+	pRb = go->AddComponent(new RigidBodyComponent(true));
+	pRb->SetCollisionGroup(CollisionGroup::Group0 | CollisionGroup::Group1);
+	pRb->AddCollider(PxConvexMeshGeometry{ pConvexMesh }, *pDefaultMaterial);
+	AddChild(go);
+
+	// FENCE OUTER
+	go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_FenceOuter.ovm"))->SetMaterial(pTrackMat);
+
+	auto pTriangleMesh = ContentManager::Load<PxTriangleMesh>(L"Meshes/F1_FenceOuter.ovpt");
+	pRb = go->AddComponent(new RigidBodyComponent(true));
+	pRb->SetCollisionGroup(CollisionGroup::Group0 | CollisionGroup::Group1);
+	pRb->AddCollider(PxTriangleMeshGeometry{ pTriangleMesh }, *pDefaultMaterial);
+	AddChild(go);
+
+	// BUILDING01
+	go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_Building01.ovm"))->SetMaterial(pBuildingMat);
+
+	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Building01.ovpc");
+	pRb = go->AddComponent(new RigidBodyComponent(true));
+	pRb->SetCollisionGroup(CollisionGroup::Group0 | CollisionGroup::Group1);
+	pRb->AddCollider(PxConvexMeshGeometry{ pConvexMesh }, *pDefaultMaterial);
+	AddChild(go);
+
+	// BUILDING02
+	go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_Building02.ovm"))->SetMaterial(pBuildingMat);
+
+	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Building02.ovpc");
+	pRb = go->AddComponent(new RigidBodyComponent(true));
+	pRb->SetCollisionGroup(CollisionGroup::Group0 | CollisionGroup::Group1);
+	pRb->AddCollider(PxConvexMeshGeometry{ pConvexMesh }, *pDefaultMaterial);
+	AddChild(go);
+
+	// BUILDING03
+	go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_Building03.ovm"))->SetMaterial(pBuildingMat);
+	AddChild(go);
+
+	// GRANDSTAND01
+	go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_GrandStand01.ovm"))->SetMaterial(pBuildingMat);
+	AddChild(go);
+
+	// GRANDSTANDCANOPY01
+	/*go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_GrandStandCanpoy01.ovm"))->SetMaterial(pTrackMat);
+	AddChild(go);*/
+
+	// SPOTLIGHTS01
+	go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_Spotlights01.ovm"))->SetMaterial(pTrackMat);
+	AddChild(go);
+
+	// SIGNS01
+	go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_Signs01.ovm"))->SetMaterial(pTrackMat);
+	AddChild(go);
+
+	// GROUND01
+	go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_Ground01.ovm"))->SetMaterial(pGroundMat);
+	AddChild(go);
+
+	// CONES
+	go = new GameObject();
+	go->AddComponent(new ModelComponent(L"Meshes/F1_Cone01.ovm"))->SetMaterial(pTrackMat);
+	go->GetTransform()->Translate(XMFLOAT3{ -30.f, 0.f, 10.f });
+
+	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Cone01.ovpc");
+	pRb = go->AddComponent(new RigidBodyComponent(false));
+	pRb->AddCollider(PxConvexMeshGeometry{ pConvexMesh }, * pConeMaterial);
+	pRb->SetCollisionGroup(CollisionGroup::Group0 | CollisionGroup::Group1);
+	AddChild(go);
 
 	// INIT VEHICLE SDK
 	m_pVehicle = PhysXManager::Get()->InitializeVehicleSDK();
@@ -58,7 +189,7 @@ void VehiclePlayground::Initialize()
 	m_pChassis->GetTransform()->Translate(XMFLOAT3{ 0.f, 4.f, 0.f });
 	m_pChassis->AddComponent(new ModelComponent(L"Meshes/F1_Car.ovm"))->SetMaterial(pVehicleMat);
 
-	auto pRb = m_pChassis->AddComponent(new RigidBodyComponent());
+	pRb = m_pChassis->AddComponent(new RigidBodyComponent());
 	// SET VEHICLE RIGID ACTOR TO RB RIGID ACTOR
 	pRb->SetPxRigidActor(m_pVehicle->getRigidDynamicActor());
 
@@ -118,6 +249,11 @@ void VehiclePlayground::Update()
 	UpdateInput();
 }
 
+void VehiclePlayground::PostDraw()
+{
+	ShadowMapRenderer::Get()->Debug_DrawDepthSRV({ m_SceneContext.windowWidth - 10.f, 10.f }, { m_ShadowMapScale, m_ShadowMapScale }, { 1.f,0.f });
+}
+
 void VehiclePlayground::OnGUI()
 {
 	// CAMERA SETTINGS
@@ -145,7 +281,10 @@ void VehiclePlayground::OnGUI()
 	
 	// CAR TELEMETRY
 	{
+		auto carPos{ m_pChassis->GetTransform()->GetPosition()};
 		ImGui::Text("Car Telemetry");
+		ImGui::Text("Position: [%f, %f, %f]",
+			carPos.x, carPos.y, carPos.z);
 		ImGui::Text("Speed: %f", m_pVehicle->computeForwardSpeed());
 		ImGui::Text("Lateral Slip: %f %f %f %f", 
 			m_WheelQueryResults[0].lateralSlip,

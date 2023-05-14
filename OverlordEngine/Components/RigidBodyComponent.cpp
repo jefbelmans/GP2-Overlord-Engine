@@ -3,7 +3,7 @@
 
 RigidBodyComponent::RigidBodyComponent(bool isStatic) :
 	m_IsStatic(isStatic),
-	m_CollisionGroups(PxFilterData(static_cast<UINT32>(CollisionGroup::Group0), 0, 0, 1))
+	m_CollisionGroups(PxFilterData(static_cast<UINT32>(CollisionGroup::Group0), static_cast<UINT32>(CollisionGroup::Group1), 0, 1))
 {
 }
 
