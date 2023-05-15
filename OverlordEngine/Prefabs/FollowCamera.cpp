@@ -49,6 +49,11 @@ void FollowCamera::Update(const SceneContext& /*sceneContext*/)
 		};
 		GetTransform()->Translate(finalPos);
 		
+		// Update Directional Light
+		/*const auto XMVecLightPos{ XMVectorAdd(finalPos, XMVectorSet(-40.f, 20.f, 40.f, 0.f)) };
+		XMFLOAT3 lightPos;
+		XMStoreFloat3(&lightPos, XMVecLightPos);
+		sceneContext.pLights->SetDirectionalLight(lightPos, { 0.6f, -0.76f, 0.5f });*/
 	}
 }
 

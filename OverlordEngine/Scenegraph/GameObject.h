@@ -12,7 +12,7 @@ class GameObject
 public:
 	typedef std::function<void (GameObject* pTriggerObject, GameObject* pOtherObject, PxTriggerAction action)> PhysicsCallback;
 
-	GameObject();
+	GameObject(bool isShadowMapStatic = false);
 	virtual ~GameObject();
 	GameObject(const GameObject& other) = delete;
 	GameObject(GameObject&& other) noexcept = delete;
@@ -40,6 +40,8 @@ public:
 
 	const std::wstring& GetTag() const { return m_Tag; }
 	void SetTag(const std::wstring& tag) { m_Tag = tag; }
+
+	bool GetIsShadowMapStatic() const { return m_IsShadowMapStatic; }
 
 	TransformComponent* GetTransform() const { return m_pTransform; }
 
@@ -159,7 +161,7 @@ private:
 	std::vector<GameObject*> m_pChildren{};
 	std::vector<BaseComponent*> m_pComponents{};
 
-	bool m_IsInitialized{}, m_IsActive{};
+	bool m_IsInitialized{}, m_IsActive{}, m_IsShadowMapStatic{};
 	GameScene* m_pParentScene{};
 	GameObject* m_pParentObject{};
 	TransformComponent* m_pTransform{};

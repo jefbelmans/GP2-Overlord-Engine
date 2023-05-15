@@ -2,7 +2,7 @@ float4x4 gWorld : WORLD;
 float4x4 gWorldViewProj : WORLDVIEWPROJECTION;
 float4x4 gWorldViewProj_Light;
 float3 gLightDirection = float3(-0.577f, -0.577f, 0.577f);
-float gShadowMapBias = 0.005f;
+float gShadowMapBias = 0.0025f;
 
 Texture2D gDiffuseMap;
 Texture2D gShadowMap;
@@ -82,7 +82,7 @@ VS_OUTPUT VS(VS_INPUT input)
 float2 texOffset(int u, int v)
 {
 	//TODO: return offseted value (our shadow map has the following dimensions: 1280 * 720)
-    return float2(u * 1.0f / 1280, v * 1.0f / 720);
+    return float2(u * 1.0f / 8192, v * 1.0f / 8192);
 }
 
 float EvaluateShadowMap(float4 lpos)

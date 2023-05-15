@@ -2,9 +2,10 @@
 #include "GameObject.h"
 #include <algorithm>
 
-GameObject::GameObject():
+GameObject::GameObject(bool isShadowMapStatic):
 	m_IsActive(true),
-	m_pTransform(new TransformComponent{})
+	m_pTransform(new TransformComponent{}),
+	m_IsShadowMapStatic(isShadowMapStatic)
 {
 	AddComponent(m_pTransform);
 }

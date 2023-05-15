@@ -20,6 +20,8 @@ public:
 
 	void Debug_DrawDepthSRV(const XMFLOAT2& position = { 0.f,0.f }, const XMFLOAT2& scale = { 1.f,1.f }, const XMFLOAT2& pivot = {0.f,0.f}) const;
 
+	void BakeShadowMap(const SceneContext& sceneContext);
+
 protected:
 	void Initialize() override;
 

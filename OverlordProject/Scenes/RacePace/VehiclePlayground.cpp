@@ -24,7 +24,7 @@ void VehiclePlayground::Initialize()
 	m_SceneContext.settings.drawGrid = false;
 	m_SceneContext.settings.enableOnGUI = true;
 
-	m_SceneContext.pLights->SetDirectionalLight({ -150.f ,150.f, -50.f }, { 0.6f, -0.76f, 0.5f });
+	m_SceneContext.pLights->SetDirectionalLight({ -120.f ,150.f, -80.f }, { 0.6f, -0.76f, 0.5f });
 
 	// PHYSX
 	auto pDefaultMaterial = PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 0.f);
@@ -51,13 +51,13 @@ void VehiclePlayground::Initialize()
 	GetPhysxProxy()->GetPhysxScene()->setVisualizationParameter(PxVisualizationParameter::eBODY_LIN_VELOCITY, 1.f);
 	
 	// TRACK
-	m_pTrack = new GameObject();
+	m_pTrack = new GameObject(true);
 	m_pTrack->AddComponent(new ModelComponent(L"Meshes/F1_Track.ovm"))->SetMaterial(pTrackMat);
-	m_pTrack->GetTransform()->Translate(0.f, 0.f, 0.f);
+	m_pTrack->GetTransform()->Translate(0.f, -0.1f, 0.f);
 	AddChild(m_pTrack);
 
 	// FENCE01
-	auto go = new GameObject();
+	auto go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_Fence01.ovm"))->SetMaterial(pTrackMat);
 
 	auto pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Fence01.ovpc");
@@ -67,7 +67,7 @@ void VehiclePlayground::Initialize()
 	AddChild(go);
 
 	// FENCE02
-	go = new GameObject();
+	go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_Fence02.ovm"))->SetMaterial(pTrackMat);
 
 	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Fence02.ovpc");
@@ -77,7 +77,7 @@ void VehiclePlayground::Initialize()
 	AddChild(go);
 
 	// FENCE03
-	go = new GameObject();
+	go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_Fence03.ovm"))->SetMaterial(pTrackMat);
 
 	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Fence03.ovpc");
@@ -87,7 +87,7 @@ void VehiclePlayground::Initialize()
 	AddChild(go);
 
 	// FENCE04
-	go = new GameObject();
+	go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_Fence04.ovm"))->SetMaterial(pTrackMat);
 
 	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Fence04.ovpc");
@@ -97,7 +97,7 @@ void VehiclePlayground::Initialize()
 	AddChild(go);
 	
 	// FENCE05
-	go = new GameObject();
+	go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_Fence05.ovm"))->SetMaterial(pTrackMat);
 
 	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Fence05.ovpc");
@@ -107,7 +107,7 @@ void VehiclePlayground::Initialize()
 	AddChild(go);
 
 	// FENCE OUTER
-	go = new GameObject();
+	go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_FenceOuter.ovm"))->SetMaterial(pTrackMat);
 
 	auto pTriangleMesh = ContentManager::Load<PxTriangleMesh>(L"Meshes/F1_FenceOuter.ovpt");
@@ -117,7 +117,7 @@ void VehiclePlayground::Initialize()
 	AddChild(go);
 
 	// BUILDING01
-	go = new GameObject();
+	go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_Building01.ovm"))->SetMaterial(pBuildingMat);
 
 	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Building01.ovpc");
@@ -127,7 +127,7 @@ void VehiclePlayground::Initialize()
 	AddChild(go);
 
 	// BUILDING02
-	go = new GameObject();
+	go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_Building02.ovm"))->SetMaterial(pBuildingMat);
 
 	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Building02.ovpc");
@@ -137,12 +137,12 @@ void VehiclePlayground::Initialize()
 	AddChild(go);
 
 	// BUILDING03
-	go = new GameObject();
+	go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_Building03.ovm"))->SetMaterial(pBuildingMat);
 	AddChild(go);
 
 	// GRANDSTAND01
-	go = new GameObject();
+	go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_GrandStand01.ovm"))->SetMaterial(pBuildingMat);
 	AddChild(go);
 
@@ -152,17 +152,17 @@ void VehiclePlayground::Initialize()
 	AddChild(go);*/
 
 	// SPOTLIGHTS01
-	go = new GameObject();
+	go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_Spotlights01.ovm"))->SetMaterial(pTrackMat);
 	AddChild(go);
 
 	// SIGNS01
-	go = new GameObject();
+	go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_Signs01.ovm"))->SetMaterial(pTrackMat);
 	AddChild(go);
 
 	// GROUND01
-	go = new GameObject();
+	go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_Ground01.ovm"))->SetMaterial(pGroundMat);
 	AddChild(go);
 
@@ -186,7 +186,8 @@ void VehiclePlayground::Initialize()
 	m_pChassis = new GameObject();
 	AddChild(m_pChassis);
 
-	m_pChassis->GetTransform()->Translate(XMFLOAT3{ 0.f, 4.f, 0.f });
+	m_pChassis->GetTransform()->Translate(XMFLOAT3{ -48.f, 2.f, -100.f });
+	m_pChassis->GetTransform()->Rotate(0.f, -90.f, 0.f);
 	m_pChassis->AddComponent(new ModelComponent(L"Meshes/F1_Car.ovm"))->SetMaterial(pVehicleMat);
 
 	pRb = m_pChassis->AddComponent(new RigidBodyComponent());
@@ -251,7 +252,8 @@ void VehiclePlayground::Update()
 
 void VehiclePlayground::PostDraw()
 {
-	ShadowMapRenderer::Get()->Debug_DrawDepthSRV({ m_SceneContext.windowWidth - 10.f, 10.f }, { m_ShadowMapScale, m_ShadowMapScale }, { 1.f,0.f });
+	if(m_DebugShadowMap)
+		ShadowMapRenderer::Get()->Debug_DrawDepthSRV({ m_SceneContext.windowWidth - 10.f, 10.f }, { m_ShadowMapScale, m_ShadowMapScale }, { 1.f,0.f });
 }
 
 void VehiclePlayground::OnGUI()
@@ -278,11 +280,10 @@ void VehiclePlayground::OnGUI()
 	m_pVehicleTelemetryData->getEngineGraph().computeGraphChannel(PxVehicleDriveGraphChannel::eENGINE_REVS,
 		xy, color, title);
 
-	
 	// CAR TELEMETRY
+	if(ImGui::CollapsingHeader("Car Telemetry"))
 	{
 		auto carPos{ m_pChassis->GetTransform()->GetPosition()};
-		ImGui::Text("Car Telemetry");
 		ImGui::Text("Position: [%f, %f, %f]",
 			carPos.x, carPos.y, carPos.z);
 		ImGui::Text("Speed: %f", m_pVehicle->computeForwardSpeed());
@@ -291,6 +292,17 @@ void VehiclePlayground::OnGUI()
 			m_WheelQueryResults[1].lateralSlip,
 			m_WheelQueryResults[2].lateralSlip,
 			m_WheelQueryResults[3].lateralSlip);
+	}
+
+	// SHADOWMAP
+	if(ImGui::CollapsingHeader("ShadowMap"))
+	{
+		ImGui::Checkbox("Debug ShadowMap", &m_DebugShadowMap);
+		ImGui::SliderFloat("ShadowMap Scale", &m_ShadowMapScale, 0.1f, 1.f);
+		if (ImGui::Button("Bake"))
+		{
+			ShadowMapRenderer::Get()->BakeShadowMap(m_SceneContext);
+		}
 	}
 }
 

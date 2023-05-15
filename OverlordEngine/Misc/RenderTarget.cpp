@@ -247,8 +247,10 @@ void RenderTarget::SaveTextureToFile(const SceneContext& sceneContext, const std
 	if (SUCCEEDED(CaptureTexture(sceneContext.d3dContext.pDevice,
 		sceneContext.d3dContext.pDeviceContext, m_pDepth, image)))
 	{
+		auto metadata = image.GetMetadata();
+		metadata.format = DXGI_FORMAT_R32_FLOAT;
 		HRESULT hr = SaveToDDSFile(image.GetImages(), image.GetImageCount(),
-						image.GetMetadata(), DDS_FLAGS_NONE, fileName.c_str());
+			metadata, DDS_FLAGS_NONE, fileName.c_str());
 		if (FAILED(hr))
 			Logger::LogWarning(L"RenderTarget::SaveTextureToFile(...) > Failed to save texture to file! (Error: %s)", hr);
 	}
@@ -264,15 +266,21 @@ void RenderTarget::LoadShadowMapFromFile(const D3D11Context& d3dContext, const s
 	info.width = m_Desc.width;
 	info.height = m_Desc.height;
 	info.format = m_Desc.depthFormat;
+	info.miscFlags = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
 
 	ScratchImage image;
 	HRESULT hr = LoadFromDDSFile(fileName.c_str(),
 		DDS_FLAGS_NONE, &info, image);
 	if (SUCCEEDED(hr))
 	{
+		auto meta{ image.GetMetadata() };
+		meta.miscFlags = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
+		meta.miscFlags2 = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
+		meta.format = DXGI_FORMAT_R32_FLOAT;
 		hr = CreateShaderResourceView(d3dContext.pDevice,
 			image.GetImages(), image.GetImageCount(),
-			image.GetMetadata(), &m_pDepthShaderResourceView);
+			meta, &m_pDepthShaderResourceView);
+		
 
 		if (FAILED(hr))
 		{

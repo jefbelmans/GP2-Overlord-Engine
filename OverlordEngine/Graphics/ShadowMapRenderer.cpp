@@ -15,8 +15,8 @@ void ShadowMapRenderer::Initialize()
 	RENDERTARGET_DESC desc {};
 	desc.enableColorBuffer = false;
 	desc.enableDepthSRV = true;
-	desc.width = 1280;
-	desc.height = 720;
+	desc.width = 8192;
+	desc.height = 8192;
 
 	m_pShadowRenderTarget = new RenderTarget(m_GameContext.d3dContext);
 	m_pShadowRenderTarget->Create(desc);
@@ -33,7 +33,8 @@ void ShadowMapRenderer::Initialize()
 	m_GeneratorTechniqueContexts[(int)ShadowGeneratorType::Skinned] 
 		= m_pShadowMapGenerator->GetTechniqueContext((int)ShadowGeneratorType::Skinned);
 
-	m_pShadowRenderTarget->LoadShadowMapFromFile(m_GameContext.d3dContext, L"Resources/Textures/BakedShadowmaps/ShadowMap.dds");
+	// Load shadowmap
+	// m_pShadowRenderTarget->LoadShadowMapFromFile(m_GameContext.d3dContext, L"Resources/Textures/Baked/ShadowMap.dds");
 }
 
 void ShadowMapRenderer::UpdateMeshFilter(const SceneContext& sceneContext, MeshFilter* pMeshFilter) const
@@ -52,6 +53,16 @@ void ShadowMapRenderer::UpdateMeshFilter(const SceneContext& sceneContext, MeshF
 
 void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 {
+	// Change the viewport to match the shadow map size, this is to render the shadow map at higher resolutions
+	D3D11_VIEWPORT vp{};
+	vp.Width = static_cast<float>(m_pShadowRenderTarget->GetDesc().width);
+	vp.Height = static_cast<float>(m_pShadowRenderTarget->GetDesc().height);
+	vp.MinDepth = 0.f;
+	vp.MaxDepth = 1.f;
+	vp.TopLeftX = 0.f;
+	vp.TopLeftY = 0.f;
+	sceneContext.d3dContext.pDeviceContext->RSSetViewports(1, &vp);
+
 	//This function is called once right before we start the Shadow Pass (= generating the ShadowMap)
 	//This function is responsible for setting the pipeline into the correct state, meaning
 	//	- Making sure the ShadowMap is unbound from the pipeline as a ShaderResource (SRV), so we can bind it as a RenderTarget (RTV)
@@ -75,7 +86,7 @@ void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 	//		*focusPosition: Calculate using the Direction Light position and direction
 	//- Use the Projection & View Matrix to calculate the ViewProjection of this Light, store in m_LightVP
 
-    const XMMATRIX projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * 600.f, 600.f, 1.f, 450.f);
+    const XMMATRIX projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * 400.f, 400.f, 0.1f, 400.f);
 
 	const Light& dirLight = sceneContext.pLights->GetDirectionalLight();
 	const auto lightDir = XMLoadFloat4(&dirLight.direction);
@@ -84,14 +95,14 @@ void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 
 	XMStoreFloat4x4(&m_LightVP, XMMatrixMultiply(view, projection));
 
-	//3. Update this matrix (m_LightVP) on the ShadowMapMaterial effect
+	// 3. Update this matrix (m_LightVP) on the ShadowMapMaterial effect
 	m_pShadowMapGenerator->SetVariable_Matrix(L"gLightViewProj", reinterpret_cast<const float*>(&m_LightVP));
 
-	//4. Set the Main Game RenderTarget to m_pShadowRenderTarget (OverlordGame::SetRenderTarget) - Hint: every Singleton object has access to the GameContext...
-	m_GameContext.pGame->SetRenderTarget(m_pShadowRenderTarget);
+	// 4. Set the Main Game RenderTarget to m_pShadowRenderTarget (OverlordGame::SetRenderTarget) - Hint: every Singleton object has access to the GameContext...
+	 m_GameContext.pGame->SetRenderTarget(m_pShadowRenderTarget);
 
-	//5. Clear the ShadowMap rendertarget (RenderTarget::Clear)
-	m_pShadowRenderTarget->Clear();
+	// 5. Clear the ShadowMap rendertarget (RenderTarget::Clear)
+	 m_pShadowRenderTarget->Clear();
 }
 
 void ShadowMapRenderer::DrawMesh(const SceneContext& sceneContext, MeshFilter* pMeshFilter, const XMFLOAT4X4& meshWorld, const std::vector<XMFLOAT4X4>& meshBones)
@@ -161,8 +172,15 @@ void ShadowMapRenderer::End(const SceneContext& sceneContext) const
 	//		- Have a look inside the function, there is a easy way to do this...
 	m_GameContext.pGame->SetRenderTarget(nullptr);
 
-	// Save shadowmap
-	m_pShadowRenderTarget->SaveTextureToFile(sceneContext, L"Resources/Textures/BakedShadowmaps/ShadowMap.dds");
+	// Restore the viewport size to the original
+	D3D11_VIEWPORT vp{};
+	vp.Width = static_cast<float>(sceneContext.windowWidth);
+	vp.Height = static_cast<float>(sceneContext.windowHeight);
+	vp.MinDepth = 0.f;
+	vp.MaxDepth = 1.f;
+	vp.TopLeftX = 0.f;
+	vp.TopLeftY = 0.f;
+	sceneContext.d3dContext.pDeviceContext->RSSetViewports(1, &vp);
 }
 
 ID3D11ShaderResourceView* ShadowMapRenderer::GetShadowMap() const
@@ -180,4 +198,9 @@ void ShadowMapRenderer::Debug_DrawDepthSRV(const XMFLOAT2& position, const XMFLO
 		constexpr ID3D11ShaderResourceView* const pSRV[] = { nullptr };
 		m_GameContext.d3dContext.pDeviceContext->PSSetShaderResources(0, 1, pSRV);
 	}
+}
+
+void ShadowMapRenderer::BakeShadowMap(const SceneContext& sceneContext)
+{
+	m_pShadowRenderTarget->SaveTextureToFile(sceneContext, L"Resources/Textures/Baked/ShadowMap.dds");
 }

@@ -27,6 +27,7 @@ private:
 		HandBrake
 	};
 
+	bool m_DebugShadowMap{ false };
 	float m_ShadowMapScale{ 0.3f };
 
 	float m_CameraSmoothing{ 1.f };

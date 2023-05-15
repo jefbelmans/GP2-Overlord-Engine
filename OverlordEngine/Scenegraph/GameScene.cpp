@@ -162,7 +162,8 @@ void GameScene::RootDraw()
 	//2. DRAW_LOOP > For every GameObject (m_pChildren), call GameObject::RootShadowMapDraw
 	for (const auto pChild : m_pChildren)
 	{
-		pChild->RootShadowMapDraw(m_SceneContext);
+		if (!pChild->GetIsShadowMapStatic())
+			pChild->RootShadowMapDraw(m_SceneContext);
 	}
 
 	//3. END > ShadowMapRenderer::End (Terminate the ShadowPass)
