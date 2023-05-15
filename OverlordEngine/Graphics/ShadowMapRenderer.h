@@ -16,11 +16,15 @@ public:
 	void End(const SceneContext&) const;
 
 	ID3D11ShaderResourceView* GetShadowMap() const;
+	ID3D11ShaderResourceView* GetBakedShadowMap() const;
+
 	const XMFLOAT4X4& GetLightVP() const { return m_LightVP; }
+	const XMFLOAT4X4& GetBakedLightVP() const { return m_BakedLightVP; }
+
+	void CalculateBakedLightVP(const XMFLOAT4& position, const XMFLOAT4& direction);
 
 	void Debug_DrawDepthSRV(const XMFLOAT2& position = { 0.f,0.f }, const XMFLOAT2& scale = { 1.f,1.f }, const XMFLOAT2& pivot = {0.f,0.f}) const;
-
-	void BakeShadowMap(const SceneContext& sceneContext);
+	void Debug_DrawBakedDepthSRV(const XMFLOAT2& position = { 0.f,0.f }, const XMFLOAT2& scale = { 1.f,1.f }, const XMFLOAT2& pivot = {0.f,0.f}) const;
 
 protected:
 	void Initialize() override;
@@ -33,9 +37,10 @@ private:
 	//Rendertarget to render the 'shadowmap' to (depth-only)
 	//Contains depth information for all rendered shadow-casting meshes from a light's perspective (usual the main directional light)
 	RenderTarget* m_pShadowRenderTarget{ nullptr };
+	RenderTarget* m_pBakedShadowRenderTarget{ nullptr };
 
 	//Light ViewProjection (perspective used to render ShadowMap)
-	XMFLOAT4X4 m_LightVP{};
+	XMFLOAT4X4 m_LightVP{}, m_BakedLightVP{};
 
 	//Shadow Generator is responsible of drawing all shadow casting meshes to the ShadowMap
 	//There are two techniques, one for static (non-skinned) meshes, and another for skinned meshes (with bones, blendIndices, blendWeights)

@@ -18,9 +18,16 @@ void ShadowMapRenderer::Initialize()
 	desc.width = 8192;
 	desc.height = 8192;
 
+	// Baked shadow map
+	m_pBakedShadowRenderTarget = new RenderTarget(m_GameContext.d3dContext);
+	m_pBakedShadowRenderTarget->Create(desc);
+
+	// Real time shadow map
+	desc.width = 8192;
+	desc.height = 8192;
 	m_pShadowRenderTarget = new RenderTarget(m_GameContext.d3dContext);
 	m_pShadowRenderTarget->Create(desc);
-
+	
 	//2. Create a new ShadowMapMaterial, this will be the material that 'generated' the ShadowMap, store in m_pShadowMapGenerator
 	//	- The effect has two techniques, one for static meshes, and another for skinned meshes (both very similar, the skinned version also transforms the vertices based on a given set of boneTransforms)
 	//	- We want to store the TechniqueContext (struct that contains information about the Technique & InputLayout required for rendering) for both techniques in the m_GeneratorTechniqueContexts array.
@@ -34,7 +41,7 @@ void ShadowMapRenderer::Initialize()
 		= m_pShadowMapGenerator->GetTechniqueContext((int)ShadowGeneratorType::Skinned);
 
 	// Load shadowmap
-	// m_pShadowRenderTarget->LoadShadowMapFromFile(m_GameContext.d3dContext, L"Resources/Textures/Baked/ShadowMap.dds");
+	m_pBakedShadowRenderTarget->LoadTextureFromFile(m_GameContext.d3dContext, L"Resources/Textures/Baked Maps/ShadowMap.dds");
 }
 
 void ShadowMapRenderer::UpdateMeshFilter(const SceneContext& sceneContext, MeshFilter* pMeshFilter) const
@@ -53,14 +60,25 @@ void ShadowMapRenderer::UpdateMeshFilter(const SceneContext& sceneContext, MeshF
 
 void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 {
-	// Change the viewport to match the shadow map size, this is to render the shadow map at higher resolutions
+	const bool bakeShadowMap{ sceneContext.pLights->GetBakeShadows() };
+
+	// Change the viewport to match the shadow map size (baked or real time)
 	D3D11_VIEWPORT vp{};
-	vp.Width = static_cast<float>(m_pShadowRenderTarget->GetDesc().width);
-	vp.Height = static_cast<float>(m_pShadowRenderTarget->GetDesc().height);
+	if (bakeShadowMap)
+	{
+		vp.Width = static_cast<float>(m_pBakedShadowRenderTarget->GetDesc().width);
+		vp.Height = static_cast<float>(m_pBakedShadowRenderTarget->GetDesc().height);
+	}
+	else
+	{
+		vp.Width = static_cast<float>(m_pShadowRenderTarget->GetDesc().width);
+		vp.Height = static_cast<float>(m_pShadowRenderTarget->GetDesc().height);
+	}
 	vp.MinDepth = 0.f;
 	vp.MaxDepth = 1.f;
 	vp.TopLeftX = 0.f;
 	vp.TopLeftY = 0.f;
+
 	sceneContext.d3dContext.pDeviceContext->RSSetViewports(1, &vp);
 
 	//This function is called once right before we start the Shadow Pass (= generating the ShadowMap)
@@ -86,7 +104,8 @@ void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 	//		*focusPosition: Calculate using the Direction Light position and direction
 	//- Use the Projection & View Matrix to calculate the ViewProjection of this Light, store in m_LightVP
 
-    const XMMATRIX projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * 400.f, 400.f, 0.1f, 400.f);
+	// Change the projection matrix when baking shadows to fit the entire scene
+	const auto projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * 110.f, 110.f, 0.1f, 400.f);
 
 	const Light& dirLight = sceneContext.pLights->GetDirectionalLight();
 	const auto lightDir = XMLoadFloat4(&dirLight.direction);
@@ -95,13 +114,14 @@ void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 
 	XMStoreFloat4x4(&m_LightVP, XMMatrixMultiply(view, projection));
 
-	// 3. Update this matrix (m_LightVP) on the ShadowMapMaterial effect
-	m_pShadowMapGenerator->SetVariable_Matrix(L"gLightViewProj", reinterpret_cast<const float*>(&m_LightVP));
+	// 3. Update this matrix (m_LightVP) on the ShadowMapMaterial effect, or m_BakedLightVP when baking shadows
+	m_pShadowMapGenerator->SetVariable_Matrix(L"gLightViewProj", reinterpret_cast<const float*>(bakeShadowMap ? &m_BakedLightVP : &m_LightVP));
 
 	// 4. Set the Main Game RenderTarget to m_pShadowRenderTarget (OverlordGame::SetRenderTarget) - Hint: every Singleton object has access to the GameContext...
-	 m_GameContext.pGame->SetRenderTarget(m_pShadowRenderTarget);
+	m_GameContext.pGame->SetRenderTarget(bakeShadowMap ? m_pBakedShadowRenderTarget : m_pShadowRenderTarget);
 
 	// 5. Clear the ShadowMap rendertarget (RenderTarget::Clear)
+	 m_pBakedShadowRenderTarget->Clear();
 	 m_pShadowRenderTarget->Clear();
 }
 
@@ -181,11 +201,36 @@ void ShadowMapRenderer::End(const SceneContext& sceneContext) const
 	vp.TopLeftX = 0.f;
 	vp.TopLeftY = 0.f;
 	sceneContext.d3dContext.pDeviceContext->RSSetViewports(1, &vp);
+
+	if (sceneContext.pLights->GetBakeShadows())
+	{
+		m_pBakedShadowRenderTarget->SaveTextureToFile(sceneContext, L"Resources/Textures/Baked Maps/ShadowMap.dds");
+		sceneContext.pLights->SetBakeShadows(false);
+
+		Logger::LogInfo(L"Successfully baked shadow map!");
+	}
 }
 
 ID3D11ShaderResourceView* ShadowMapRenderer::GetShadowMap() const
 {
 	return m_pShadowRenderTarget->GetDepthShaderResourceView();
+}
+
+ID3D11ShaderResourceView* ShadowMapRenderer::GetBakedShadowMap() const
+{
+	return m_pBakedShadowRenderTarget->GetDepthShaderResourceView();
+}
+
+void ShadowMapRenderer::CalculateBakedLightVP(const XMFLOAT4& position, const XMFLOAT4& direction)
+{
+	const float aspectRatio = float(m_GameContext.windowWidth / m_GameContext.windowHeight);
+	const auto projection = XMMatrixOrthographicLH(aspectRatio * 400.f, 400.f, 0.1f, 400.f);
+
+	const auto lightDir = XMLoadFloat4(&direction);
+	const auto lightPos = XMLoadFloat4(&position);
+	const XMMATRIX view = XMMatrixLookAtLH(lightPos, lightPos + lightDir, XMVectorSet(0.f, 1.f, 0.f, 0.f));
+
+	XMStoreFloat4x4(&m_BakedLightVP, XMMatrixMultiply(view, projection));
 }
 
 void ShadowMapRenderer::Debug_DrawDepthSRV(const XMFLOAT2& position, const XMFLOAT2& scale, const XMFLOAT2& pivot) const
@@ -200,7 +245,14 @@ void ShadowMapRenderer::Debug_DrawDepthSRV(const XMFLOAT2& position, const XMFLO
 	}
 }
 
-void ShadowMapRenderer::BakeShadowMap(const SceneContext& sceneContext)
+void ShadowMapRenderer::Debug_DrawBakedDepthSRV(const XMFLOAT2& position, const XMFLOAT2& scale, const XMFLOAT2& pivot) const
 {
-	m_pShadowRenderTarget->SaveTextureToFile(sceneContext, L"Resources/Textures/Baked/ShadowMap.dds");
+	if (m_pShadowRenderTarget->HasDepthSRV())
+	{
+		SpriteRenderer::Get()->DrawImmediate(m_GameContext.d3dContext, m_pBakedShadowRenderTarget->GetDepthShaderResourceView(), position, XMFLOAT4{ Colors::White }, pivot, scale);
+
+		//Remove from Pipeline
+		constexpr ID3D11ShaderResourceView* const pSRV[] = { nullptr };
+		m_GameContext.d3dContext.pDeviceContext->PSSetShaderResources(0, 1, pSRV);
+	}
 }

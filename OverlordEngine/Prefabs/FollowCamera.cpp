@@ -14,7 +14,7 @@ void FollowCamera::Initialize(const SceneContext& /*sceneContext*/)
 	AddComponent(m_pCamera);
 }
 
-void FollowCamera::Update(const SceneContext& /*sceneContext*/)
+void FollowCamera::Update(const SceneContext& sceneContext)
 {
 	if (m_pCamera->IsActive())
 	{
@@ -50,10 +50,10 @@ void FollowCamera::Update(const SceneContext& /*sceneContext*/)
 		GetTransform()->Translate(finalPos);
 		
 		// Update Directional Light
-		/*const auto XMVecLightPos{ XMVectorAdd(finalPos, XMVectorSet(-40.f, 20.f, 40.f, 0.f)) };
+		const auto XMVecLightPos{ XMVectorAdd(finalPos, XMVectorSet(-35.f, 40.f, 5.f, 0.f)) };
 		XMFLOAT3 lightPos;
 		XMStoreFloat3(&lightPos, XMVecLightPos);
-		sceneContext.pLights->SetDirectionalLight(lightPos, { 0.6f, -0.76f, 0.5f });*/
+		sceneContext.pLights->SetDirectionalLight(lightPos, { 0.6f, -0.76f, 0.5f });
 	}
 }
 

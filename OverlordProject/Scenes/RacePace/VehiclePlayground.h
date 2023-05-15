@@ -28,6 +28,8 @@ private:
 	};
 
 	bool m_DebugShadowMap{ false };
+	bool m_DebugBakedShadowMap{ false };
+	bool m_UseBakedShadows{ false };
 	float m_ShadowMapScale{ 0.3f };
 
 	float m_CameraSmoothing{ 1.f };

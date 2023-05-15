@@ -2,7 +2,6 @@
 #include <numeric>
 
 #include "VehiclePlayground.h"
-#include "Materials/DiffuseMaterial.h"
 #include "Materials/Shadow/DiffuseMaterial_Shadow.h"
 
 float gSteerVsForwardSpeedData[2 * 8] =
@@ -24,7 +23,8 @@ void VehiclePlayground::Initialize()
 	m_SceneContext.settings.drawGrid = false;
 	m_SceneContext.settings.enableOnGUI = true;
 
-	m_SceneContext.pLights->SetDirectionalLight({ -120.f ,150.f, -80.f }, { 0.6f, -0.76f, 0.5f });
+	// SET BAKED DIR LIGHT
+	m_SceneContext.pLights->SetBakedDirectionalLight({ -100.f ,150.f, -80.f }, { 0.6f, -0.76f, 0.5f });
 
 	// PHYSX
 	auto pDefaultMaterial = PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 0.f);
@@ -254,6 +254,9 @@ void VehiclePlayground::PostDraw()
 {
 	if(m_DebugShadowMap)
 		ShadowMapRenderer::Get()->Debug_DrawDepthSRV({ m_SceneContext.windowWidth - 10.f, 10.f }, { m_ShadowMapScale, m_ShadowMapScale }, { 1.f,0.f });
+
+	if(m_DebugBakedShadowMap)
+		ShadowMapRenderer::Get()->Debug_DrawBakedDepthSRV({ m_SceneContext.windowWidth - 10.f, 10.f }, { m_ShadowMapScale, m_ShadowMapScale }, { 1.f,0.f });
 }
 
 void VehiclePlayground::OnGUI()
@@ -297,11 +300,15 @@ void VehiclePlayground::OnGUI()
 	// SHADOWMAP
 	if(ImGui::CollapsingHeader("ShadowMap"))
 	{
-		ImGui::Checkbox("Debug ShadowMap", &m_DebugShadowMap);
-		ImGui::SliderFloat("ShadowMap Scale", &m_ShadowMapScale, 0.1f, 1.f);
+		ImGui::Checkbox("Use Baked Shadows", &m_UseBakedShadows);
+		m_SceneContext.pLights->SetUseBakedShadows(m_UseBakedShadows);
+
+		ImGui::Checkbox("Debug Real Time ShadowMap", &m_DebugShadowMap);
+		ImGui::Checkbox("Debug Baked ShadowMap", &m_DebugBakedShadowMap);
+		ImGui::SliderFloat("ShadowMap Scale", &m_ShadowMapScale, 0.01f, 1.f);
 		if (ImGui::Button("Bake"))
 		{
-			ShadowMapRenderer::Get()->BakeShadowMap(m_SceneContext);
+			m_SceneContext.pLights->SetBakeShadows(true);
 		}
 	}
 }

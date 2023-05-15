@@ -240,7 +240,7 @@ ID3D11ShaderResourceView* RenderTarget::GetDepthShaderResourceView() const
 	return m_pDepthShaderResourceView;
 }
 
-void RenderTarget::SaveTextureToFile(const SceneContext& sceneContext, const std::wstring& fileName)
+void RenderTarget::SaveTextureToFile(const SceneContext& sceneContext, const std::wstring& fileName) const
 {
 	// Save the pixel data to a file using the DirectXTex library
 	ScratchImage image;
@@ -260,17 +260,18 @@ void RenderTarget::SaveTextureToFile(const SceneContext& sceneContext, const std
 	}
 }
 
-void RenderTarget::LoadShadowMapFromFile(const D3D11Context& d3dContext, const std::wstring& fileName)
+void RenderTarget::LoadTextureFromFile(const D3D11Context& d3dContext, const std::wstring& fileName)
 {
 	TexMetadata info{};
 	info.width = m_Desc.width;
 	info.height = m_Desc.height;
-	info.format = m_Desc.depthFormat;
+	info.format = DXGI_FORMAT_R32_FLOAT;
 	info.miscFlags = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
 
 	ScratchImage image;
 	HRESULT hr = LoadFromDDSFile(fileName.c_str(),
 		DDS_FLAGS_NONE, &info, image);
+
 	if (SUCCEEDED(hr))
 	{
 		auto meta{ image.GetMetadata() };
@@ -279,7 +280,7 @@ void RenderTarget::LoadShadowMapFromFile(const D3D11Context& d3dContext, const s
 		meta.format = DXGI_FORMAT_R32_FLOAT;
 		hr = CreateShaderResourceView(d3dContext.pDevice,
 			image.GetImages(), image.GetImageCount(),
-			meta, &m_pDepthShaderResourceView);
+			info, &m_pDepthShaderResourceView);
 		
 
 		if (FAILED(hr))

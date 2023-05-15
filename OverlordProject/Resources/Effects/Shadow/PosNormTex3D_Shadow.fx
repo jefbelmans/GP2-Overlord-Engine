@@ -1,11 +1,14 @@
 float4x4 gWorld : WORLD;
 float4x4 gWorldViewProj : WORLDVIEWPROJECTION;
 float4x4 gWorldViewProj_Light;
+float4x4 gBakedWorldViewProj_Light;
 float3 gLightDirection = float3(-0.577f, -0.577f, 0.577f);
 float gShadowMapBias = 0.0025f;
+bool gUseBakedShadows = false;
 
 Texture2D gDiffuseMap;
 Texture2D gShadowMap;
+Texture2D gBakedShadowMap;
 
 SamplerState samLinear
 {
@@ -44,6 +47,7 @@ struct VS_OUTPUT
     float3 normal : NORMAL;
     float2 texCoord : TEXCOORD;
     float4 lPos : TEXCOORD1;
+    float4 lPosBaked : TEXCOORD2;
 };
 
 DepthStencilState EnableDepth
@@ -67,6 +71,7 @@ VS_OUTPUT VS(VS_INPUT input)
 	//TODO: complete Vertex Shader
 	//Hint: Don't forget to project our position to light clip space and store it in lPos
     output.lPos = mul(float4(input.pos, 1.0f), gWorldViewProj_Light);
+    output.lPosBaked = mul(float4(input.pos, 1.0f), gBakedWorldViewProj_Light);
 	
 	// Step 1:	convert position into float4 and multiply with matWorldViewProj
     output.pos = mul(float4(input.pos, 1.0f), gWorldViewProj);
@@ -79,13 +84,13 @@ VS_OUTPUT VS(VS_INPUT input)
     return output;
 }
 
-float2 texOffset(int u, int v)
+float2 texOffset(int u, int v, int w, int h)
 {
-	//TODO: return offseted value (our shadow map has the following dimensions: 1280 * 720)
-    return float2(u * 1.0f / 8192, v * 1.0f / 8192);
+	//TODO: return offseted value (our shadow maps have differing dimensions)
+    return float2(u * 1.0f / w, v * 1.0f / h);
 }
 
-float EvaluateShadowMap(float4 lpos)
+float EvaluateShadowMap(float4 lpos, Texture2D shadowMap)
 {
 	//re-homogenize position after interpolation
     lpos.xyz /= lpos.w;
@@ -107,12 +112,14 @@ float EvaluateShadowMap(float4 lpos)
 	//PCF sampling for shadow map
     float sum = 0;
     float x, y;
- 
+    int width, height;
+    shadowMap.GetDimensions(width, height);
+    
     //perform PCF filtering on a 4 x 4 texel neighborhood
     for (y = -1.5f; y <= 1.5f; ++y)
         for (x = -1.5f; x <= 1.5f; ++x)
-            sum += gShadowMap.SampleCmpLevelZero(cmpSampler, lpos.xy + texOffset(x, y), lpos.z);
-	
+            sum += shadowMap.SampleCmpLevelZero(cmpSampler, lpos.xy + texOffset(x, y, width, height), lpos.z);
+            
     return (sum / 16.0f) * 0.5f + 0.5f;
 }
 
@@ -121,8 +128,14 @@ float EvaluateShadowMap(float4 lpos)
 //--------------------------------------------------------------------------------------
 float4 PS(VS_OUTPUT input) : SV_TARGET
 {
-    float shadowValue = EvaluateShadowMap(input.lPos);
-
+    float shadowValue = EvaluateShadowMap(input.lPos, gShadowMap);
+   
+    if (gUseBakedShadows)
+    {
+        float bakedShadowValue = EvaluateShadowMap(input.lPosBaked, gBakedShadowMap);
+        shadowValue = min(shadowValue, bakedShadowValue);
+    }
+   
     float4 diffuseColor = gDiffuseMap.Sample(samLinear, input.texCoord);
     float3 color_rgb = diffuseColor.rgb;
     float color_a = diffuseColor.a;

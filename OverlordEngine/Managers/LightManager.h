@@ -49,9 +49,20 @@ public:
 	Light& GetDirectionalLight() { return m_DirectionalLight; }
 	void SetDirectionalLight(const XMFLOAT3& position, const XMFLOAT3& direction);
 
+	Light& GetBakedDirectionalLight() { return m_BakedDirectionalLight; }
+	void SetBakedDirectionalLight(const XMFLOAT3& position, const XMFLOAT3& direction);
+
+	void SetBakeShadows(bool doBake) { m_DoBakeShadows = doBake; }
+	bool GetBakeShadows() const { return m_DoBakeShadows; }
+
+	void SetUseBakedShadows(bool useBaked) { m_UseBakedShadows = useBaked; }
+	bool GetUseBakedShadows() const { return m_UseBakedShadows; }
+
 private:
 
+	bool m_DoBakeShadows{};
+	bool m_UseBakedShadows{};
 	std::vector<Light> m_Lights{};
-	Light m_DirectionalLight{};
+	Light m_DirectionalLight{}, m_BakedDirectionalLight{};
 };
 

@@ -162,7 +162,9 @@ void GameScene::RootDraw()
 	//2. DRAW_LOOP > For every GameObject (m_pChildren), call GameObject::RootShadowMapDraw
 	for (const auto pChild : m_pChildren)
 	{
-		if (!pChild->GetIsShadowMapStatic())
+		if ((!pChild->GetIsShadowMapStatic() && !m_SceneContext.pLights->GetBakeShadows()) || // Only draw non-static objects if we're not baking shadows.
+			(m_SceneContext.pLights->GetBakeShadows() && pChild->GetIsShadowMapStatic()) || // If we are baking shadows, draw only the lightmap static objects
+			!m_SceneContext.pLights->GetUseBakedShadows()) // Draw all objects if we're not using baked shadows.
 			pChild->RootShadowMapDraw(m_SceneContext);
 	}
 

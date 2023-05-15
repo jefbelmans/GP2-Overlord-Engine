@@ -13,6 +13,8 @@ void DiffuseMaterial_Shadow::SetDiffuseTexture(const std::wstring& assetFile)
 
 void DiffuseMaterial_Shadow::InitializeEffectVariables()
 {
+	const auto pShadowMapRenderer = ShadowMapRenderer::Get();
+	SetVariable_Texture(L"gBakedShadowMap", pShadowMapRenderer->GetBakedShadowMap());
 }
 
 void DiffuseMaterial_Shadow::OnUpdateModelVariables(const SceneContext& sceneContext, const ModelComponent* pModel) const
@@ -39,7 +41,21 @@ void DiffuseMaterial_Shadow::OnUpdateModelVariables(const SceneContext& sceneCon
 			XMLoadFloat4x4(&pShadowMapRenderer->GetLightVP())
 		));
 
-	SetVariable_Matrix(L"gWorldViewProj_Light", reinterpret_cast<const float*>(&lWvp));
 	SetVariable_Texture(L"gShadowMap", pShadowMapRenderer->GetShadowMap());
+	SetVariable_Matrix(L"gWorldViewProj_Light", reinterpret_cast<const float*>(&lWvp));
 	SetVariable_Vector(L"gLightDirection", sceneContext.pLights->GetDirectionalLight().direction);
+	
+	SetVariable_Scalar(L"gUseBakedShadows", sceneContext.pLights->GetUseBakedShadows());
+
+	if ((m_IsBakedLightWVPDirty) && sceneContext.pLights->GetUseBakedShadows())
+	{
+		XMStoreFloat4x4(&m_BakedLightWVP,
+			XMMatrixMultiply(
+				XMLoadFloat4x4(&pModel->GetTransform()->GetWorld()),
+				XMLoadFloat4x4(&pShadowMapRenderer->GetBakedLightVP())
+			));
+
+		SetVariable_Matrix(L"gBakedWorldViewProj_Light", reinterpret_cast<const float*>(&m_BakedLightWVP));
+		m_IsBakedLightWVPDirty = false;
+	}
 }
