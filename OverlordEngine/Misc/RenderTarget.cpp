@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "RenderTarget.h"
+#include "DirectXTex.h"
 
 RenderTarget::RenderTarget(const D3D11Context& d3dContext) :
 	m_D3DContext(d3dContext)
@@ -237,6 +238,51 @@ ID3D11ShaderResourceView* RenderTarget::GetDepthShaderResourceView() const
 		Logger::LogError(L"RenderTarget::GetDepthShaderResourceView(...) > No DEPTH SRV created during Creation. (Make sure to enable \'EnableDepthSRV\' during RT Creation)");
 
 	return m_pDepthShaderResourceView;
+}
+
+void RenderTarget::SaveTextureToFile(const SceneContext& sceneContext, const std::wstring& fileName)
+{
+	// Save the pixel data to a file using the DirectXTex library
+	ScratchImage image;
+	if (SUCCEEDED(CaptureTexture(sceneContext.d3dContext.pDevice,
+		sceneContext.d3dContext.pDeviceContext, m_pDepth, image)))
+	{
+		HRESULT hr = SaveToDDSFile(image.GetImages(), image.GetImageCount(),
+						image.GetMetadata(), DDS_FLAGS_NONE, fileName.c_str());
+		if (FAILED(hr))
+			Logger::LogWarning(L"RenderTarget::SaveTextureToFile(...) > Failed to save texture to file! (Error: %s)", hr);
+	}
+	else
+	{
+		Logger::LogWarning(L"RenderTarget::SaveTextureToFile(...) > Failed to capture texture!");
+	}
+}
+
+void RenderTarget::LoadShadowMapFromFile(const D3D11Context& d3dContext, const std::wstring& fileName)
+{
+	TexMetadata info{};
+	info.width = m_Desc.width;
+	info.height = m_Desc.height;
+	info.format = m_Desc.depthFormat;
+
+	ScratchImage image;
+	HRESULT hr = LoadFromDDSFile(fileName.c_str(),
+		DDS_FLAGS_NONE, &info, image);
+	if (SUCCEEDED(hr))
+	{
+		hr = CreateShaderResourceView(d3dContext.pDevice,
+			image.GetImages(), image.GetImageCount(),
+			image.GetMetadata(), &m_pDepthShaderResourceView);
+
+		if (FAILED(hr))
+		{
+			Logger::LogWarning(L"RenderTarget::GetDepthShaderResourceView(...) > Failed to create SRV from texture! (Error: %s)", hr);
+		}
+	}
+	else
+	{
+		Logger::LogWarning(L"RenderTarget::GetDepthShaderResourceView(...) > Failed to load texture from file! (Error: %s)", hr);
+	}
 }
 
 void RenderTarget::Clear(XMFLOAT4 clearColor) const

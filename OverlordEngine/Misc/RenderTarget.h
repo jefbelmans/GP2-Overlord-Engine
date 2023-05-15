@@ -66,6 +66,9 @@ public:
 	ID3D11ShaderResourceView* GetColorShaderResourceView() const;
 	ID3D11ShaderResourceView* GetDepthShaderResourceView() const;
 
+	void SaveTextureToFile(const SceneContext& sceneContext, const std::wstring& fileName);
+	void LoadShadowMapFromFile(const D3D11Context& d3dContext, const std::wstring& fileName);
+
 	bool HasRenderTargetView() const { return m_pRenderTargetView != nullptr; }
 	bool HasDepthDepthStencilView() const { return m_pDepthStencilView != nullptr; }
 

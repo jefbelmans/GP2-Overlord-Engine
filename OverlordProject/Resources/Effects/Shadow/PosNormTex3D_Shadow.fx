@@ -113,7 +113,7 @@ float EvaluateShadowMap(float4 lpos)
         for (x = -1.5f; x <= 1.5f; ++x)
             sum += gShadowMap.SampleCmpLevelZero(cmpSampler, lpos.xy + texOffset(x, y), lpos.z);
 	
-    return (sum / 16.0f) / 2.0f + 0.5f;
+    return (sum / 16.0f) * 0.5f + 0.5f;
 }
 
 //--------------------------------------------------------------------------------------

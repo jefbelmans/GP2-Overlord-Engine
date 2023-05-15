@@ -67,4 +67,7 @@
     <ClInclude Include="Scenes\RacePace\VehiclePlayground.h" />
     <ClInclude Include="Scenes\Week 9\ParticleScene.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

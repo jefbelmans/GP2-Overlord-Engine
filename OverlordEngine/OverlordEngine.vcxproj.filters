@@ -133,4 +133,7 @@
     <ClInclude Include="PhysX\Vehicle\PhysXWheelContactModifyCallback.hpp" />
     <ClInclude Include="Prefabs\FollowCamera.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

@@ -32,6 +32,8 @@ void ShadowMapRenderer::Initialize()
 
 	m_GeneratorTechniqueContexts[(int)ShadowGeneratorType::Skinned] 
 		= m_pShadowMapGenerator->GetTechniqueContext((int)ShadowGeneratorType::Skinned);
+
+	m_pShadowRenderTarget->LoadShadowMapFromFile(m_GameContext.d3dContext, L"Resources/Textures/BakedShadowmaps/ShadowMap.dds");
 }
 
 void ShadowMapRenderer::UpdateMeshFilter(const SceneContext& sceneContext, MeshFilter* pMeshFilter) const
@@ -73,7 +75,7 @@ void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 	//		*focusPosition: Calculate using the Direction Light position and direction
 	//- Use the Projection & View Matrix to calculate the ViewProjection of this Light, store in m_LightVP
 
-    const XMMATRIX projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * 400.0f, 400.0f, 1.f, 450.f);
+    const XMMATRIX projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * 600.f, 600.f, 1.f, 450.f);
 
 	const Light& dirLight = sceneContext.pLights->GetDirectionalLight();
 	const auto lightDir = XMLoadFloat4(&dirLight.direction);
@@ -150,7 +152,7 @@ void ShadowMapRenderer::DrawMesh(const SceneContext& sceneContext, MeshFilter* p
 	}
 }
 
-void ShadowMapRenderer::End(const SceneContext&) const
+void ShadowMapRenderer::End(const SceneContext& sceneContext) const
 {
 	//This function is called at the end of the Shadow-pass, all shadow-casting meshes should be drawn to the ShadowMap at this point.
 	//Now we can reset the Main Game Rendertarget back to the original RenderTarget, this also Unbinds the ShadowMapRenderTarget as RTV from the Pipeline, and can safely use it as a ShaderResourceView after this point.
@@ -158,6 +160,9 @@ void ShadowMapRenderer::End(const SceneContext&) const
 	//1. Reset the Main Game RenderTarget back to default (OverlordGame::SetRenderTarget)
 	//		- Have a look inside the function, there is a easy way to do this...
 	m_GameContext.pGame->SetRenderTarget(nullptr);
+
+	// Save shadowmap
+	m_pShadowRenderTarget->SaveTextureToFile(sceneContext, L"Resources/Textures/BakedShadowmaps/ShadowMap.dds");
 }
 
 ID3D11ShaderResourceView* ShadowMapRenderer::GetShadowMap() const
