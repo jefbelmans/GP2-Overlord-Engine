@@ -46,16 +46,28 @@ void DiffuseMaterial_Shadow::OnUpdateModelVariables(const SceneContext& sceneCon
 	SetVariable_Vector(L"gLightDirection", sceneContext.pLights->GetDirectionalLight().direction);
 	
 	SetVariable_Scalar(L"gUseBakedShadows", sceneContext.pLights->GetUseBakedShadows());
+	XMStoreFloat4x4(&m_BakedLightWVP,
+		XMMatrixMultiply(
+			XMLoadFloat4x4(&pModel->GetTransform()->GetWorld()),
+			XMLoadFloat4x4(&pShadowMapRenderer->GetBakedLightVP())
+		));
 
-	if ((m_IsBakedLightWVPDirty) && sceneContext.pLights->GetUseBakedShadows())
-	{
-		XMStoreFloat4x4(&m_BakedLightWVP,
-			XMMatrixMultiply(
-				XMLoadFloat4x4(&pModel->GetTransform()->GetWorld()),
-				XMLoadFloat4x4(&pShadowMapRenderer->GetBakedLightVP())
-			));
+	SetVariable_Matrix(L"gBakedWorldViewProj_Light", reinterpret_cast<const float*>(&m_BakedLightWVP));
 
-		SetVariable_Matrix(L"gBakedWorldViewProj_Light", reinterpret_cast<const float*>(&m_BakedLightWVP));
-		m_IsBakedLightWVPDirty = false;
-	}
+	// Rotates the shadows on the race track by 90 degrees for some  fucking reason
+	// TODO: Fix this
+
+	//if ((m_IsBakedLightWVPDirty || !pModel->GetGameObject()->GetIsShadowMapStatic()) && sceneContext.pLights->GetUseBakedShadows())
+	//{
+	//	m_IsBakedLightWVPDirty = false;
+	//	SetVariable_Scalar(L"gUseBakedShadows", sceneContext.pLights->GetUseBakedShadows());
+	//	XMStoreFloat4x4(&m_BakedLightWVP,
+	//		XMMatrixMultiply(
+	//			XMLoadFloat4x4(&pModel->GetTransform()->GetWorld()),
+	//			XMLoadFloat4x4(&pShadowMapRenderer->GetBakedLightVP())
+	//		));
+
+	//	SetVariable_Matrix(L"gBakedWorldViewProj_Light", reinterpret_cast<const float*>(&m_BakedLightWVP));
+	// 	m_IsBakedLightWVPDirty = false;
+	//}
 }
