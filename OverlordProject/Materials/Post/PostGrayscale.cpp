@@ -7,5 +7,3 @@
 		PostProcessingMaterial(L"Effects/Post/Grayscale.fx")
 	{
 	}
-
-
