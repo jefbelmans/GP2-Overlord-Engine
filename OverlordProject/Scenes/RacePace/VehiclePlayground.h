@@ -1,6 +1,7 @@
 #pragma once
 #include "PxPhysicsAPI.h"
 
+class PostMotionBlur;
 class VehiclePlayground final : public GameScene
 {
 public:
@@ -18,26 +19,28 @@ protected:
 	void OnGUI() override;
 
 private:
-	enum InputIds
-	{
-		SteerLeft,
-		SteerRight,
-		Accelerate,
-		Deaccelerate,
-		HandBrake
-	};
+	
 
+#pragma region Post Processing
+	PostMotionBlur* m_pPostMotionBlur;
+#pragma endregion
+
+#pragma region Shadow Settings
 	bool m_DebugShadowMap{ false };
 	bool m_DebugBakedShadowMap{ false };
 	bool m_UseBakedShadows{ false };
 	float m_ShadowMapScale{ 0.3f };
+#pragma endregion
 
+#pragma region Camera Settings
 	float m_CameraSmoothing{ 1.f };
 	float m_CameraLookAhead{ 45.f };
 	float m_CameraDistance{ 40.f };
 	float m_CameraPitch{ 40.f };
 	FollowCamera* m_pCamera{ nullptr };
-
+#pragma endregion
+	
+#pragma region Vehicle Settings
 	GameObject* m_pChassis{ nullptr };
 	GameObject* m_pWheels[4]{ nullptr };
 
@@ -52,8 +55,8 @@ private:
 	bool m_IsVehicleInAir{ false };
 	bool m_IsDigitalControl{ false };
 
-	PxFixedSizeLookupTable<8>			m_SteerVsForwardSpeedTable;
-	PxVehicleKeySmoothingData			m_keySmoothingData =
+	PxFixedSizeLookupTable<8> m_SteerVsForwardSpeedTable;
+	PxVehicleKeySmoothingData m_keySmoothingData =
 	{
 		{
 			6.0f,	//rise rate eANALOG_INPUT_ACCEL
@@ -70,23 +73,71 @@ private:
 			5.0f	//fall rate eANALOG_INPUT_STEER_RIGHT
 		}
 	};
-	PxVehiclePadSmoothingData			m_padSmoothingData =
+
+	PxVehiclePadSmoothingData m_padSmoothingData =
 	{
-		{
-			6.0f,	//rise rate eANALOG_INPUT_ACCEL
-			6.0f,	//rise rate eANALOG_INPUT_BRAKE		
-			6.0f,	//rise rate eANALOG_INPUT_HANDBRAKE	
-			2.5f,	//rise rate eANALOG_INPUT_STEER_LEFT
-			2.5f,	//rise rate eANALOG_INPUT_STEER_RIGHT
-		},
-		{
-			10.0f,	//fall rate eANALOG_INPUT_ACCEL
-			10.0f,	//fall rate eANALOG_INPUT_BRAKE		
-			10.0f,	//fall rate eANALOG_INPUT_HANDBRAKE	
-			5.0f,	//fall rate eANALOG_INPUT_STEER_LEFT
-			5.0f	//fall rate eANALOG_INPUT_STEER_RIGHT
-		}
+{
+	6.0f,	//rise rate eANALOG_INPUT_ACCEL
+	6.0f,	//rise rate eANALOG_INPUT_BRAKE		
+	6.0f,	//rise rate eANALOG_INPUT_HANDBRAKE	
+	2.5f,	//rise rate eANALOG_INPUT_STEER_LEFT
+	2.5f,	//rise rate eANALOG_INPUT_STEER_RIGHT
+},
+{
+	10.0f,	//fall rate eANALOG_INPUT_ACCEL
+	10.0f,	//fall rate eANALOG_INPUT_BRAKE		
+	10.0f,	//fall rate eANALOG_INPUT_HANDBRAKE	
+	5.0f,	//fall rate eANALOG_INPUT_STEER_LEFT
+	5.0f	//fall rate eANALOG_INPUT_STEER_RIGHT
+}
 	};
+#pragma endregion
+
+#pragma region Input Settings
+	enum InputIds
+	{
+		SteerLeft,
+		SteerRight,
+		Accelerate,
+		Deaccelerate,
+		HandBrake
+	};
+#pragma endregion
+
+#pragma region Checkpoint Settings
+	std::vector<XMFLOAT3> m_CheckpointPositions
+	{
+		XMFLOAT3(-55.f,		3.0f,	-96.0f),
+		XMFLOAT3(-120.0f,	3.0f,	-96.0f),
+		XMFLOAT3(-157.0f,	3.0f,	25.0f),
+		XMFLOAT3(-55.0f,	3.0f,	55.0f),
+		XMFLOAT3(-117.0f,	3.0f,	-26.0f),
+		XMFLOAT3(-67.0f,	3.0f,	-30.0f),
+		XMFLOAT3(75.0f,		3.0f,	-47.0f),
+		XMFLOAT3(12.0f,		3.0f,	93.0f),
+		XMFLOAT3(95.0f,		3.0f,	143.0f),
+		XMFLOAT3(141.0f,	3.0f,	-59.0f)
+	};
+
+	std::vector<XMFLOAT3> m_CheckpointRotations
+	{
+		XMFLOAT3(0.f, 90.f, 0.f),
+		XMFLOAT3(0.f, 90.f, 0.f),
+		XMFLOAT3(0.f, 0.f, 0.f),
+		XMFLOAT3(0.f, 90.f, 0.f),
+		XMFLOAT3(0.f, 0.f, 0.f),
+		XMFLOAT3(0.f, 90.f, 0.f),
+		XMFLOAT3(0.f, 90.f, 0.f),
+		XMFLOAT3(0.f, 0.f, 0.f),
+		XMFLOAT3(0.f, 90.f, 0.f),
+		XMFLOAT3(0.f, 0.f, 0.f)
+	};
+
+	std::vector<GameObject*> m_pCheckpoints;
+	int m_NextCheckpoint{ 0 };
+#pragma endregion
+
+	void ConstructScene();
 
 	void SetupTelemetryData();
 

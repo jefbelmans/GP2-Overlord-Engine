@@ -3,6 +3,7 @@
 
 #include "VehiclePlayground.h"
 #include "Materials/Shadow/DiffuseMaterial_Shadow.h"
+#include "Materials/Post/PostMotionBlur.h"
 
 float gSteerVsForwardSpeedData[2 * 8] =
 {
@@ -25,7 +26,129 @@ void VehiclePlayground::Initialize()
 
 	// SET BAKED DIR LIGHT
 	m_SceneContext.pLights->SetBakedDirectionalLight({ -100.f ,150.f, -80.f }, { 0.6f, -0.76f, 0.5f });
+	
+	// POST PROCESSING STACK
+	m_pPostMotionBlur = MaterialManager::Get()->CreateMaterial<PostMotionBlur>();
+	m_pPostMotionBlur->SetIsEnabled(false);
+	AddPostProcessingEffect(m_pPostMotionBlur);
 
+	// Constructs the entire scene with all the GO's
+	ConstructScene();
+
+	// CAMERA
+	m_pCamera = AddChild(new FollowCamera(m_pChassis, m_pVehicle, m_CameraPitch));
+	m_pCamera->GetComponent<CameraComponent>()->SetActive(true);
+	m_pCamera->SetSmoothing(m_CameraSmoothing);
+	m_pCamera->SetLookAhead(m_CameraLookAhead);
+	m_pCamera->SetOffsetDistance(m_CameraDistance);
+
+	//Input
+	auto inputAction = InputAction(SteerLeft, InputState::down, VK_LEFT);
+	m_SceneContext.pInput->AddInputAction(inputAction);
+
+	inputAction = InputAction(SteerRight, InputState::down, VK_RIGHT);
+	m_SceneContext.pInput->AddInputAction(inputAction);
+
+	inputAction = InputAction(Accelerate, InputState::down, VK_UP);
+	m_SceneContext.pInput->AddInputAction(inputAction);
+
+	inputAction = InputAction(Deaccelerate, InputState::down, VK_DOWN);
+	m_SceneContext.pInput->AddInputAction(inputAction);
+
+	inputAction = InputAction(HandBrake, InputState::down, VK_SPACE, -1, XINPUT_GAMEPAD_X);
+	m_SceneContext.pInput->AddInputAction(inputAction);
+}
+
+VehiclePlayground::~VehiclePlayground()
+{
+	PxCloseVehicleSDK();
+}
+
+void VehiclePlayground::Update()
+{
+	UpdateVehicle();
+	UpdateInput();
+}
+
+void VehiclePlayground::PostDraw()
+{
+	if(m_DebugShadowMap)
+		ShadowMapRenderer::Get()->Debug_DrawDepthSRV({ m_SceneContext.windowWidth - 10.f, 10.f }, { m_ShadowMapScale, m_ShadowMapScale }, { 1.f,0.f });
+
+	if(m_DebugBakedShadowMap)
+		ShadowMapRenderer::Get()->Debug_DrawBakedDepthSRV({ m_SceneContext.windowWidth - 10.f, 10.f }, { m_ShadowMapScale, m_ShadowMapScale }, { 1.f,0.f });
+}
+
+void VehiclePlayground::OnGUI()
+{
+	// GAME STATS
+	if (ImGui::CollapsingHeader("Game Statistics"))
+	{
+		ImGui::Text("Next Checkpoint: %i", m_NextCheckpoint);
+	}
+
+	// CAMERA SETTINGS
+	if(ImGui::CollapsingHeader("Camera Settings"))
+	{
+		ImGui::SliderFloat("Pitch", &m_CameraPitch, 0.f, 90.f);
+		// m_pCamera->SetPitch(m_CameraPitch);
+
+		ImGui::SliderFloat("Smoothing", &m_CameraSmoothing, 0.f, 1.f);
+		m_pCamera->SetSmoothing(m_CameraSmoothing);
+
+		ImGui::SliderFloat("LookAhead", &m_CameraLookAhead, 0.f, 100.f);
+		m_pCamera->SetLookAhead(m_CameraLookAhead);
+
+		ImGui::SliderFloat("Offset Distance", &m_CameraDistance, 0.f, 100.f);
+		m_pCamera->SetOffsetDistance(m_CameraDistance);
+	}
+
+	// CAR TELEMETRY
+	if(ImGui::CollapsingHeader("Car Telemetry"))
+	{
+		/*float xy[2 * PxVehicleGraph::eMAX_NB_SAMPLES];
+		PxVec3 color[PxVehicleGraph::eMAX_NB_SAMPLES];
+		char title[PxVehicleGraph::eMAX_NB_TITLE_CHARS];
+		m_pVehicleTelemetryData->getEngineGraph().computeGraphChannel(PxVehicleDriveGraphChannel::eENGINE_REVS,
+			xy, color, title);*/
+
+		auto carPos{ m_pChassis->GetTransform()->GetPosition()};
+		ImGui::Text("Position: [%f, %f, %f]",
+			carPos.x, carPos.y, carPos.z);
+		ImGui::Text("Speed: %f", m_pVehicle->computeForwardSpeed());
+		ImGui::Text("Lateral Slip: %f %f %f %f", 
+			m_WheelQueryResults[0].lateralSlip,
+			m_WheelQueryResults[1].lateralSlip,
+			m_WheelQueryResults[2].lateralSlip,
+			m_WheelQueryResults[3].lateralSlip);
+	}
+
+	// SHADOWMAP
+	if(ImGui::CollapsingHeader("Shadows"))
+	{
+		ImGui::Checkbox("Use Baked Shadows", &m_UseBakedShadows);
+		m_SceneContext.pLights->SetUseBakedShadows(m_UseBakedShadows);
+
+		ImGui::Checkbox("Debug Real Time Shadow Map", &m_DebugShadowMap);
+		ImGui::Checkbox("Debug Baked Shadow Map", &m_DebugBakedShadowMap);
+		ImGui::SliderFloat("Shadow Map Scale", &m_ShadowMapScale, 0.01f, 1.f);
+		if (ImGui::Button("Bake Shadows"))
+		{
+			m_SceneContext.pLights->SetBakeShadows(true);
+		}
+	}
+
+	// POST PROCESSING
+	if (ImGui::CollapsingHeader("Post Processing"))
+	{
+		bool isEnabled = m_pPostMotionBlur->IsEnabled();
+		ImGui::Checkbox("Motion Blur PP", &isEnabled);
+		m_pPostMotionBlur->SetIsEnabled(isEnabled);
+	}
+}
+
+void VehiclePlayground::ConstructScene()
+{
 	// PHYSX
 	auto pDefaultMaterial = PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 0.f);
 	auto pConeMaterial = PhysXManager::Get()->GetPhysics()->createMaterial(0.7f, 0.7f, 0.4f);
@@ -43,13 +166,14 @@ void VehiclePlayground::Initialize()
 	auto pGroundMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow>();
 	pGroundMat->SetDiffuseTexture(L"Textures/F1_Ground.png");
 
+
 	// GROUND PLANE
 	GameSceneExt::CreatePhysXGroundPlane(*this, pDefaultMaterial);
 
 	// PHYSX DEBUG RENDERING
 	GetPhysxProxy()->EnablePhysxDebugRendering(true);
 	GetPhysxProxy()->GetPhysxScene()->setVisualizationParameter(PxVisualizationParameter::eBODY_LIN_VELOCITY, 1.f);
-	
+
 	// TRACK
 	m_pTrack = new GameObject(true);
 	m_pTrack->AddComponent(new ModelComponent(L"Meshes/F1_Track.ovm"))->SetMaterial(pTrackMat);
@@ -95,7 +219,7 @@ void VehiclePlayground::Initialize()
 	pRb->SetCollisionGroup(CollisionGroup::Group0 | CollisionGroup::Group1);
 	pRb->AddCollider(PxConvexMeshGeometry{ pConvexMesh }, *pDefaultMaterial);
 	AddChild(go);
-	
+
 	// FENCE05
 	go = new GameObject(true);
 	go->AddComponent(new ModelComponent(L"Meshes/F1_Fence05.ovm"))->SetMaterial(pTrackMat);
@@ -173,14 +297,9 @@ void VehiclePlayground::Initialize()
 
 	pConvexMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Cone01.ovpc");
 	pRb = go->AddComponent(new RigidBodyComponent(false));
-	pRb->AddCollider(PxConvexMeshGeometry{ pConvexMesh }, * pConeMaterial);
+	pRb->AddCollider(PxConvexMeshGeometry{ pConvexMesh }, *pConeMaterial);
 	pRb->SetCollisionGroup(CollisionGroup::Group0 | CollisionGroup::Group1);
 	AddChild(go);
-
-	// INIT VEHICLE SDK
-	m_pVehicle = PhysXManager::Get()->InitializeVehicleSDK();
-	m_pVehicleInputData = new PxVehicleDrive4WRawInputData();
-	m_SteerVsForwardSpeedTable = PxFixedSizeLookupTable<8>(gSteerVsForwardSpeedData, 6);
 
 	// CHASIS
 	m_pChassis = new GameObject();
@@ -190,9 +309,19 @@ void VehiclePlayground::Initialize()
 	m_pChassis->GetTransform()->Rotate(0.f, -90.f, 0.f);
 	m_pChassis->AddComponent(new ModelComponent(L"Meshes/F1_Car.ovm"))->SetMaterial(pVehicleMat);
 
+	m_pChassis->SetTag(L"Player");
+
 	pRb = m_pChassis->AddComponent(new RigidBodyComponent());
-	// SET VEHICLE RIGID ACTOR TO RB RIGID ACTOR
-	pRb->SetPxRigidActor(m_pVehicle->getRigidDynamicActor());
+	auto pActor = pRb->GetPxRigidActor();
+
+	// INIT VEHICLE SDK
+	m_pVehicle = PhysXManager::Get()->InitializeVehicleSDK(pActor);
+	m_pVehicleInputData = new PxVehicleDrive4WRawInputData();
+	m_SteerVsForwardSpeedTable = PxFixedSizeLookupTable<8>(gSteerVsForwardSpeedData, 6);
+
+	// TODO: Fix user data getting overwritten during vehicle init
+	// Quick fix is to restore it here with the RigidbodyComponent, else the trigger callbacks will fail to get the overlapping GameObject
+	pActor->userData = pRb;
 
 	// WHEELS
 	for (int i = 0; i < 4; i++)
@@ -204,112 +333,26 @@ void VehiclePlayground::Initialize()
 	SetupTelemetryData();
 
 	// CHECKPOINTS
-	auto checkpoint = new GameObject();
-	checkpoint->GetTransform()->Translate(0.f, 3.f, 0.f);
-	pRb = checkpoint->AddComponent(new RigidBodyComponent());
-	pRb->SetKinematic(true);
+	for (int i = 0; i < m_CheckpointPositions.size(); i++)
+	{
+		// CREATE GO
+		auto checkpoint = new GameObject();
+		checkpoint->GetTransform()->Translate(m_CheckpointPositions[i]);
+		checkpoint->GetTransform()->Rotate(m_CheckpointRotations[i]);
 
-	pRb->AddCollider(PxBoxGeometry{ 2.f, 3.f, 0.5f }, *pDefaultMaterial, true);
-	checkpoint->SetOnTriggerCallBack([&](GameObject* pTrigger, GameObject* pOther, PxTriggerAction action){
+		// ADD RIGIDBODY
+		pRb = checkpoint->AddComponent(new RigidBodyComponent());
+		pRb->SetKinematic(true);
+
+		// ADD COLLIDER
+		pRb->AddCollider(PxBoxGeometry{ 14.f, 3.f, 0.5f }, *pDefaultMaterial, true);
+		checkpoint->SetOnTriggerCallBack([&](GameObject* pTrigger, GameObject* pOther, PxTriggerAction action) {
 			OnTriggerCallback(pTrigger, pOther, action);
-		});
-	AddChild(checkpoint);
+			});
 
-	// CAMERA
-	m_pCamera = AddChild(new FollowCamera(m_pChassis, m_pVehicle, m_CameraPitch));
-	m_pCamera->GetComponent<CameraComponent>()->SetActive(true);
-	m_pCamera->SetSmoothing(m_CameraSmoothing);
-	m_pCamera->SetLookAhead(m_CameraLookAhead);
-	m_pCamera->SetOffsetDistance(m_CameraDistance);
-
-	//Input
-	auto inputAction = InputAction(SteerLeft, InputState::down, VK_LEFT);
-	m_SceneContext.pInput->AddInputAction(inputAction);
-
-	inputAction = InputAction(SteerRight, InputState::down, VK_RIGHT);
-	m_SceneContext.pInput->AddInputAction(inputAction);
-
-	inputAction = InputAction(Accelerate, InputState::down, VK_UP);
-	m_SceneContext.pInput->AddInputAction(inputAction);
-
-	inputAction = InputAction(Deaccelerate, InputState::down, VK_DOWN);
-	m_SceneContext.pInput->AddInputAction(inputAction);
-
-	inputAction = InputAction(HandBrake, InputState::down, VK_SPACE, -1, XINPUT_GAMEPAD_X);
-	m_SceneContext.pInput->AddInputAction(inputAction);
-}
-
-VehiclePlayground::~VehiclePlayground()
-{
-	PxCloseVehicleSDK();
-}
-
-void VehiclePlayground::Update()
-{
-	UpdateVehicle();
-	UpdateInput();
-}
-
-void VehiclePlayground::PostDraw()
-{
-	if(m_DebugShadowMap)
-		ShadowMapRenderer::Get()->Debug_DrawDepthSRV({ m_SceneContext.windowWidth - 10.f, 10.f }, { m_ShadowMapScale, m_ShadowMapScale }, { 1.f,0.f });
-
-	if(m_DebugBakedShadowMap)
-		ShadowMapRenderer::Get()->Debug_DrawBakedDepthSRV({ m_SceneContext.windowWidth - 10.f, 10.f }, { m_ShadowMapScale, m_ShadowMapScale }, { 1.f,0.f });
-}
-
-void VehiclePlayground::OnGUI()
-{
-	// CAMERA SETTINGS
-	if(ImGui::CollapsingHeader("Camera Settings"))
-	{
-		ImGui::SliderFloat("Pitch", &m_CameraPitch, 0.f, 90.f);
-		// m_pCamera->SetPitch(m_CameraPitch);
-
-		ImGui::SliderFloat("Smoothing", &m_CameraSmoothing, 0.f, 1.f);
-		m_pCamera->SetSmoothing(m_CameraSmoothing);
-
-		ImGui::SliderFloat("LookAhead", &m_CameraLookAhead, 0.f, 100.f);
-		m_pCamera->SetLookAhead(m_CameraLookAhead);
-
-		ImGui::SliderFloat("Offset Distance", &m_CameraDistance, 0.f, 100.f);
-		m_pCamera->SetOffsetDistance(m_CameraDistance);
-	}
-
-	float xy[2 * PxVehicleGraph::eMAX_NB_SAMPLES];
-	PxVec3 color[PxVehicleGraph::eMAX_NB_SAMPLES];
-	char title[PxVehicleGraph::eMAX_NB_TITLE_CHARS];
-	m_pVehicleTelemetryData->getEngineGraph().computeGraphChannel(PxVehicleDriveGraphChannel::eENGINE_REVS,
-		xy, color, title);
-
-	// CAR TELEMETRY
-	if(ImGui::CollapsingHeader("Car Telemetry"))
-	{
-		auto carPos{ m_pChassis->GetTransform()->GetPosition()};
-		ImGui::Text("Position: [%f, %f, %f]",
-			carPos.x, carPos.y, carPos.z);
-		ImGui::Text("Speed: %f", m_pVehicle->computeForwardSpeed());
-		ImGui::Text("Lateral Slip: %f %f %f %f", 
-			m_WheelQueryResults[0].lateralSlip,
-			m_WheelQueryResults[1].lateralSlip,
-			m_WheelQueryResults[2].lateralSlip,
-			m_WheelQueryResults[3].lateralSlip);
-	}
-
-	// SHADOWMAP
-	if(ImGui::CollapsingHeader("ShadowMap"))
-	{
-		ImGui::Checkbox("Use Baked Shadows", &m_UseBakedShadows);
-		m_SceneContext.pLights->SetUseBakedShadows(m_UseBakedShadows);
-
-		ImGui::Checkbox("Debug Real Time ShadowMap", &m_DebugShadowMap);
-		ImGui::Checkbox("Debug Baked ShadowMap", &m_DebugBakedShadowMap);
-		ImGui::SliderFloat("ShadowMap Scale", &m_ShadowMapScale, 0.01f, 1.f);
-		if (ImGui::Button("Bake"))
-		{
-			m_SceneContext.pLights->SetBakeShadows(true);
-		}
+		// ADD TO SCENE
+		AddChild(checkpoint);
+		m_pCheckpoints.emplace_back(checkpoint);
 	}
 }
 
@@ -434,12 +477,15 @@ void VehiclePlayground::UpdateVehicle()
 
 }
 
-void VehiclePlayground::OnTriggerCallback(GameObject* /*trigger*/, GameObject* /*other*/, PxTriggerAction action)
+void VehiclePlayground::OnTriggerCallback(GameObject* trigger, GameObject* other, PxTriggerAction action)
 {
 	if (action == PxTriggerAction::ENTER)
 	{
-		// TODO: add code to handle passing checkpoint
-		Logger::LogInfo(L"Checkpoint passed");
+		// Ignore everything that is not the player
+		if (other->GetTag() != L"Player") return;
+
+		if(trigger == m_pCheckpoints[m_NextCheckpoint])
+			m_NextCheckpoint = (m_NextCheckpoint + 1) % int(m_pCheckpoints.size());
 	}
 }
 

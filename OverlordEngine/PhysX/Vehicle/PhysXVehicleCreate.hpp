@@ -109,7 +109,7 @@ namespace vehicle
 		ShapeUserData* shapeUserDatas;
 	};
 
-	PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehDesc, PxPhysics* physics, PxConvexMesh* pWheelMesh, PxConvexMesh* pChassisMesh);
+	PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehDesc, PxPhysics* physics, PxConvexMesh* pWheelMesh, PxConvexMesh* pChassisMesh, PxRigidActor* pVehActor);
 
 	PxVehicleDriveTank* createVehicleTank(const VehicleDesc& vehDesc, PxPhysics* physics, PxCooking* cooking);
 
@@ -133,7 +133,7 @@ namespace vehicle
 	(const PxVehicleChassisData& chassisData,
 		PxMaterial** wheelMaterials, PxConvexMesh** wheelConvexMeshes, const PxU32 numWheels, const PxFilterData& wheelSimFilterData,
 		PxMaterial** chassisMaterials, PxConvexMesh** chassisConvexMeshes, const PxU32 numChassisMeshes, const PxFilterData& chassisSimFilterData,
-		PxPhysics& physics);
+		PxPhysics& physics, PxRigidActor* pVehActor);
 
 	void configureUserData(PxVehicleWheels* vehicle, ActorUserData* actorUserData, ShapeUserData* shapeUserDatas);
 

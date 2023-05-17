@@ -153,7 +153,7 @@ PxScene* PhysXManager::CreateScene(GameScene* pScene)
 	return physxScene;
 }
 
-PxVehicleDrive4W* PhysXManager::InitializeVehicleSDK()
+PxVehicleDrive4W* PhysXManager::InitializeVehicleSDK(PxRigidActor* pVehActor)
 {
 	PxInitVehicleSDK(*m_pPhysics);
 	PxVehicleSetBasisVectors(PxVec3(0, 1, 0), PxVec3(0, 0, 1));
@@ -202,11 +202,11 @@ PxVehicleDrive4W* PhysXManager::InitializeVehicleSDK()
 	const auto pWheelMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Wheel.ovpc");
 	const auto pChassisMesh = ContentManager::Load<PxConvexMesh>(L"Meshes/F1_Car.ovpc");
 
-	PxVehicleDrive4W* vehicleReference = createVehicle4W(m_VehicleDesc, m_pPhysics, pWheelMesh, pChassisMesh);
+	PxVehicleDrive4W* vehicleReference = createVehicle4W(m_VehicleDesc, m_pPhysics, pWheelMesh, pChassisMesh, pVehActor);
 	PxTransform startTransform(PxVec3(0, (m_VehicleDesc.chassisDims.y * 0.5f + m_VehicleDesc.wheelRadius + 1.0f), 0), PxQuat(PxIdentity));
 	vehicleReference->getRigidDynamicActor()->setGlobalPose(startTransform);
 	vehicleReference->getRigidDynamicActor()->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_CCD, true);
-	m_pVehicleScene->addActor(*vehicleReference->getRigidDynamicActor());
+	// m_pVehicleScene->addActor(*vehicleReference->getRigidDynamicActor());
 
 	//Set the vehicle to rest in first gear.
 	//Set the vehicle to use auto-gears.

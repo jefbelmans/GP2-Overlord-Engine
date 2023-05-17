@@ -18,5 +18,6 @@ protected:
 
 private:
 	TextureData* m_pDiffuseTexture{};
+	mutable XMFLOAT4X4 m_BakedLightWVP{};
 };
 

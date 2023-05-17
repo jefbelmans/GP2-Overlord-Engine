@@ -45,6 +45,7 @@ void DiffuseMaterial_Shadow::OnUpdateModelVariables(const SceneContext& sceneCon
 	SetVariable_Matrix(L"gWorldViewProj_Light", reinterpret_cast<const float*>(&lWvp));
 	SetVariable_Vector(L"gLightDirection", sceneContext.pLights->GetDirectionalLight().direction);
 	
+	// BAKED SHADOWS
 	SetVariable_Scalar(L"gUseBakedShadows", sceneContext.pLights->GetUseBakedShadows());
 	XMStoreFloat4x4(&m_BakedLightWVP,
 		XMMatrixMultiply(

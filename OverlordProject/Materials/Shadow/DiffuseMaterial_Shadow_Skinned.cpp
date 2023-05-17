@@ -13,6 +13,8 @@ void DiffuseMaterial_Shadow_Skinned::SetDiffuseTexture(const std::wstring& asset
 
 void DiffuseMaterial_Shadow_Skinned::InitializeEffectVariables()
 {
+	const auto pShadowMapRenderer = ShadowMapRenderer::Get();
+	SetVariable_Texture(L"gBakedShadowMap", pShadowMapRenderer->GetBakedShadowMap());
 }
 
 void DiffuseMaterial_Shadow_Skinned::OnUpdateModelVariables(const SceneContext& sceneContext, const ModelComponent* pModel) const
@@ -44,6 +46,16 @@ void DiffuseMaterial_Shadow_Skinned::OnUpdateModelVariables(const SceneContext& 
 	SetVariable_Matrix(L"gWorldViewProj_Light", reinterpret_cast<const float*>(&lWvp));
 	SetVariable_Texture(L"gShadowMap", pShadowMapRenderer->GetShadowMap());
 	SetVariable_Vector(L"gLightDirection", sceneContext.pLights->GetDirectionalLight().direction);
+
+	// BAKED SHADOWS
+	SetVariable_Scalar(L"gUseBakedShadows", sceneContext.pLights->GetUseBakedShadows());
+	XMStoreFloat4x4(&m_BakedLightWVP,
+		XMMatrixMultiply(
+			XMLoadFloat4x4(&pModel->GetTransform()->GetWorld()),
+			XMLoadFloat4x4(&pShadowMapRenderer->GetBakedLightVP())
+		));
+
+	SetVariable_Matrix(L"gBakedWorldViewProj_Light", reinterpret_cast<const float*>(&m_BakedLightWVP));
 
 	// BONES
 	auto anim = pModel->GetAnimator();

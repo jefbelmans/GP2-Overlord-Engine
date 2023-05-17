@@ -186,7 +186,7 @@ namespace vehicle
 
 	} //namespace fourwheel
 
-	PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehicle4WDesc, PxPhysics* physics, PxConvexMesh* pWheelMesh, PxConvexMesh* pChassisMesh)
+	PxVehicleDrive4W* createVehicle4W(const VehicleDesc& vehicle4WDesc, PxPhysics* physics, PxConvexMesh* pWheelMesh, PxConvexMesh* pChassisMesh, PxRigidActor* pVehActor)
 	{
 		const PxVec3 chassisDims = vehicle4WDesc.chassisDims;
 		const PxF32 wheelWidth = vehicle4WDesc.wheelWidth;
@@ -231,7 +231,7 @@ namespace vehicle
 			(rigidBodyData,
 				wheelMaterials, wheelConvexMeshes, numWheels, wheelSimFilterData,
 				chassisMaterials, chassisConvexMeshes, 1, chassisSimFilterData,
-				*physics);
+				*physics, pVehActor);
 		}
 
 		//Set up the sim data for the wheels.

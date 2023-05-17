@@ -25,7 +25,7 @@ public:
 	bool IsPvdConnected() const { return m_pPvd && m_pPvd->isConnected(); }
 
 	// VEHICLE
-	PxVehicleDrive4W* InitializeVehicleSDK();
+	PxVehicleDrive4W* InitializeVehicleSDK(PxRigidActor* pVehActor);
 
 	// VEHICLE GETTERS
 	PxBatchQuery* GetBatchQuery() const { return m_pBatchQuery; }

@@ -8,6 +8,7 @@ inline PxFilterFlags OverlordSimulationFilterShader(
 {
 	PX_UNUSED(pConstantBlock);
 	PX_UNUSED(blockSize);
+
 	//if (filterData0.word3 == 0 || filterData1.word3 == 0)
 	//{
 	//	return physx::PxDefaultSimulationFilterShader(attribute0, filterData0, attribute1, filterData1, pairFlags, pConstantBlock, blockSize);
@@ -17,7 +18,9 @@ inline PxFilterFlags OverlordSimulationFilterShader(
 	if ((0 == (filterData0.word0 & filterData1.word1)) && (0 == (filterData1.word0 & filterData0.word1)))
 		return PxFilterFlag::eSUPPRESS;
 
-	if ((attribute0 & PxFilterObjectFlag::eTRIGGER) != 0 || (attribute1 & PxFilterObjectFlag::eTRIGGER) != 0)
+	if (((attribute0 & PxFilterObjectFlag::eTRIGGER) != 0 || (attribute1 & PxFilterObjectFlag::eTRIGGER) != 0)
+		&& (0 == (filterData0.word0 & vehicle::COLLISION_FLAG_WHEEL)) // IGNORE THE WHEELS WHEN PASSING CHECKPOINT
+		&& (0 == (filterData1.word0 & vehicle::COLLISION_FLAG_WHEEL)))
 	{
 		//pairFlags |= PxPairFlag::eNOTIFY_TOUCH_LOST;
 		pairFlags |= PxPairFlag::eTRIGGER_DEFAULT;

@@ -10,6 +10,7 @@
 
 #include "Materials/Post/PostGrayscale.h"
 #include "Materials/Post/PostBlur.h"
+#include "Materials/Post/PostMotionBlur.h"
 
 void PostProcessingScene::Initialize()
 {
@@ -57,9 +58,12 @@ void PostProcessingScene::Initialize()
 	//=====================
 	m_pPostGrayscale = MaterialManager::Get()->CreateMaterial<PostGrayscale>();
 	m_pPostBlur = MaterialManager::Get()->CreateMaterial<PostBlur>();
+	m_pPostMotionBlur = MaterialManager::Get()->CreateMaterial<PostMotionBlur>();
 
+	AddPostProcessingEffect(m_pPostMotionBlur);
 	AddPostProcessingEffect(m_pPostGrayscale);
 	AddPostProcessingEffect(m_pPostBlur);
+	
 }
 
 void PostProcessingScene::OnGUI()
@@ -71,4 +75,8 @@ void PostProcessingScene::OnGUI()
 	isEnabled = m_pPostBlur->IsEnabled();
 	ImGui::Checkbox("Blur PP", &isEnabled);
 	m_pPostBlur->SetIsEnabled(isEnabled);
+
+	isEnabled = m_pPostMotionBlur->IsEnabled();
+	ImGui::Checkbox("Motion Blur PP", &isEnabled);
+	m_pPostMotionBlur->SetIsEnabled(isEnabled);
 }

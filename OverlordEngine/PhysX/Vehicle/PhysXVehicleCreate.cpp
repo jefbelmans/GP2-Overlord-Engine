@@ -62,12 +62,8 @@ namespace vehicle
 	(const PxVehicleChassisData& chassisData,
 		PxMaterial** wheelMaterials, PxConvexMesh** wheelConvexMeshes, const PxU32 numWheels, const PxFilterData& wheelSimFilterData,
 		PxMaterial** chassisMaterials, PxConvexMesh** chassisConvexMeshes, const PxU32 numChassisMeshes, const PxFilterData& chassisSimFilterData,
-		PxPhysics& physics)
+		PxPhysics& /*physics*/, PxRigidActor* pVehActor)
 	{
-		//We need a rigid body actor for the vehicle.
-		//Don't forget to add the actor to the scene after setting up the associated vehicle.
-		PxRigidDynamic* vehActor = physics.createRigidDynamic(PxTransform(PxIdentity));
-
 		//Wheel and chassis query filter data.
 		//Optional: cars don't drive on other cars.
 		PxFilterData wheelQryFilterData;
@@ -79,7 +75,7 @@ namespace vehicle
 		for (PxU32 i = 0; i < numWheels; i++)
 		{
 			PxConvexMeshGeometry geom(wheelConvexMeshes[i]);
-			PxShape* wheelShape = PxRigidActorExt::createExclusiveShape(*vehActor, geom, *wheelMaterials[i]);
+			PxShape* wheelShape = PxRigidActorExt::createExclusiveShape(*pVehActor, geom, *wheelMaterials[i]);
 			wheelShape->setQueryFilterData(wheelQryFilterData);
 			wheelShape->setSimulationFilterData(wheelSimFilterData);
 			wheelShape->setLocalPose(PxTransform(PxIdentity));
@@ -88,17 +84,17 @@ namespace vehicle
 		//Add the chassis shapes to the actor.
 		for (PxU32 i = 0; i < numChassisMeshes; i++)
 		{
-			PxShape* chassisShape = PxRigidActorExt::createExclusiveShape(*vehActor, PxConvexMeshGeometry(chassisConvexMeshes[i]), *chassisMaterials[i]);
+			PxShape* chassisShape = PxRigidActorExt::createExclusiveShape(*pVehActor, PxConvexMeshGeometry(chassisConvexMeshes[i]), *chassisMaterials[i]);
 			chassisShape->setQueryFilterData(chassisQryFilterData);
 			chassisShape->setSimulationFilterData(chassisSimFilterData);
 			chassisShape->setLocalPose(PxTransform(PxIdentity));
 		}
 
-		vehActor->setMass(chassisData.mMass);
-		vehActor->setMassSpaceInertiaTensor(chassisData.mMOI);
-		vehActor->setCMassLocalPose(PxTransform(chassisData.mCMOffset, PxQuat(PxIdentity)));
+		pVehActor->is<PxRigidDynamic>()->setMass(chassisData.mMass);
+		pVehActor->is<PxRigidDynamic>()->setMassSpaceInertiaTensor(chassisData.mMOI);
+		pVehActor->is<PxRigidDynamic>()->setCMassLocalPose(PxTransform(chassisData.mCMOffset, PxQuat(PxIdentity)));
 
-		return vehActor;
+		return pVehActor->is<PxRigidDynamic>();
 	}
 
 	void configureUserData(PxVehicleWheels* vehicle, ActorUserData* actorUserData, ShapeUserData* shapeUserDatas)
