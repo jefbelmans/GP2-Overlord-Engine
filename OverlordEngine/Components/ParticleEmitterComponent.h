@@ -3,8 +3,8 @@ class ParticleMaterial;
 
 struct ParticleEmitterSettings
 {
-	float minSize{ .1f }; //The minimum size each particle can be at the time when it is spawned
-	float maxSize{ 2.f }; //The maximum size each particle can be at the time when it is spawned
+	XMFLOAT2 minSize{ .1f, .1f }; //The minimum size each particle can be at the time when it is spawned
+	XMFLOAT2 maxSize{ 2.f, 2.f }; //The maximum size each particle can be at the time when it is spawned
 
 	float minEnergy{ 1.f }; //The minimum lifetime of each particle, measured in seconds
 	float maxEnergy{ 2.f }; //The maximum lifetime of each particle, measured in seconds
@@ -45,6 +45,14 @@ public:
 	ParticleEmitterSettings& GetSettings() { return m_EmitterSettings; }; //EmitterSettings Getter (by reference) > allows settings changes
 	void DrawImGui();
 
+	void SpawnBurst(int count);
+	void Play() { m_IsPlaying = true; }
+	void Pause() { m_IsPlaying = false; }
+
+	bool GetIsPlaying() const { return m_IsPlaying; }
+
+	void SetSpawnOffset(const XMFLOAT3& offset){m_SpawnOffset = offset; }
+
 protected:
 	void Initialize(const SceneContext&) override;
 	void Update(const SceneContext&) override;
@@ -54,6 +62,8 @@ private:
 	void CreateVertexBuffer(const SceneContext& sceneContext); //Method to create the vertex buffer
 	void UpdateParticle(Particle& p, float elapsedTime) const;
 	void SpawnParticle(Particle& p);
+
+	XMFLOAT3 m_SpawnOffset{};
 
 	TextureData* m_pParticleTexture{};
 	static ParticleMaterial* m_pParticleMaterial; //Material used to render the particles (static >> shared by all emitters)
@@ -69,5 +79,6 @@ private:
 	std::wstring m_AssetFile{};
 
 	bool m_DrawImGui{ false };
+	bool m_IsPlaying{ true };
 };
 

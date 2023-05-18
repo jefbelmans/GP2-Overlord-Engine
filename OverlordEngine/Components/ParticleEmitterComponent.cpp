@@ -64,8 +64,12 @@ void ParticleEmitterComponent::Update(const SceneContext& sceneContext)
 {
 	const float dt = sceneContext.pGameTime->GetElapsed();
 
-	float particleInterval{ (m_EmitterSettings.maxEnergy - m_EmitterSettings.minEnergy) / m_ParticleCount };
+	float particleInterval{ (m_EmitterSettings.maxEnergy + m_EmitterSettings.minEnergy) * 0.5f / m_ParticleCount};
+	
 	m_LastParticleSpawn += dt;
+
+	if (!m_IsPlaying)
+		m_LastParticleSpawn = 0.f;
 
 	m_ActiveParticles = 0;
 
@@ -83,9 +87,12 @@ void ParticleEmitterComponent::Update(const SceneContext& sceneContext)
 			UpdateParticle(m_ParticlesArray[i], dt);
 			
 		
-		if (!m_ParticlesArray[i].isActive && m_LastParticleSpawn >= particleInterval)
+		if (!m_ParticlesArray[i].isActive && m_LastParticleSpawn >= particleInterval && m_IsPlaying)
+		{
 			SpawnParticle(m_ParticlesArray[i]);
-
+			m_LastParticleSpawn -= particleInterval;
+		}
+			
 		if (m_ParticlesArray[i].isActive)
 			pBuffer[m_ActiveParticles++] = m_ParticlesArray[i].vertexInfo;
 	}
@@ -114,7 +121,8 @@ void ParticleEmitterComponent::UpdateParticle(Particle& p, float elapsedTime) co
 	p.vertexInfo.Color = m_EmitterSettings.color;
 	p.vertexInfo.Color.w *= lifePercent;
 
-	p.vertexInfo.Size = p.initialSize * (1.f + (p.sizeChange - 1.f) * (1.f - lifePercent));
+	p.vertexInfo.Size.x = p.initialSize * (1.f + (p.sizeChange - 1.f) * (1.f - lifePercent));
+	p.vertexInfo.Size.y = p.initialSize * (1.f + (p.sizeChange - 1.f) * (1.f - lifePercent));
 }
 
 void ParticleEmitterComponent::SpawnParticle(Particle& p)
@@ -136,10 +144,15 @@ void ParticleEmitterComponent::SpawnParticle(Particle& p)
 
 	XMStoreFloat3(&p.vertexInfo.Position,
 			XMVectorAdd(
-				XMLoadFloat3(&GetTransform()->GetWorldPosition()), XMVectorMultiply(rndVec, 
-					XMVectorSet(rndRange, rndRange, rndRange, 0.f))));
+				XMVectorAdd(XMLoadFloat3(&GetTransform()->GetWorldPosition()),
+					XMLoadFloat3(&m_SpawnOffset)),
+					XMVectorMultiply(rndVec,XMVectorSet(rndRange, rndRange, rndRange, 0.f)))
+	);
 
-	p.vertexInfo.Size = p.initialSize = MathHelper::randF(m_EmitterSettings.minSize, m_EmitterSettings.maxSize);
+
+
+	p.vertexInfo.Size.x = p.initialSize = MathHelper::randF(m_EmitterSettings.minSize.x, m_EmitterSettings.maxSize.x);
+	p.vertexInfo.Size.y = p.initialSize = MathHelper::randF(m_EmitterSettings.minSize.y, m_EmitterSettings.maxSize.y);
 
 	p.sizeChange = MathHelper::randF(m_EmitterSettings.minScale, m_EmitterSettings.maxScale);
 
@@ -180,10 +193,28 @@ void ParticleEmitterComponent::DrawImGui()
 	{
 		ImGui::SliderUInt("Count", &m_ParticleCount, 0, m_MaxParticles);
 		ImGui::InputFloatRange("Energy Bounds", &m_EmitterSettings.minEnergy, &m_EmitterSettings.maxEnergy);
-		ImGui::InputFloatRange("Size Bounds", &m_EmitterSettings.minSize, &m_EmitterSettings.maxSize);
+		ImGui::InputFloatRange("Size Min", &m_EmitterSettings.minSize.x, &m_EmitterSettings.minSize.y);
+		ImGui::InputFloatRange("Size Max", &m_EmitterSettings.maxSize.x, &m_EmitterSettings.maxSize.y);
 		ImGui::InputFloatRange("Scale Bounds", &m_EmitterSettings.minScale, &m_EmitterSettings.maxScale);
 		ImGui::InputFloatRange("Radius Bounds", &m_EmitterSettings.minEmitterRadius, &m_EmitterSettings.maxEmitterRadius);
 		ImGui::InputFloat3("Velocity", &m_EmitterSettings.velocity.x);
 		ImGui::ColorEdit4("Color", &m_EmitterSettings.color.x, ImGuiColorEditFlags_NoInputs);
+		const auto& particlePos{ m_ParticlesArray[0].vertexInfo.Position };
+		ImGui::Text("Particle 0 position: %f, %f, %f", particlePos.x, particlePos.y, particlePos.z);
+	}
+}
+
+void ParticleEmitterComponent::SpawnBurst(int count)
+{
+	for (size_t i = 0; i < m_ParticleCount; i++)
+	{
+		if (!m_ParticlesArray[i].isActive)
+		{
+			SpawnParticle(m_ParticlesArray[i]);
+			count--;
+
+			if(count <= 0)
+				return;
+		}
 	}
 }

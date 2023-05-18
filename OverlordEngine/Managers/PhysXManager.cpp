@@ -98,9 +98,9 @@ void PhysXManager::InitializeVehicleDescription(const PxFilterData& chassisSimFi
 	const PxF32 chassisMass = 950.f;
 	const PxVec3 chassisDims(2.09f, 1.38f, 6.37f);
 	const PxVec3 chassisMOI
-	((chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 12.0f,
-		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 1.2f * chassisMass / 12.0f,
-		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * chassisMass / 12.f);
+	((chassisDims.y * chassisDims.y + chassisDims.z * chassisDims.z) * chassisMass / 5.0f,
+		(chassisDims.x * chassisDims.x + chassisDims.z * chassisDims.z) * 1.f * chassisMass / 10.0f,
+		(chassisDims.x * chassisDims.x + chassisDims.y * chassisDims.y) * chassisMass / 5.f);
 	const PxVec3 chassisCMOffset(0.0f, 0.0f, 0.5f);
 
 	//Set up the wheel mass, radius, width, moment of inertia, and number of wheels.

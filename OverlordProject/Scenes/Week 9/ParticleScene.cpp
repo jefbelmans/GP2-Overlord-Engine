@@ -11,8 +11,8 @@ void ParticleScene::Initialize()
 	//Particle System
 	ParticleEmitterSettings settings{};
 	settings.velocity = { 0.f,6.f,0.f };
-	settings.minSize = 1.f;
-	settings.maxSize = 2.f;
+	settings.minSize = { 1.f, 2.f };
+	settings.maxSize = { 2.f, 2.5f };
 	settings.minEnergy = 1.f;
 	settings.maxEnergy = 2.f;
 	settings.minScale = 3.5f;
@@ -69,5 +69,17 @@ void ParticleScene::Update()
 void ParticleScene::OnGUI()
 {
 	ImGui::Checkbox("Auto Move", &m_AutoMove);
+	bool isPlaying{ m_pEmitter->GetIsPlaying() };
+	ImGui::Checkbox("Play", &isPlaying);
+
+	if(isPlaying)
+		m_pEmitter->Play();
+	else
+		m_pEmitter->Pause();
+
 	m_pEmitter->DrawImGui();
+	if (ImGui::Button("Spawn Burst"))
+	{
+		m_pEmitter->SpawnBurst(20);
+	}
 }

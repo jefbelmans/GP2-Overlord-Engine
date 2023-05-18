@@ -22,11 +22,17 @@ private:
 	
 #pragma region Game Settings
 	TimerComponent* m_pTimer{ nullptr };
+	float m_RumbleStrength{};
 #pragma endregion
 
-
-#pragma region Post Processing
+#pragma region Post Processing Settings
 	PostMotionBlur* m_pPostMotionBlur;
+#pragma endregion
+
+#pragma region Particle System Settings
+	ParticleEmitterComponent* m_pEmitterRL{ nullptr };
+	ParticleEmitterComponent* m_pEmitterRR{ nullptr };
+	ParticleEmitterSettings m_EmitterSettings{};
 #pragma endregion
 
 #pragma region Shadow Settings
@@ -116,7 +122,7 @@ private:
 		XMFLOAT3(-157.0f,	3.0f,	25.0f),
 		XMFLOAT3(-55.0f,	3.0f,	55.0f),
 		XMFLOAT3(-117.0f,	3.0f,	-26.0f),
-		XMFLOAT3(-67.0f,	3.0f,	-30.0f),
+		XMFLOAT3(-67.0f,	3.0f,	-35.0f),
 		XMFLOAT3(75.0f,		3.0f,	-47.0f),
 		XMFLOAT3(12.0f,		3.0f,	93.0f),
 		XMFLOAT3(95.0f,		3.0f,	143.0f),

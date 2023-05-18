@@ -261,7 +261,7 @@ namespace vehicle
 
 			//Engine
 			PxVehicleEngineData engine;
-			engine.mPeakTorque = 1000.0f;
+			engine.mPeakTorque = 1400.0f;
 			engine.mMaxOmega = 1000.0f;//approx 6000 rpm
 			engine.mDampingRateFullThrottle = 0.1f;
 			driveSimData.setEngineData(engine);

@@ -23,8 +23,8 @@ void ShadowMapRenderer::Initialize()
 	m_pBakedShadowRenderTarget->Create(desc);
 
 	// Real time shadow map
-	desc.width = 8192;
-	desc.height = 8192;
+	desc.width = 4096;
+	desc.height = 4096;
 	m_pShadowRenderTarget = new RenderTarget(m_GameContext.d3dContext);
 	m_pShadowRenderTarget->Create(desc);
 	

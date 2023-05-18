@@ -52,4 +52,9 @@ namespace MathHelper
 		if (value < lo)
 			value = lo;
 	}
+
+	inline float remap(float value, float inputMin, float inputMax, float outputMin, float outputMax)
+	{
+		return (value - inputMin) / (inputMax - inputMin) * (outputMax - outputMin) + outputMin;
+	}
 }

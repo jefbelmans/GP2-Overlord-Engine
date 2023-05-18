@@ -12,7 +12,7 @@ float gSteerVsForwardSpeedData[2 * 8] =
 	5.f,		0.8f,
 	10.f,		0.6f,
 	15.f,		0.5f,
-	22.5f,		0.38f,
+	22.5f,		0.32f,
 	30.f,		0.24f,
 	PX_MAX_F32,		PX_MAX_F32,
 	PX_MAX_F32,		PX_MAX_F32
@@ -46,6 +46,28 @@ void VehiclePlayground::Initialize()
 	m_pCamera->SetSmoothing(m_CameraSmoothing);
 	m_pCamera->SetLookAhead(m_CameraLookAhead);
 	m_pCamera->SetOffsetDistance(m_CameraDistance);
+
+	// PARTICLE SYSTEMS
+	m_EmitterSettings.velocity = { 0.f, 2.f, 0.f };
+	m_EmitterSettings.minSize = { 0.3f, 1.2f };
+	m_EmitterSettings.maxSize = { 0.4f, 1.3f };
+	m_EmitterSettings.minEnergy = 0.6f;
+	m_EmitterSettings.maxEnergy = 1.f;
+	m_EmitterSettings.minScale = 1.4f;
+	m_EmitterSettings.maxScale = 1.6f;
+	m_EmitterSettings.minEmitterRadius = .1f;
+	m_EmitterSettings.maxEmitterRadius = .15f;
+	m_EmitterSettings.color = { 100.f, 100.f, 100.f, 1.f };
+
+	auto pEmitterGO = new GameObject();
+	m_pEmitterRR = pEmitterGO->AddComponent(new ParticleEmitterComponent(L"Textures/Smoke.png", m_EmitterSettings, 150));
+	pEmitterGO->GetTransform()->Translate(XMFLOAT3{ -0.75f, 0.1f, -2.f });
+	m_pChassis->AddChild(pEmitterGO);
+
+	pEmitterGO = new GameObject();
+	m_pEmitterRL = pEmitterGO->AddComponent(new ParticleEmitterComponent(L"Textures/Smoke.png", m_EmitterSettings, 150));
+	pEmitterGO->GetTransform()->Translate(XMFLOAT3{ 0.75f, 0.1f, -2.f });
+	m_pChassis->AddChild(pEmitterGO);
 
 	//Input
 	auto inputAction = InputAction(SteerLeft, InputState::down, VK_LEFT);
@@ -90,6 +112,7 @@ void VehiclePlayground::OnGUI()
 	if (ImGui::CollapsingHeader("Game Statistics"))
 	{
 		ImGui::Text("Next Checkpoint: %i", m_NextCheckpoint);
+		ImGui::Text("Rumble Strength: %f", m_RumbleStrength);
 	}
 
 	// CAMERA SETTINGS
@@ -120,12 +143,19 @@ void VehiclePlayground::OnGUI()
 		auto carPos{ m_pChassis->GetTransform()->GetPosition()};
 		ImGui::Text("Position: [%f, %f, %f]",
 			carPos.x, carPos.y, carPos.z);
+
 		ImGui::Text("Speed: %f", m_pVehicle->computeForwardSpeed());
 		ImGui::Text("Lateral Slip: %f %f %f %f", 
 			m_WheelQueryResults[0].lateralSlip,
 			m_WheelQueryResults[1].lateralSlip,
 			m_WheelQueryResults[2].lateralSlip,
 			m_WheelQueryResults[3].lateralSlip);
+
+		ImGui::Text("Longitudinal Slip: % f % f % f % f",
+			m_WheelQueryResults[0].longitudinalSlip,
+			m_WheelQueryResults[1].longitudinalSlip,
+			m_WheelQueryResults[2].longitudinalSlip,
+			m_WheelQueryResults[3].longitudinalSlip);
 	}
 
 	// SHADOWMAP
@@ -388,12 +418,24 @@ void VehiclePlayground::UpdateInput()
 	auto input{ m_SceneContext.pInput };
 	
 	// Vibrations
+	// Calculate the avarge lateral slip of all wheels
 	const float avgLateralSlip = std::accumulate(m_WheelQueryResults, m_WheelQueryResults + 4, 0.0f,
 		[](float sum, const physx::PxWheelQueryResult& wheelQueryResult) {
 			return sum + std::abs(wheelQueryResult.lateralSlip);
 		}) / 4.f;
+	
+	m_RumbleStrength = MathHelper::remap(avgLateralSlip, 0.f, .6f, 0.f, 0.3f);
 
-	input->SetVibration(avgLateralSlip * 0.03f, avgLateralSlip * 0.085f);
+	m_pEmitterRL->Pause();
+	m_pEmitterRR->Pause();
+
+	if (std::abs(m_WheelQueryResults[0].lateralSlip) >= 0.275f)
+		m_pEmitterRL->Play();
+
+	if (std::abs(m_WheelQueryResults[1].lateralSlip) >= 0.275f)
+		m_pEmitterRR->Play();
+
+	input->SetVibration(m_RumbleStrength * .05f, m_RumbleStrength * .15f);
 
 	float steerInput = input->GetThumbstickPosition(true).x;
 	float throtleInput = input->GetTriggerPressure(false);

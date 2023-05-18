@@ -127,6 +127,6 @@ struct VertexParticle
 {
 	XMFLOAT3 Position{};
 	XMFLOAT4 Color{XMFLOAT4{Colors::White}};
-	float Size{5.f};
+	XMFLOAT2 Size{5.f, 5.f};
 	float Rotation{0.f};
 };
