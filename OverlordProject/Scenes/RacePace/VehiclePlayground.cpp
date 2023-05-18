@@ -32,6 +32,11 @@ void VehiclePlayground::Initialize()
 	m_pPostMotionBlur->SetIsEnabled(false);
 	AddPostProcessingEffect(m_pPostMotionBlur);
 
+	// TIMER
+	auto pTimerGO = new GameObject();
+	m_pTimer = pTimerGO->AddComponent(new TimerComponent());
+	AddChild(pTimerGO);
+
 	// Constructs the entire scene with all the GO's
 	ConstructScene();
 
@@ -484,8 +489,15 @@ void VehiclePlayground::OnTriggerCallback(GameObject* trigger, GameObject* other
 		// Ignore everything that is not the player
 		if (other->GetTag() != L"Player") return;
 
-		if(trigger == m_pCheckpoints[m_NextCheckpoint])
+		if (trigger == m_pCheckpoints[m_NextCheckpoint])
+		{
 			m_NextCheckpoint = (m_NextCheckpoint + 1) % int(m_pCheckpoints.size());
+			if (m_NextCheckpoint == 1)
+			{
+				m_pTimer->Start();
+				m_pTimer->Lap();
+			}
+		}
 	}
 }
 

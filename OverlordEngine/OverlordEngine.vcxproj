@@ -126,6 +126,7 @@
     <ClInclude Include="PhysX\Vehicle\PhysXWheelContactModifyCallback.hpp" />
     <ClInclude Include="Prefabs\FixedCamera.h" />
     <ClInclude Include="Prefabs\FreeCamera.h" />
+    <ClInclude Include="Components\TimerComponent.h" />
     <ClInclude Include="Utils\ImguiHelper.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </ExcludedFromBuild>
@@ -201,6 +202,7 @@
     <ClCompile Include="PhysX\Vehicle\PhysXVehicleTireFriction.cpp" />
     <ClCompile Include="Prefabs\FixedCamera.cpp" />
     <ClCompile Include="Prefabs\FreeCamera.cpp" />
+    <ClCompile Include="Components\TimerComponent.cpp" />
     <ClCompile Include="Utils\ImguiHelper.cpp" />
     <ClCompile Include="Misc\Material.cpp" />
     <ClCompile Include="Misc\BaseMaterial.cpp" />

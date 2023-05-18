@@ -20,6 +20,10 @@ protected:
 
 private:
 	
+#pragma region Game Settings
+	TimerComponent* m_pTimer{ nullptr };
+#pragma endregion
+
 
 #pragma region Post Processing
 	PostMotionBlur* m_pPostMotionBlur;
