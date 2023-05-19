@@ -102,6 +102,7 @@
     <ClCompile Include="Prefabs\BoneObject.cpp" />
     <ClCompile Include="Materials\DiffuseMaterial.cpp" />
     <ClCompile Include="Prefabs\Character.cpp" />
+    <ClCompile Include="Scenes\VelocityOverdrive\VO_GameScene.cpp" />
     <ClCompile Include="Scenes\Week 10\PostProcessingScene.cpp" />
     <ClCompile Include="Scenes\Week 4\ModelTestScene.cpp" />
     <ClCompile Include="Prefabs\CubePrefab.cpp" />
@@ -140,7 +141,6 @@
     <ClCompile Include="Scenes\Week 3\W3_PongScene.cpp" />
     <ClCompile Include="Scenes\Week 4\UberMaterialScene.cpp" />
     <ClCompile Include="Materials\UberMaterial.cpp" />
-    <ClCompile Include="Scenes\RacePace\VehiclePlayground.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OverlordEngine\OverlordEngine.vcxproj">
@@ -157,6 +157,7 @@
     <ClInclude Include="Prefabs\BoneObject.h" />
     <ClInclude Include="Materials\DiffuseMaterial.h" />
     <ClInclude Include="Prefabs\Character.h" />
+    <ClInclude Include="Scenes\VelocityOverdrive\VO_GameScene.h" />
     <ClInclude Include="Scenes\Week 10\PostProcessingScene.h" />
     <ClInclude Include="Scenes\Week 4\ModelTestScene.h" />
     <ClInclude Include="Prefabs\CubePrefab.h" />
@@ -182,7 +183,6 @@
     <ClInclude Include="Scenes\Week 3\W3_PongScene.h" />
     <ClInclude Include="Scenes\Week 4\UberMaterialScene.h" />
     <ClInclude Include="Materials\UberMaterial.h" />
-    <ClInclude Include="Scenes\RacePace\VehiclePlayground.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include <numeric>
 
-#include "VehiclePlayground.h"
+#include "VO_GameScene.h"
 #include "Materials/Shadow/DiffuseMaterial_Shadow.h"
 #include "Materials/Post/PostMotionBlur.h"
 
@@ -18,7 +18,7 @@ float gSteerVsForwardSpeedData[2 * 8] =
 	PX_MAX_F32,		PX_MAX_F32
 };
 
-void VehiclePlayground::Initialize()
+void VO_GameScene::Initialize()
 {
 	// SCENE SETTINGS
 	m_SceneContext.settings.drawGrid = false;
@@ -86,18 +86,18 @@ void VehiclePlayground::Initialize()
 	m_SceneContext.pInput->AddInputAction(inputAction);
 }
 
-VehiclePlayground::~VehiclePlayground()
+VO_GameScene::~VO_GameScene()
 {
 	PxCloseVehicleSDK();
 }
 
-void VehiclePlayground::Update()
+void VO_GameScene::Update()
 {
 	UpdateVehicle();
 	UpdateInput();
 }
 
-void VehiclePlayground::PostDraw()
+void VO_GameScene::PostDraw()
 {
 	if(m_DebugShadowMap)
 		ShadowMapRenderer::Get()->Debug_DrawDepthSRV({ m_SceneContext.windowWidth - 10.f, 10.f }, { m_ShadowMapScale, m_ShadowMapScale }, { 1.f,0.f });
@@ -106,7 +106,7 @@ void VehiclePlayground::PostDraw()
 		ShadowMapRenderer::Get()->Debug_DrawBakedDepthSRV({ m_SceneContext.windowWidth - 10.f, 10.f }, { m_ShadowMapScale, m_ShadowMapScale }, { 1.f,0.f });
 }
 
-void VehiclePlayground::OnGUI()
+void VO_GameScene::OnGUI()
 {
 	// GAME STATS
 	if (ImGui::CollapsingHeader("Game Statistics"))
@@ -182,7 +182,7 @@ void VehiclePlayground::OnGUI()
 	}
 }
 
-void VehiclePlayground::ConstructScene()
+void VO_GameScene::ConstructScene()
 {
 	// PHYSX
 	auto pDefaultMaterial = PhysXManager::Get()->GetPhysics()->createMaterial(0.5f, 0.5f, 0.f);
@@ -391,7 +391,7 @@ void VehiclePlayground::ConstructScene()
 	}
 }
 
-void VehiclePlayground::SetupTelemetryData()
+void VO_GameScene::SetupTelemetryData()
 {
 	m_pVehicleTelemetryData = PxVehicleTelemetryData::allocate(4);
 
@@ -411,7 +411,7 @@ void VehiclePlayground::SetupTelemetryData()
 		backgroundColor, lineColorHigh, lineColorLow);
 }
 
-void VehiclePlayground::UpdateInput()
+void VO_GameScene::UpdateInput()
 {
 	ReleaseAllControls();
 
@@ -429,10 +429,10 @@ void VehiclePlayground::UpdateInput()
 	m_pEmitterRL->Pause();
 	m_pEmitterRR->Pause();
 
-	if (std::abs(m_WheelQueryResults[0].lateralSlip) >= 0.275f)
+	if (std::abs(m_WheelQueryResults[0].lateralSlip) >= 0.3f)
 		m_pEmitterRL->Play();
 
-	if (std::abs(m_WheelQueryResults[1].lateralSlip) >= 0.275f)
+	if (std::abs(m_WheelQueryResults[1].lateralSlip) >= 0.3f)
 		m_pEmitterRR->Play();
 
 	input->SetVibration(m_RumbleStrength * .05f, m_RumbleStrength * .15f);
@@ -464,7 +464,7 @@ void VehiclePlayground::UpdateInput()
 		AccelerateReverse(1.f);
 }
 
-void VehiclePlayground::UpdateVehicle()
+void VO_GameScene::UpdateVehicle()
 {
 	if (m_pVehicle == nullptr) return;
 
@@ -524,7 +524,7 @@ void VehiclePlayground::UpdateVehicle()
 
 }
 
-void VehiclePlayground::OnTriggerCallback(GameObject* trigger, GameObject* other, PxTriggerAction action)
+void VO_GameScene::OnTriggerCallback(GameObject* trigger, GameObject* other, PxTriggerAction action)
 {
 	if (action == PxTriggerAction::ENTER)
 	{
@@ -543,7 +543,7 @@ void VehiclePlayground::OnTriggerCallback(GameObject* trigger, GameObject* other
 	}
 }
 
-void VehiclePlayground::AccelerateForward(float analogAcc)
+void VO_GameScene::AccelerateForward(float analogAcc)
 {
 	//If I am going reverse, change to first gear
 	if (m_pVehicle->mDriveDynData.getCurrentGear() == PxVehicleGearsData::eREVERSE)
@@ -561,7 +561,7 @@ void VehiclePlayground::AccelerateForward(float analogAcc)
 	}
 }
 
-void VehiclePlayground::AccelerateReverse(float analogAcc /*= 0.f*/)
+void VO_GameScene::AccelerateReverse(float analogAcc /*= 0.f*/)
 {
 	//Force gear change to reverse
 	m_pVehicle->mDriveDynData.forceGearChange(PxVehicleGearsData::eREVERSE);
@@ -576,7 +576,7 @@ void VehiclePlayground::AccelerateReverse(float analogAcc /*= 0.f*/)
 	}
 }
 
-void VehiclePlayground::Brake()
+void VO_GameScene::Brake()
 {
 	if (m_IsDigitalControl)
 	{
@@ -588,7 +588,7 @@ void VehiclePlayground::Brake()
 	}
 }
 
-void VehiclePlayground::Steer(float analogSteer /*= 0.f*/)
+void VO_GameScene::Steer(float analogSteer /*= 0.f*/)
 {
 	if (m_IsDigitalControl)
 	{
@@ -603,7 +603,7 @@ void VehiclePlayground::Steer(float analogSteer /*= 0.f*/)
 	}
 }
 
-void VehiclePlayground::Handbrake()
+void VO_GameScene::Handbrake()
 {
 	if (m_IsDigitalControl)
 	{
@@ -615,7 +615,7 @@ void VehiclePlayground::Handbrake()
 	}
 }
 
-void VehiclePlayground::ReleaseAllControls()
+void VO_GameScene::ReleaseAllControls()
 {
 	if (m_IsDigitalControl)
 	{

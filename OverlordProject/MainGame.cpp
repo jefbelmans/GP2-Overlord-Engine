@@ -78,7 +78,7 @@
 #endif
 
 #ifdef VelocityOverdrive
-#include "Scenes/RacePace/VehiclePlayground.h"
+#include "Scenes/VelocityOverdrive/VO_GameScene.h"
 #endif
 
 #pragma endregion
@@ -159,7 +159,7 @@ void MainGame::Initialize()
 #endif
 
 #ifdef VelocityOverdrive
-	SceneManager::Get()->AddGameScene(new VehiclePlayground());
+	SceneManager::Get()->AddGameScene(new VO_GameScene());
 #endif // RacePace
 
 }

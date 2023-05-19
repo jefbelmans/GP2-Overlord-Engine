@@ -1,16 +1,15 @@
 #pragma once
-#include "PxPhysicsAPI.h"
 
 class PostMotionBlur;
-class VehiclePlayground final : public GameScene
+class VO_GameScene final : public GameScene
 {
 public:
-	VehiclePlayground() : GameScene(L"Vehicle Playground") {};
-	~VehiclePlayground() override;
-	VehiclePlayground(const VehiclePlayground& other) = delete;
-	VehiclePlayground(VehiclePlayground&& other) noexcept = delete;
-	VehiclePlayground& operator=(const VehiclePlayground& other) = delete;
-	VehiclePlayground& operator=(VehiclePlayground&& other) noexcept = delete;
+	VO_GameScene() : GameScene(L"Velocity Overdrive - Game Scene") {};
+	~VO_GameScene() override;
+	VO_GameScene(const VO_GameScene& other) = delete;
+	VO_GameScene(VO_GameScene&& other) noexcept = delete;
+	VO_GameScene& operator=(const VO_GameScene& other) = delete;
+	VO_GameScene& operator=(VO_GameScene&& other) noexcept = delete;
 
 protected:
 	void Initialize() override;

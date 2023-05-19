@@ -105,7 +105,7 @@ void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 	//- Use the Projection & View Matrix to calculate the ViewProjection of this Light, store in m_LightVP
 
 	// Change the projection matrix when baking shadows to fit the entire scene
-	const auto projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * 110.f, 110.f, 0.1f, 400.f);
+	const auto projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * 155.f, 155.f, 0.1f, 400.f);
 
 	const Light& dirLight = sceneContext.pLights->GetDirectionalLight();
 	const auto lightDir = XMLoadFloat4(&dirLight.direction);
