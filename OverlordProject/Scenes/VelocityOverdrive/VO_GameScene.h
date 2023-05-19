@@ -24,6 +24,11 @@ private:
 	float m_RumbleStrength{};
 #pragma endregion
 
+#pragma region Sound Settings
+	FMOD::Channel* m_pEngineChannel{ nullptr };
+	FMOD::Sound* m_pEngineSound{ nullptr };
+#pragma endregion
+
 #pragma region Post Processing Settings
 	PostMotionBlur* m_pPostMotionBlur;
 #pragma endregion

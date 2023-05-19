@@ -32,6 +32,24 @@ void VO_GameScene::Initialize()
 	m_pPostMotionBlur->SetIsEnabled(false);
 	AddPostProcessingEffect(m_pPostMotionBlur);
 
+	// AUDIO
+	auto pFmodSystem = SoundManager::Get()->GetSystem();
+	auto result = pFmodSystem->createStream("Resources/Sounds/Engine.wav", FMOD_LOOP_NORMAL, nullptr, &m_pEngineSound);
+	if (result != FMOD_OK)
+	{
+		std::wstringstream strstr;
+		strstr << L"FMOD error! \n[" << result << L"] " << FMOD_ErrorString(result) << std::endl;
+		Logger::LogError(strstr.str());
+	}
+
+	result = pFmodSystem->playSound(m_pEngineSound, nullptr, false, &m_pEngineChannel);
+	if (result != FMOD_OK)
+	{
+		std::wstringstream strstr;
+		strstr << L"FMOD error! \n[" << result << L"] " << FMOD_ErrorString(result) << std::endl;
+		Logger::LogError(strstr.str());
+	}
+
 	// TIMER
 	auto pTimerGO = new GameObject();
 	m_pTimer = pTimerGO->AddComponent(new TimerComponent());
@@ -95,6 +113,8 @@ void VO_GameScene::Update()
 {
 	UpdateVehicle();
 	UpdateInput();
+	const float pitch = MathHelper::remap(m_pVehicle->mDriveDynData.mEnginespeed, 0.f, 1500.f, 0.6f, 1.f);
+	m_pEngineChannel->setPitch(pitch);
 }
 
 void VO_GameScene::PostDraw()
@@ -145,6 +165,9 @@ void VO_GameScene::OnGUI()
 			carPos.x, carPos.y, carPos.z);
 
 		ImGui::Text("Speed: %f", m_pVehicle->computeForwardSpeed());
+		ImGui::Text("Engine Speed: %f", m_pVehicle->mDriveDynData.mEnginespeed);
+		ImGui::Text("Current Gear: %i", m_pVehicle->mDriveDynData.getCurrentGear());
+
 		ImGui::Text("Lateral Slip: %f %f %f %f", 
 			m_WheelQueryResults[0].lateralSlip,
 			m_WheelQueryResults[1].lateralSlip,

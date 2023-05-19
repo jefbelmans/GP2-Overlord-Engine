@@ -261,20 +261,35 @@ namespace vehicle
 
 			//Engine
 			PxVehicleEngineData engine;
-			engine.mPeakTorque = 1400.0f;
-			engine.mMaxOmega = 1000.0f;//approx 6000 rpm
+			engine.mPeakTorque = 1600.0f;
+			engine.mMaxOmega = 1500.0f;//approx 15000 rpm
 			engine.mDampingRateFullThrottle = 0.1f;
 			driveSimData.setEngineData(engine);
 
 			//Gears
 			PxVehicleGearsData gears;
 			gears.mSwitchTime = 0.0f;
+			gears.mNbRatios = 8;
 			driveSimData.setGearsData(gears);
 
 			//Clutch
 			PxVehicleClutchData clutch;
-			clutch.mStrength = 200.0f;
+			clutch.mStrength = 10.f;
 			driveSimData.setClutchData(clutch);
+
+			PxVehicleAutoBoxData autoBox;
+			autoBox.mUpRatios[2] = 0.9f;
+			autoBox.mUpRatios[3] = 0.85f;
+			autoBox.mUpRatios[4] = 0.95f;
+			autoBox.mUpRatios[5] = 0.85f;
+			autoBox.mUpRatios[6] = 0.8f;
+			autoBox.mDownRatios[3] = 0.55f;
+			autoBox.mDownRatios[4] = 0.6f;
+			autoBox.mDownRatios[5] = 0.63f;
+			autoBox.mDownRatios[6] = 0.68f;
+			autoBox.mDownRatios[7] = 0.7f;
+			autoBox.setLatency(0.5f);
+			driveSimData.setAutoBoxData(autoBox);
 
 			//Ackermann steer accuracy
 			PxVehicleAckermannGeometryData ackermann;
