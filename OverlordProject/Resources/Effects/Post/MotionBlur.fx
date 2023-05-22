@@ -27,6 +27,11 @@ RasterizerState cullBack
     CullMode = Back;
 };
 
+BlendState EnableBlending
+{
+    BlendEnable[0] = FALSE;
+};
+
 //IN/OUT STRUCTS
 //--------------
 struct VS_INPUT
@@ -86,14 +91,15 @@ float4 PS(PS_INPUT input) : SV_Target
     // Use this frame's position and last frame's to compute the pixel velocity.
     float2 velocity = (currentPos - previousPos) * 0.5f; 
     
-    float4 color = float4(0, 0, 0, 0);
+    float4 color = float4(0, 0, 0, 1);
     for(int i = 0; i < gNumSamples; ++i)
     { 
         // Sample the color buffer along the velocity vector and add to color
-        color += gColorTexture.Sample(samPoint, input.TexCoord + velocity * i);
+        color.xyz += gColorTexture.Sample(samPoint, input.TexCoord + velocity * i).xyz;
     }
     
-    return color / gNumSamples;
+    color.xyz /= gNumSamples;
+    return color;
 }
 
 
@@ -105,6 +111,7 @@ technique11 Grayscale
     {
         SetDepthStencilState(depthEnabled, 0);
         SetRasterizerState(cullBack);
+        SetBlendState(EnableBlending, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
 
         SetVertexShader(CompileShader(vs_4_0, VS()));
         SetGeometryShader(NULL);

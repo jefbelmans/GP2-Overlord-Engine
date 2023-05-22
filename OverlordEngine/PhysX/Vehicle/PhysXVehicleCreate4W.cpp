@@ -269,7 +269,7 @@ namespace vehicle
 			//Gears
 			PxVehicleGearsData gears;
 			gears.mSwitchTime = 0.0f;
-			gears.mNbRatios = 8;
+			// gears.mNbRatios = 8;
 			driveSimData.setGearsData(gears);
 
 			//Clutch
@@ -277,19 +277,19 @@ namespace vehicle
 			clutch.mStrength = 10.f;
 			driveSimData.setClutchData(clutch);
 
-			PxVehicleAutoBoxData autoBox;
+		/*	PxVehicleAutoBoxData autoBox;
 			autoBox.mUpRatios[2] = 0.9f;
 			autoBox.mUpRatios[3] = 0.85f;
 			autoBox.mUpRatios[4] = 0.95f;
 			autoBox.mUpRatios[5] = 0.85f;
-			autoBox.mUpRatios[6] = 0.8f;
-			autoBox.mDownRatios[3] = 0.55f;
-			autoBox.mDownRatios[4] = 0.6f;
-			autoBox.mDownRatios[5] = 0.63f;
-			autoBox.mDownRatios[6] = 0.68f;
-			autoBox.mDownRatios[7] = 0.7f;
-			autoBox.setLatency(0.5f);
-			driveSimData.setAutoBoxData(autoBox);
+			autoBox.mUpRatios[6] = 0.775f;
+			autoBox.mDownRatios[3] = 0.7f;
+			autoBox.mDownRatios[4] = 0.675f;
+			autoBox.mDownRatios[5] = 0.625f;
+			autoBox.mDownRatios[6] = 0.6f;
+			autoBox.mDownRatios[7] = 0.58f;
+			autoBox.setLatency(0.8f);
+			driveSimData.setAutoBoxData(autoBox);*/
 
 			//Ackermann steer accuracy
 			PxVehicleAckermannGeometryData ackermann;

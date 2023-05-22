@@ -52,6 +52,7 @@ void VO_GameScene::Initialize()
 
 	// TIMER
 	auto pTimerGO = new GameObject();
+	pTimerGO->SetTag(L"Timer");
 	m_pTimer = pTimerGO->AddComponent(new TimerComponent());
 	AddChild(pTimerGO);
 
@@ -113,8 +114,17 @@ void VO_GameScene::Update()
 {
 	UpdateVehicle();
 	UpdateInput();
+
 	const float pitch = MathHelper::remap(m_pVehicle->mDriveDynData.mEnginespeed, 0.f, 1500.f, 0.6f, 1.f);
 	m_pEngineChannel->setPitch(pitch);
+
+	if (InputManager::IsMouseButton(InputState::pressed, VK_LBUTTON))
+	{
+		if (const auto pPickedObject = m_SceneContext.pCamera->Pick())
+		{
+			Logger::LogInfo(pPickedObject->GetTag());
+		}
+	}
 }
 
 void VO_GameScene::PostDraw()
