@@ -24,6 +24,10 @@ private:
 	float m_RumbleStrength{};
 #pragma endregion
 
+#pragma region UI
+	GameObject* m_pTestButton{};
+#pragma endregion
+
 #pragma region Sound Settings
 	FMOD::Channel* m_pEngineChannel{ nullptr };
 	FMOD::Sound* m_pEngineSound{ nullptr };

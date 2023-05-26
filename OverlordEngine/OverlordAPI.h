@@ -19,6 +19,7 @@
 #include "Base/GameTime.h"
 #include "Base/GameStats.h"
 #include "Base/Logger.h"
+#include "Base/IInteractable.h"
 
 #include "Managers/ContentManager.h"
 #include "Managers/InputManager.h"
@@ -27,6 +28,7 @@
 #include "Managers/SceneManager.h"
 #include "Managers/SoundManager.h"
 #include "Managers/PhysXManager.h"
+#include "Managers/EventSystem.h"
 
 #include "Components/BaseComponent.h"
 #include "Components/TransformComponent.h"
@@ -39,6 +41,7 @@
 #include "Components/ControllerComponent.h" //Week 5
 #include "Components/ParticleEmitterComponent.h" //Week 9
 #include "Components/TimerComponent.h" // Custom
+#include "Components/ButtonComponent.h" // Custom
 
 #include "Content/ContentLoader.h"
 #include "Content/EffectLoader.h"

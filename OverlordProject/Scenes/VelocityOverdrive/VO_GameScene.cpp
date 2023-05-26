@@ -31,6 +31,12 @@ void VO_GameScene::Initialize()
 	m_pPostMotionBlur = MaterialManager::Get()->CreateMaterial<PostMotionBlur>();
 	m_pPostMotionBlur->SetIsEnabled(false);
 	AddPostProcessingEffect(m_pPostMotionBlur);
+	
+	// UI
+	m_pTestButton = new GameObject();
+	auto pButton = m_pTestButton->AddComponent(new ButtonComponent(L"Textures/ButtonBase.png", {m_SceneContext.windowWidth / 2 , m_SceneContext.windowHeight / 2}, {1.5f, 0.5f}));
+	pButton->SetPressedAssetPath(L"Textures/ButtonBase.png");
+	AddChild(m_pTestButton);
 
 	// AUDIO
 	auto pFmodSystem = SoundManager::Get()->GetSystem();
@@ -117,14 +123,6 @@ void VO_GameScene::Update()
 
 	const float pitch = MathHelper::remap(m_pVehicle->mDriveDynData.mEnginespeed, 0.f, 1500.f, 0.6f, 1.f);
 	m_pEngineChannel->setPitch(pitch);
-
-	if (InputManager::IsMouseButton(InputState::pressed, VK_LBUTTON))
-	{
-		if (const auto pPickedObject = m_SceneContext.pCamera->Pick())
-		{
-			Logger::LogInfo(pPickedObject->GetTag());
-		}
-	}
 }
 
 void VO_GameScene::PostDraw()

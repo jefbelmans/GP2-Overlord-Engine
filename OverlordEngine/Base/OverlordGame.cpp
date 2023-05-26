@@ -25,6 +25,7 @@ OverlordGame::~OverlordGame()
 	SpriteRenderer::Destroy();
 	TextRenderer::Destroy();
 	ShadowMapRenderer::Destroy();
+	EventSystem::Destroy();
 	Logger::Release(); //TODO > Singleton
 
 	//ImGui Cleanup
@@ -332,6 +333,7 @@ HRESULT OverlordGame::InitializeGame()
 	SpriteRenderer::Create(m_GameContext);
 	TextRenderer::Create(m_GameContext);
 	ShadowMapRenderer::Create(m_GameContext);
+	EventSystem::Create(m_GameContext);
 
 	//***************
 	//GAME INITIALIZE
@@ -451,6 +453,7 @@ void OverlordGame::GameLoop() const
 	//UPDATE
 	InputManager::UpdateInputStates(ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard);
 	SceneManager::Get()->Update();
+	EventSystem::Get()->Update();
 
 	//****
 	//DRAW

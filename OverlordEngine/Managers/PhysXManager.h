@@ -52,8 +52,8 @@ private:
 	const int m_NrOfVehicles{ 1 };
 	PxMaterial* m_pDefaultMaterial{ nullptr };
 	vehicle::VehicleSceneQueryData* m_pVehicleSceneQueryData{nullptr};
-	PxBatchQuery* m_pBatchQuery{ nullptr };
 	vehicle::PxVehicleDrivableSurfaceToTireFrictionPairs* m_pFrictionPairs{ nullptr };
+	PxBatchQuery* m_pBatchQuery{ nullptr };
 	PxScene* m_pVehicleScene{ nullptr };
 
 	vehicle::ActorUserData m_ActorUserData{};
@@ -62,5 +62,4 @@ private:
 	vehicle::VehicleDesc m_VehicleDesc;
 
 	void InitializeVehicleDescription(const PxFilterData& chassisSimFilterData, const PxFilterData& wheelSimFilterData);
-
 };

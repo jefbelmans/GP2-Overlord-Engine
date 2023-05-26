@@ -106,8 +106,11 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Components\ButtonComponent.h" />
     <ClInclude Include="Components\ControllerComponent.h" />
+    <ClInclude Include="Base\IInteractable.h" />
     <ClInclude Include="Components\ParticleEmitterComponent.h" />
+    <ClInclude Include="Managers\EventSystem.h" />
     <ClInclude Include="Prefabs\FollowCamera.h" />
     <ClInclude Include="Graphics\ShadowMapRenderer.h" />
     <ClInclude Include="Lab_Todos.h" />
@@ -184,8 +187,10 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Components\ButtonComponent.cpp" />
     <ClCompile Include="Components\ControllerComponent.cpp" />
     <ClCompile Include="Components\ParticleEmitterComponent.cpp" />
+    <ClCompile Include="Managers\EventSystem.cpp" />
     <ClCompile Include="Prefabs\FollowCamera.cpp" />
     <ClCompile Include="Graphics\ShadowMapRenderer.cpp" />
     <ClCompile Include="Managers\LightManager.cpp" />

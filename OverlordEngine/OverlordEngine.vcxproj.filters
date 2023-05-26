@@ -61,6 +61,8 @@
     <ClCompile Include="PhysX\Vehicle\PhysXVehicleTireFriction.cpp" />
     <ClCompile Include="Prefabs\FollowCamera.cpp" />
     <ClCompile Include="Components\TimerComponent.cpp" />
+    <ClCompile Include="Managers\EventSystem.cpp" />
+    <ClCompile Include="Components\ButtonComponent.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -134,6 +136,9 @@
     <ClInclude Include="PhysX\Vehicle\PhysXWheelContactModifyCallback.hpp" />
     <ClInclude Include="Prefabs\FollowCamera.h" />
     <ClInclude Include="Components\TimerComponent.h" />
+    <ClInclude Include="Managers\EventSystem.h" />
+    <ClInclude Include="Base\IInteractable.h" />
+    <ClInclude Include="Components\ButtonComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
