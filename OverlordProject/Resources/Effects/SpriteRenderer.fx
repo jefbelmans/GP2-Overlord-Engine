@@ -16,9 +16,12 @@ BlendState EnableBlending
     DestBlend = INV_SRC_ALPHA;
 };
 
-DepthStencilState NoDepth
+DepthStencilState DisableDepth
 {
     DepthEnable = FALSE;
+    DepthWriteMask = ZERO;
+    DepthFunc = LESS;
+    StencilEnable = FALSE;
 };
 
 RasterizerState BackCulling
@@ -92,12 +95,12 @@ void MainGS(point VS_DATA vertex[1], inout TriangleStream<GS_DATA> triStream)
     float rotation = vertex[0].TransformData.w; //Extract the rotation data from the VS_DATA vertex struct
     float2 pivot = vertex[0].TransformData2.xy; //Extract the pivot data from the VS_DATA vertex struct
     float2 scale = vertex[0].TransformData2.zw; //Extract the scale data from the VS_DATA vertex struct
+    float4 color = vertex[0].Color; //Extract the color data from the VS_DATA vertex struct
     float2 texCoord = float2(0, 0); //Initial Texture Coordinate
+
 	
     float2 pivotOffset = -pivot * gTextureSize * scale;
     float2 rotCosSin = float2(cos(rotation), sin(rotation));
-    
-	//...
 
 	// LT----------RT //TringleStrip (LT > RT > LB, LB > RB > RT)
 	// |          / |
@@ -107,32 +110,32 @@ void MainGS(point VS_DATA vertex[1], inout TriangleStream<GS_DATA> triStream)
 	// LB----------RB
 
 	//VERTEX 1 [LT]
-    CreateVertex(triStream, position, float4(1, 1, 1, 1), texCoord, rotation, rotCosSin, offset, pivotOffset); //Change the color data too!
+    CreateVertex(triStream, position, color, texCoord, rotation, rotCosSin, offset, pivotOffset); //Change the color data too!
 
 	//VERTEX 2 [RT]
     position.x = offset.x + gTextureSize.x * scale.x;
     position.y = offset.y;
     texCoord = position.xy;
     texCoord = float2(1, 0);
-    CreateVertex(triStream, position, float4(1, 1, 1, 1), texCoord, rotation, rotCosSin, offset, pivotOffset); //Change the color data too!
+    CreateVertex(triStream, position, color, texCoord, rotation, rotCosSin, offset, pivotOffset); //Change the color data too!
 
 	//VERTEX 3 [LB]
     position.x = offset.x;
     position.y = offset.y + gTextureSize.y * scale.y;
     texCoord = float2(0, 1);
-    CreateVertex(triStream, position, float4(1, 1, 1, 1), texCoord, rotation, rotCosSin, offset, pivotOffset); //Change the color data too!
+    CreateVertex(triStream, position, color, texCoord, rotation, rotCosSin, offset, pivotOffset); //Change the color data too!
 
 	//VERTEX 4 [RB]
     position.xy = offset + gTextureSize.xy * scale;
     texCoord = float2(1, 1);
-    CreateVertex(triStream, position, float4(1, 1, 1, 1), texCoord, rotation, rotCosSin, offset, pivotOffset); //Change the color data too!
+    CreateVertex(triStream, position, color, texCoord, rotation, rotCosSin, offset, pivotOffset); //Change the color data too!
 }
 
 //PIXEL SHADER
 //************
 float4 MainPS(GS_DATA input) : SV_TARGET
 {
-    return gSpriteTexture.Sample(samPoint, input.TexCoord) * input.Color;
+    return gSpriteTexture.Sample(samPoint, input.TexCoord).a * input.Color;
 }
 
 // Default Technique
@@ -142,7 +145,7 @@ technique10 Default
     {
         SetRasterizerState(BackCulling);
         SetBlendState(EnableBlending, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
-		// SetDepthStencilState(NoDepth,0);
+        SetDepthStencilState(DisableDepth, 0);
         SetVertexShader(CompileShader(vs_4_0, MainVS()));
         SetGeometryShader(CompileShader(gs_4_0, MainGS()));
         SetPixelShader(CompileShader(ps_4_0, MainPS()));

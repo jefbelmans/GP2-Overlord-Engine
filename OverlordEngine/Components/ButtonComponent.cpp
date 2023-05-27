@@ -12,28 +12,29 @@ void ButtonComponent::OnClickBegin()
 {
 	Logger::LogInfo(L"ButtonComponent::OnClick");
 	m_pSpriteComponent->SetTexture(m_PressedAssetPath);
-	m_pSpriteComponent->SetColor(XMFLOAT4{ Colors::DarkGray });
 }
 
 void ButtonComponent::OnClickEnd()
 {
 	Logger::LogInfo(L"ButtonComponent::OnClickReleased");
 	m_pSpriteComponent->SetTexture(m_BaseAssetPath);
-	m_pSpriteComponent->SetColor(XMFLOAT4{ Colors::White });
+
+	if(m_IsSelected)
+		m_pSpriteComponent->SetTexture(m_SelectedAssetPath);
 }
 
 void ButtonComponent::OnHoverBegin()
 {
 	Logger::LogInfo(L"ButtonComponent::OnHoverBegin");
 	m_pSpriteComponent->SetTexture(m_SelectedAssetPath);
-	m_pSpriteComponent->SetColor(XMFLOAT4{ Colors::Gray });
+	m_IsSelected = true;
 }
 
 void ButtonComponent::OnHoverEnd()
 {
 	Logger::LogInfo(L"ButtonComponent::OnHoverEnd");
 	m_pSpriteComponent->SetTexture(m_BaseAssetPath);
-	m_pSpriteComponent->SetColor(XMFLOAT4{ Colors::White });
+	m_IsSelected = false;
 }
 
 void ButtonComponent::Initialize(const SceneContext&)

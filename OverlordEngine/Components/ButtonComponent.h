@@ -23,6 +23,8 @@ public:
 private:
 	void Initialize(const SceneContext&) override;
 
+	bool m_IsSelected{ false };
+
 	SpriteComponent* m_pSpriteComponent{};
 
 	// TEXTURES

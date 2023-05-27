@@ -34,8 +34,9 @@ void VO_GameScene::Initialize()
 	
 	// UI
 	m_pTestButton = new GameObject();
-	auto pButton = m_pTestButton->AddComponent(new ButtonComponent(L"Textures/ButtonBase.png", {m_SceneContext.windowWidth / 2 , m_SceneContext.windowHeight / 2}, {1.5f, 0.5f}));
-	pButton->SetPressedAssetPath(L"Textures/ButtonBase.png");
+	auto pButton = m_pTestButton->AddComponent(new ButtonComponent(L"Textures/ButtonBase.png", {m_SceneContext.windowWidth / 2 , m_SceneContext.windowHeight / 2}, {1.f, 1.f}));
+	pButton->SetPressedAssetPath(L"Textures/ButtonPressed.png");
+	pButton->SetSelectedAssetPath(L"Textures/ButtonSelected.png");
 	AddChild(m_pTestButton);
 
 	// AUDIO

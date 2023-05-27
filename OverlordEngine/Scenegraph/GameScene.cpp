@@ -184,9 +184,6 @@ void GameScene::RootDraw()
 		pChild->RootDraw(m_SceneContext);
 	}
 
-	//SpriteRenderer Draw
-	SpriteRenderer::Get()->Draw(m_SceneContext);
-
 	//Object-Scene Post-Draw
 	PostDraw();
 	for (const auto pChild : m_pChildren)
@@ -237,8 +234,9 @@ void GameScene::RootDraw()
 		//Done!
 	}
 
-	//TextRenderer Draw
-	// Draw it after the PP pass, as we don't want the text to be affected by the PP effects.
+	//TextRenderer & SpriteRenderer Draw
+	// Draw it after the PP pass, as we don't want the sprites and text to be affected by the PP effects.
+	SpriteRenderer::Get()->Draw(m_SceneContext);
 	TextRenderer::Get()->Draw(m_SceneContext);
 #pragma endregion
 }
