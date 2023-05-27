@@ -17,6 +17,8 @@ protected:
 	void PostDraw() override;
 	void OnGUI() override;
 
+	void OnSceneActivated() override;
+	void OnSceneDeactivated() override;
 private:
 	
 #pragma region Game Settings
@@ -25,7 +27,11 @@ private:
 #pragma endregion
 
 #pragma region UI
-	GameObject* m_pTestButton{};
+	GameObject* m_pBannerLap{};
+	GameObject* m_pBannerBest{};
+
+	GameObject* m_pPausePanel{};
+	GameObject* m_pBackButton{};
 #pragma endregion
 
 #pragma region Sound Settings

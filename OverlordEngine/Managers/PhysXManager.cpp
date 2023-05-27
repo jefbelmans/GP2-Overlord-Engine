@@ -147,9 +147,6 @@ PxScene* PhysXManager::CreateScene(GameScene* pScene)
 	const auto physxScene = m_pPhysics->createScene(sceneDesc);
 	ASSERT_IF(physxScene == nullptr, L"Scene creation failed!")
 
-		if (m_pVehicleScene == nullptr)
-			m_pVehicleScene = physxScene;
-
 	return physxScene;
 }
 

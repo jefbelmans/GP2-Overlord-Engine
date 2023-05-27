@@ -20,6 +20,7 @@ public:
 
 	PxPhysics* GetPhysics() const { return m_pPhysics; }
 	PxScene* CreateScene(GameScene* pScene);
+	void SetVehicleScene(GameScene* pScene) { m_pVehicleScene = pScene->GetPhysxProxy()->GetPhysxScene(); }
 
 	bool ToggleVisualDebuggerConnection() const;
 	bool IsPvdConnected() const { return m_pPvd && m_pPvd->isConnected(); }

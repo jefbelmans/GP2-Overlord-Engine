@@ -55,7 +55,7 @@ void DiffuseMaterial_Shadow::OnUpdateModelVariables(const SceneContext& sceneCon
 
 	SetVariable_Matrix(L"gBakedWorldViewProj_Light", reinterpret_cast<const float*>(&m_BakedLightWVP));
 
-	// Rotates the shadows on the race track by 90 degrees for some  fucking reason
+	// Rotates the shadows on the race track by 90 degrees for some fucking reason
 	// TODO: Fix this
 
 	//if ((m_IsBakedLightWVPDirty || !pModel->GetGameObject()->GetIsShadowMapStatic()) && sceneContext.pLights->GetUseBakedShadows())

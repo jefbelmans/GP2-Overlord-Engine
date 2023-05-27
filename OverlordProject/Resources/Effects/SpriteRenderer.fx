@@ -18,8 +18,8 @@ BlendState EnableBlending
 
 DepthStencilState DisableDepth
 {
-    DepthEnable = FALSE;
-    DepthWriteMask = ZERO;
+    DepthEnable = TRUE;
+    DepthWriteMask = ALL;
     DepthFunc = LESS;
     StencilEnable = FALSE;
 };
@@ -98,7 +98,6 @@ void MainGS(point VS_DATA vertex[1], inout TriangleStream<GS_DATA> triStream)
     float4 color = vertex[0].Color; //Extract the color data from the VS_DATA vertex struct
     float2 texCoord = float2(0, 0); //Initial Texture Coordinate
 
-	
     float2 pivotOffset = -pivot * gTextureSize * scale;
     float2 rotCosSin = float2(cos(rotation), sin(rotation));
 
@@ -135,7 +134,7 @@ void MainGS(point VS_DATA vertex[1], inout TriangleStream<GS_DATA> triStream)
 //************
 float4 MainPS(GS_DATA input) : SV_TARGET
 {
-    return gSpriteTexture.Sample(samPoint, input.TexCoord).a * input.Color;
+    return gSpriteTexture.Sample(samPoint, input.TexCoord) * input.Color;
 }
 
 // Default Technique

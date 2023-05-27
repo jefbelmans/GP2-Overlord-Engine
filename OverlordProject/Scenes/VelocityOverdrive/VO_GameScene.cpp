@@ -24,20 +24,36 @@ void VO_GameScene::Initialize()
 	m_SceneContext.settings.drawGrid = false;
 	m_SceneContext.settings.enableOnGUI = true;
 
+	PhysXManager::Get()->SetVehicleScene(this);
+
 	// SET BAKED DIR LIGHT
 	m_SceneContext.pLights->SetBakedDirectionalLight({ -100.f ,150.f, -80.f }, { 0.6f, -0.76f, 0.5f });
 	
 	// POST PROCESSING STACK
 	m_pPostMotionBlur = MaterialManager::Get()->CreateMaterial<PostMotionBlur>();
 	m_pPostMotionBlur->SetIsEnabled(false);
-	AddPostProcessingEffect(m_pPostMotionBlur);
-	
+
 	// UI
-	m_pTestButton = new GameObject();
-	auto pButton = m_pTestButton->AddComponent(new ButtonComponent(L"Textures/ButtonBase.png", {m_SceneContext.windowWidth / 2 , m_SceneContext.windowHeight / 2}, {1.f, 1.f}));
-	pButton->SetPressedAssetPath(L"Textures/ButtonPressed.png");
-	pButton->SetSelectedAssetPath(L"Textures/ButtonSelected.png");
-	AddChild(m_pTestButton);
+	// Pause Panel
+	m_pPausePanel = new GameObject();
+	m_pPausePanel->AddComponent(new SpriteComponent(L"Textures/UI/Panel.png", {1.f, 1.f}));
+	m_pPausePanel->GetTransform()->Scale(4.f, 3.f, 1.f);
+	m_pPausePanel->GetTransform()->Translate(m_SceneContext.windowWidth - 20.f, m_SceneContext.windowHeight - 20.f, 0.1f);
+	AddChild(m_pPausePanel);
+
+	// Banner Lap
+	m_pBannerLap = new GameObject();
+	m_pBannerLap->AddComponent(new SpriteComponent(L"Textures/UI/BannerSpecial.png", { 1.f, 0.f }));
+	m_pBannerLap->GetTransform()->Scale(3.f, 3.f, 1.f);
+	m_pBannerLap->GetTransform()->Translate(m_SceneContext.windowWidth - 30.f, 20.f, 0.1f);
+	AddChild(m_pBannerLap);
+
+	// Banner Best
+	m_pBannerBest = new GameObject();
+	m_pBannerBest->AddComponent(new SpriteComponent(L"Textures/UI/BannerSpecial.png", { 1.f, 0.f }));
+	m_pBannerBest->GetTransform()->Scale(3.f, 3.f, 1.f);
+	m_pBannerBest->GetTransform()->Translate(m_SceneContext.windowWidth - 30.f, 100.f, 0.1f);
+	AddChild(m_pBannerBest);
 
 	// AUDIO
 	auto pFmodSystem = SoundManager::Get()->GetSystem();
@@ -49,7 +65,7 @@ void VO_GameScene::Initialize()
 		Logger::LogError(strstr.str());
 	}
 
-	result = pFmodSystem->playSound(m_pEngineSound, nullptr, false, &m_pEngineChannel);
+	result = pFmodSystem->playSound(m_pEngineSound, nullptr, true, &m_pEngineChannel);
 	if (result != FMOD_OK)
 	{
 		std::wstringstream strstr;
@@ -212,6 +228,16 @@ void VO_GameScene::OnGUI()
 		ImGui::Checkbox("Motion Blur PP", &isEnabled);
 		m_pPostMotionBlur->SetIsEnabled(isEnabled);
 	}
+}
+
+void VO_GameScene::OnSceneActivated()
+{
+	m_pEngineChannel->setPaused(false);
+}
+
+void VO_GameScene::OnSceneDeactivated()
+{
+	m_pEngineChannel->setPaused(true);
 }
 
 void VO_GameScene::ConstructScene()

@@ -78,6 +78,7 @@
 #endif
 
 #ifdef VelocityOverdrive
+#include "Scenes/VelocityOverdrive/VO_MenuScene.h"
 #include "Scenes/VelocityOverdrive/VO_GameScene.h"
 #endif
 
@@ -159,6 +160,7 @@ void MainGame::Initialize()
 #endif
 
 #ifdef VelocityOverdrive
+	SceneManager::Get()->AddGameScene(new VO_MenuScene());
 	SceneManager::Get()->AddGameScene(new VO_GameScene());
 #endif // RacePace
 
