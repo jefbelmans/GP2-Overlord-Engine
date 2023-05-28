@@ -15,7 +15,7 @@ void VO_MenuScene::Initialize()
 	// MAIN MENU
 	// START BUTTON
 	m_pStartButton = new GameObject();
-	auto pButton = m_pStartButton->AddComponent(new ButtonComponent(std::bind(&VO_MenuScene::LoadGame, this), L"Textures/UI/ButtonBase.png", { 40.f, m_SceneContext.windowHeight - 130.f }, { 3.f, 3.f }));
+	auto pButton = m_pStartButton->AddComponent(new ButtonComponent(std::bind(&VO_MenuScene::LoadGame, this), L"Textures/UI/ButtonBase.png", { 40.f, m_SceneContext.windowHeight - 130.f }, { 2.7f, 2.7f }));
 	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
 	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
 	pButton->SetSelectedColor({ .95f, .95f, .95f, 1.f });
@@ -26,8 +26,8 @@ void VO_MenuScene::Initialize()
 	m_pBackgroundPanel = new GameObject();
 	m_pBackgroundPanel->AddComponent(new SpriteComponent(L"Textures/UI/Panel.png", {0.f, 1.f}));
 	m_pBackgroundPanel->GetTransform()->Translate(20.f, m_SceneContext.windowHeight - 20.f, 0.1f);
-	m_pBackgroundPanel->GetTransform()->Scale(4.f, 4.f, 1.f);
-	AddChild(m_pBackgroundPanel);
+	m_pBackgroundPanel->GetTransform()->Scale(2.25f, 3.f, 1.f);
+	// AddChild(m_pBackgroundPanel);
 
 	// 3D SCENE
 	// CAMERA
@@ -47,7 +47,8 @@ void VO_MenuScene::Initialize()
 
 void VO_MenuScene::Draw()
 {
-	
+	// START TEXT
+	TextRenderer::Get()->DrawText(m_pFont, L"START GAME", { 52.5f, m_SceneContext.windowHeight - 105.f }, XMFLOAT4{ Colors::Orange });
 }
 
 void VO_MenuScene::OnGUI()
