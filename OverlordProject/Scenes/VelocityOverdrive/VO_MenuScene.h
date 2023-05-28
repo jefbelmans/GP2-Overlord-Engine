@@ -11,11 +11,14 @@ public:
 
 protected:
 	void Initialize() override;
-	void Update() override;
+	void Draw() override;
 	void OnGUI() override;
 
 private:
 #pragma region UI
+	// FONT
+	SpriteFont* m_pFont{};
+
 	// MAIN MENU
 	GameObject* m_pBackgroundPanel{};
 	GameObject* m_pStartButton{};

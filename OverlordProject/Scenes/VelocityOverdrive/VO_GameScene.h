@@ -23,6 +23,7 @@ private:
 	
 #pragma region Game Settings
 	TimerComponent* m_pTimer{ nullptr };
+	bool m_IsPaused{ false };
 	float m_RumbleStrength{};
 #pragma endregion
 
@@ -32,6 +33,8 @@ private:
 
 	GameObject* m_pPausePanel{};
 	GameObject* m_pBackButton{};
+
+	void TogglePauseMenu();
 #pragma endregion
 
 #pragma region Sound Settings
@@ -124,7 +127,8 @@ private:
 		SteerRight,
 		Accelerate,
 		Deaccelerate,
-		HandBrake
+		HandBrake,
+		TogglePause
 	};
 #pragma endregion
 

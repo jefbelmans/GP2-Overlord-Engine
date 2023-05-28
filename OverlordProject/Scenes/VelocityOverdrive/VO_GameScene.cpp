@@ -39,7 +39,6 @@ void VO_GameScene::Initialize()
 	m_pPausePanel->AddComponent(new SpriteComponent(L"Textures/UI/Panel.png", {1.f, 1.f}));
 	m_pPausePanel->GetTransform()->Scale(4.f, 3.f, 1.f);
 	m_pPausePanel->GetTransform()->Translate(m_SceneContext.windowWidth - 20.f, m_SceneContext.windowHeight - 20.f, 0.1f);
-	AddChild(m_pPausePanel);
 
 	// Banner Lap
 	m_pBannerLap = new GameObject();
@@ -125,6 +124,9 @@ void VO_GameScene::Initialize()
 	m_SceneContext.pInput->AddInputAction(inputAction);
 
 	inputAction = InputAction(HandBrake, InputState::down, VK_SPACE, -1, XINPUT_GAMEPAD_X);
+	m_SceneContext.pInput->AddInputAction(inputAction);
+
+	inputAction = InputAction(TogglePause, InputState::pressed, VK_ESCAPE, -1, XINPUT_GAMEPAD_START);
 	m_SceneContext.pInput->AddInputAction(inputAction);
 }
 
@@ -238,6 +240,21 @@ void VO_GameScene::OnSceneActivated()
 void VO_GameScene::OnSceneDeactivated()
 {
 	m_pEngineChannel->setPaused(true);
+}
+
+void VO_GameScene::TogglePauseMenu()
+{
+	m_IsPaused = !m_IsPaused;
+	m_pEngineChannel->setPaused(m_IsPaused);
+
+	if(m_IsPaused)
+	{
+		AddChild(m_pPausePanel);
+	}
+	else
+	{
+		RemoveChild(m_pPausePanel);
+	}
 }
 
 void VO_GameScene::ConstructScene()
@@ -474,24 +491,19 @@ void VO_GameScene::UpdateInput()
 	ReleaseAllControls();
 
 	auto input{ m_SceneContext.pInput };
-	
+
+	// PAUSE MENU
+	if (input->IsActionTriggered(TogglePause))
+		TogglePauseMenu();
+
 	// Vibrations
-	// Calculate the avarge lateral slip of all wheels
+	// Calculate the average  lateral slip of all wheels
 	const float avgLateralSlip = std::accumulate(m_WheelQueryResults, m_WheelQueryResults + 4, 0.0f,
 		[](float sum, const physx::PxWheelQueryResult& wheelQueryResult) {
 			return sum + std::abs(wheelQueryResult.lateralSlip);
 		}) / 4.f;
 	
 	m_RumbleStrength = MathHelper::remap(avgLateralSlip, 0.f, .6f, 0.f, 0.3f);
-
-	m_pEmitterRL->Pause();
-	m_pEmitterRR->Pause();
-
-	if (std::abs(m_WheelQueryResults[0].lateralSlip) >= 0.3f)
-		m_pEmitterRL->Play();
-
-	if (std::abs(m_WheelQueryResults[1].lateralSlip) >= 0.3f)
-		m_pEmitterRR->Play();
 
 	input->SetVibration(m_RumbleStrength * .05f, m_RumbleStrength * .15f);
 
@@ -580,6 +592,15 @@ void VO_GameScene::UpdateVehicle()
 		m_pWheels[i]->GetTransform()->Rotate(XMVectorSet(wheelRot.x, wheelRot.y, wheelRot.z, wheelRot.w));
 	}
 
+	// Drift VFX
+	m_pEmitterRL->Pause();
+	m_pEmitterRR->Pause();
+
+	if (std::abs(m_WheelQueryResults[0].lateralSlip) >= 0.3f)
+		m_pEmitterRL->Play();
+
+	if (std::abs(m_WheelQueryResults[1].lateralSlip) >= 0.3f)
+		m_pEmitterRR->Play();
 }
 
 void VO_GameScene::OnTriggerCallback(GameObject* trigger, GameObject* other, PxTriggerAction action)

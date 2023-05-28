@@ -8,8 +8,11 @@ void VO_MenuScene::Initialize()
 	m_SceneContext.settings.drawGrid = false;
 	m_SceneContext.settings.clearColor = XMFLOAT4{ 112.f / 255.f, 139.f / 255.f, 196.f / 255.f, 1.f };
 
-	// MAIN MENU
+	// UI
+	// FONT
+	m_pFont = ContentManager::Load<SpriteFont>(L"SpriteFonts/LemonMilk_32.fnt");
 
+	// MAIN MENU
 	// START BUTTON
 	m_pStartButton = new GameObject();
 	auto pButton = m_pStartButton->AddComponent(new ButtonComponent(std::bind(&VO_MenuScene::LoadGame, this), L"Textures/UI/ButtonBase.png", { 40.f, m_SceneContext.windowHeight - 130.f }, { 3.f, 3.f }));
@@ -42,8 +45,9 @@ void VO_MenuScene::Initialize()
 	AddChild(pVehicle);
 }
 
-void VO_MenuScene::Update()
+void VO_MenuScene::Draw()
 {
+	
 }
 
 void VO_MenuScene::OnGUI()

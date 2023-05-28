@@ -3,7 +3,7 @@
 
 void TimerComponent::Initialize(const SceneContext& /*sceneContext*/)
 {
-	m_pFont = ContentManager::Load<SpriteFont>(L"SpriteFonts/Bahnschrift_32.fnt");
+	m_pFont = ContentManager::Load<SpriteFont>(L"SpriteFonts/LemonMilk_32.fnt");
 	m_IsPaused = true;
 
 	FormatLaptime();
