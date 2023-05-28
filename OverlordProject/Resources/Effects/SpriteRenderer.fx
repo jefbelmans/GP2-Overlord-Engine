@@ -18,9 +18,9 @@ BlendState EnableBlending
 
 DepthStencilState DisableDepth
 {
-    DepthEnable = TRUE;
-    DepthWriteMask = ALL;
-    DepthFunc = LESS;
+    DepthEnable = FALSE;
+    DepthWriteMask = ZERO;
+    DepthFunc = ALWAYS;
     StencilEnable = FALSE;
 };
 

@@ -63,6 +63,6 @@ void ButtonComponent::Initialize(const SceneContext&)
 	const auto& pos{ GetPosition() };
 	const auto& scale{ GetScale() };
 
-	transfom->Translate(pos.x, pos.y, 0.f);
+	transfom->Translate(pos.x, pos.y, 1.f);
 	transfom->Scale(scale.x, scale.y, 1.f);
 }
