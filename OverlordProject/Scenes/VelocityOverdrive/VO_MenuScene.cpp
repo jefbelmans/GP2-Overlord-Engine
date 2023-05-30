@@ -12,36 +12,34 @@ void VO_MenuScene::Initialize()
 	m_SceneContext.settings.drawPhysXDebug = false;
 	m_SceneContext.settings.clearColor = XMFLOAT4{ 112.f / 255.f, 139.f / 255.f, 196.f / 255.f, 1.f };
 	m_SceneContext.pLights->SetDirectionalLight({ 10.f, 10.f, -10.f }, { .85f, -.74f, 0.34f });
+	m_SceneContext.settings.showInfoOverlay = false;
 
 	// UI
 	// FONT
-	m_pFont = ContentManager::Load<SpriteFont>(L"SpriteFonts/LemonMilk_32.fnt");
+	m_pFontText = ContentManager::Load<SpriteFont>(L"SpriteFonts/LemonMilk_32.fnt");
+	m_pFontTitle = ContentManager::Load<SpriteFont>(L"SpriteFonts/LemonMilk_96.fnt");
 
 	// MAIN MENU
+	// BANNER
+	m_pBanner = AddChild(new GameObject);
+	m_pBanner->AddComponent(new SpriteComponent(L"Textures/MenuBanner.png", { 0.5f, 1.f }));
+	m_pBanner->GetTransform()->Translate(m_SceneContext.windowWidth * 0.5f, m_SceneContext.windowHeight, 0.f);
+
 	// START BUTTON
-	m_pStartButton = new GameObject();
-	auto pButton = m_pStartButton->AddComponent(new ButtonComponent(std::bind(&VO_MenuScene::LoadGame, this), L"Textures/UI/ButtonBase.png", { 40.f, m_SceneContext.windowHeight - 230.f }, { 2.7f, 2.7f }));
+	m_pStartButton = AddChild(new GameObject);
+	auto pButton = m_pStartButton->AddComponent(new ButtonComponent(std::bind(&VO_MenuScene::LoadGame, this), L"Textures/UI/ButtonBase.png", { 30.f, m_SceneContext.windowHeight - 250.f }, { 2.7f, 2.7f }));
 	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
 	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
 	pButton->SetSelectedColor({ .95f, .95f, .95f, 1.f });
 	pButton->SetPressedColor({ .92f, .92f, .92f, 1.f });
-	AddChild(m_pStartButton);
 
 	// QUIT BUTTON
-	m_pQuitButton = new GameObject();
-	pButton = m_pQuitButton->AddComponent(new ButtonComponent(std::bind(&VO_MenuScene::QuitGame, this), L"Textures/UI/ButtonBase.png", { 40.f, m_SceneContext.windowHeight - 130.f }, { 2.7f, 2.7f }));
+	m_pQuitButton = AddChild(new GameObject);
+	pButton = m_pQuitButton->AddComponent(new ButtonComponent(std::bind(&VO_MenuScene::QuitGame, this), L"Textures/UI/ButtonBase.png", { 30.f, m_SceneContext.windowHeight - 150.f }, { 2.7f, 2.7f }));
 	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
 	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
 	pButton->SetSelectedColor({ .95f, .95f, .95f, 1.f });
 	pButton->SetPressedColor({ .92f, .92f, .92f, 1.f });
-	AddChild(m_pQuitButton);
-
-	// PANEL
-	m_pBackgroundPanel = new GameObject();
-	m_pBackgroundPanel->AddComponent(new SpriteComponent(L"Textures/UI/Panel.png", {0.f, 1.f}));
-	m_pBackgroundPanel->GetTransform()->Translate(20.f, m_SceneContext.windowHeight - 20.f, 0.1f);
-	m_pBackgroundPanel->GetTransform()->Scale(2.25f, 3.f, 1.f);
-	// AddChild(m_pBackgroundPanel);
 
 	// 3D SCENE
 	// CAMERA
@@ -88,11 +86,16 @@ void VO_MenuScene::Initialize()
 
 void VO_MenuScene::Draw()
 {
+	// GAME NAME
+	TextRenderer::Get()->DrawText(m_pFontTitle, L"Velocity Overdrive", { 39.f,  39.f }, XMFLOAT4{ 0.77f, 0.33f, 0.22f, 0.85f });
+	TextRenderer::Get()->DrawText(m_pFontTitle, L"Velocity Overdrive", { 36.f,  34.f }, XMFLOAT4{ 0.86f, 0.42f, 0.19f, 0.85f });
+	TextRenderer::Get()->DrawText(m_pFontTitle, L"Velocity Overdrive", { 33.f, 30.f }, XMFLOAT4{ 0.95f, 0.51f, 0.16f, 1.f });
+
 	// START TEXT
-	TextRenderer::Get()->DrawText(m_pFont, L"START GAME", { 52.5f, m_SceneContext.windowHeight - 205.f }, XMFLOAT4{ Colors::Orange });
+	TextRenderer::Get()->DrawText(m_pFontText, L"START GAME", { 42.5f, m_SceneContext.windowHeight - 225.f }, XMFLOAT4{ Colors::Orange });
 
 	// QUIT TEXT
-	TextRenderer::Get()->DrawText(m_pFont, L"QUIT GAME", { 60.f, m_SceneContext.windowHeight - 105.f }, XMFLOAT4{ Colors::Orange });
+	TextRenderer::Get()->DrawText(m_pFontText, L"QUIT GAME", { 50.f, m_SceneContext.windowHeight - 125.f }, XMFLOAT4{ Colors::Orange });
 }
 
 void VO_MenuScene::OnGUI()

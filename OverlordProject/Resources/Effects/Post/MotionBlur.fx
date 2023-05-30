@@ -6,7 +6,7 @@ Texture2D gDepthTexture;
 float4x4 gInverseViewProj;
 float4x4 gPreviousViewProj;
 
-int gNumSamples = 3;
+int gNumSamples = 6;
 
 SamplerState samPoint
 {
@@ -89,7 +89,7 @@ float4 PS(PS_INPUT input) : SV_Target
     previousPos /= previousPos.w;
     
     // Use this frame's position and last frame's to compute the pixel velocity.
-    float2 velocity = (currentPos - previousPos) * 0.5f; 
+    float2 velocity = ((currentPos - previousPos) * 0.5f);
     
     float4 color = float4(0, 0, 0, 1);
     for(int i = 0; i < gNumSamples; ++i)

@@ -19,18 +19,19 @@ protected:
 private:
 #pragma region UI
 	// FONT
-	SpriteFont* m_pFont{};
+	SpriteFont* m_pFontText{};
+	SpriteFont* m_pFontTitle{};
 
 	// MAIN MENU
-	GameObject* m_pBackgroundPanel{};
 	GameObject* m_pStartButton{};
 	GameObject* m_pOptionsButton{};
 	GameObject* m_pQuitButton{};
 
 	// OPTIONS MENU
 	GameObject* m_pBackButton{};
-	GameObject* m_pBakedShadowsLabel{};
 	GameObject* m_pBakedShadowsCheckBox{};
+
+	GameObject* m_pBanner{};
 #pragma endregion
 
 #pragma region Camera

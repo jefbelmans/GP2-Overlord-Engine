@@ -35,6 +35,8 @@ void VO_GameScene::Initialize()
 	m_pPostMotionBlur = MaterialManager::Get()->CreateMaterial<PostMotionBlur>();
 	m_pPostMotionBlur->SetIsEnabled(false);
 
+	AddPostProcessingEffect(m_pPostMotionBlur);
+
 	// UI
 	InitializeUI();
 
@@ -132,10 +134,9 @@ void VO_GameScene::Draw()
 {
 	if(m_IsPaused)
 	{
-		TextRenderer::Get()->DrawText(m_pFont, L"RESUME GAME", { m_SceneContext.windowWidth - 230.f, m_SceneContext.windowHeight - 105.f }, XMFLOAT4{ Colors::Orange });
+		TextRenderer::Get()->DrawText(m_pFont, L"RESUME GAME", { m_SceneContext.windowWidth - 227.f, m_SceneContext.windowHeight - 105.f }, XMFLOAT4{ Colors::Orange });
 		TextRenderer::Get()->DrawText(m_pFont, L"BACK TO MENU", { m_SceneContext.windowWidth - 440.f, m_SceneContext.windowHeight - 105.f }, XMFLOAT4{ Colors::Orange });
 	}
-
 }
 
 void VO_GameScene::PostDraw()
@@ -231,7 +232,7 @@ void VO_GameScene::OnSceneActivated()
 	m_pEngineChannel->setPaused(false);
 
 	// RESET VEHICLE
-	m_pChassis->GetTransform()->Translate(XMFLOAT3{ -48.f, 2.f, -100.f });
+	m_pChassis->GetTransform()->Translate(XMFLOAT3{ -48.f, 0.2f, -100.f });
 	m_pChassis->GetTransform()->Rotate(0.f, -90.f, 0.f);
 
 	m_pTimer->Pause();
