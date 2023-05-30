@@ -25,8 +25,6 @@ void TimerComponent::Pause()
 void TimerComponent::Reset()
 {
 	m_CurrentLap = 0.f;
-	m_LastLap = 0.f;
-	m_BestLap = 0.f;
 }
 
 void TimerComponent::Lap()

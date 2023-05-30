@@ -1,12 +1,19 @@
 float4x4 gWorld : WORLD;
 float4x4 gWorldViewProj : WORLDVIEWPROJECTION;
+
+// LIGHTING
 float4x4 gWorldViewProj_Light;
 float4x4 gBakedWorldViewProj_Light;
 float3 gLightDirection = float3(-0.577f, -0.577f, 0.577f);
-float gShadowMapBias = 0.001f;
+float gShadowMapBias = 0.0008f;
 bool gUseBakedShadows = false;
 
+// DIFFUSE COLOR
+bool gUseDiffuseMap = true;
+float4 gDiffuseColor;
 Texture2D gDiffuseMap;
+
+// SHADOWS
 Texture2D gShadowMap;
 Texture2D gBakedShadowMap;
 
@@ -134,8 +141,8 @@ float4 PS(VS_OUTPUT input) : SV_TARGET
         float bakedShadowValue = EvaluateShadowMap(input.lPosBaked, gBakedShadowMap);
         shadowValue = min(shadowValue, bakedShadowValue);
     }
-   
-    float4 diffuseColor = gDiffuseMap.Sample(samLinear, input.texCoord);
+
+    float4 diffuseColor = gUseDiffuseMap ? gDiffuseMap.Sample(samLinear, input.texCoord) : gDiffuseColor;
     float3 color_rgb = diffuseColor.rgb;
     float color_a = diffuseColor.a;
 	

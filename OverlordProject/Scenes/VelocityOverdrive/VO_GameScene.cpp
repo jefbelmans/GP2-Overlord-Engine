@@ -3,6 +3,7 @@
 
 #include "VO_GameScene.h"
 #include "Materials/Shadow/DiffuseMaterial_Shadow.h"
+#include "Materials/Shadow/DiffuseMaterial_Shadow_Skinned.h"
 #include "Materials/Post/PostMotionBlur.h"
 
 float gSteerVsForwardSpeedData[2 * 8] =
@@ -22,6 +23,7 @@ void VO_GameScene::Initialize()
 {
 	// SCENE SETTINGS
 	m_SceneContext.settings.drawGrid = false;
+	m_SceneContext.settings.drawPhysXDebug = false;
 	m_SceneContext.settings.enableOnGUI = true;
 
 	PhysXManager::Get()->SetVehicleScene(this);
@@ -34,25 +36,7 @@ void VO_GameScene::Initialize()
 	m_pPostMotionBlur->SetIsEnabled(false);
 
 	// UI
-	// Pause Panel
-	m_pPausePanel = new GameObject();
-	m_pPausePanel->AddComponent(new SpriteComponent(L"Textures/UI/Panel.png", {1.f, 1.f}));
-	m_pPausePanel->GetTransform()->Scale(4.f, 3.f, 1.f);
-	m_pPausePanel->GetTransform()->Translate(m_SceneContext.windowWidth - 20.f, m_SceneContext.windowHeight - 20.f, 0.1f);
-
-	// Banner Lap
-	m_pBannerLap = new GameObject();
-	m_pBannerLap->AddComponent(new SpriteComponent(L"Textures/UI/BannerSpecial.png", { 1.f, 0.f }));
-	m_pBannerLap->GetTransform()->Scale(3.f, 3.f, 1.f);
-	m_pBannerLap->GetTransform()->Translate(m_SceneContext.windowWidth - 30.f, 20.f, 0.1f);
-	AddChild(m_pBannerLap);
-
-	// Banner Best
-	m_pBannerBest = new GameObject();
-	m_pBannerBest->AddComponent(new SpriteComponent(L"Textures/UI/BannerSpecial.png", { 1.f, 0.f }));
-	m_pBannerBest->GetTransform()->Scale(3.f, 3.f, 1.f);
-	m_pBannerBest->GetTransform()->Translate(m_SceneContext.windowWidth - 30.f, 100.f, 0.1f);
-	AddChild(m_pBannerBest);
+	InitializeUI();
 
 	// AUDIO
 	auto pFmodSystem = SoundManager::Get()->GetSystem();
@@ -142,6 +126,16 @@ void VO_GameScene::Update()
 
 	const float pitch = MathHelper::remap(m_pVehicle->mDriveDynData.mEnginespeed, 0.f, 1500.f, 0.6f, 1.f);
 	m_pEngineChannel->setPitch(pitch);
+}
+
+void VO_GameScene::Draw()
+{
+	if(m_IsPaused)
+	{
+		TextRenderer::Get()->DrawText(m_pFont, L"RESUME GAME", { m_SceneContext.windowWidth - 230.f, m_SceneContext.windowHeight - 105.f }, XMFLOAT4{ Colors::Orange });
+		TextRenderer::Get()->DrawText(m_pFont, L"BACK TO MENU", { m_SceneContext.windowWidth - 440.f, m_SceneContext.windowHeight - 105.f }, XMFLOAT4{ Colors::Orange });
+	}
+
 }
 
 void VO_GameScene::PostDraw()
@@ -235,26 +229,90 @@ void VO_GameScene::OnGUI()
 void VO_GameScene::OnSceneActivated()
 {
 	m_pEngineChannel->setPaused(false);
+
+	// RESET VEHICLE
+	m_pChassis->GetTransform()->Translate(XMFLOAT3{ -48.f, 2.f, -100.f });
+	m_pChassis->GetTransform()->Rotate(0.f, -90.f, 0.f);
+
+	m_pTimer->Pause();
+	m_pTimer->Reset();
+
+	m_NextCheckpoint = 0;
+
+	ShadowMapRenderer::Get()->SetViewWidthHeight(155.f, 155.f);
 }
 
 void VO_GameScene::OnSceneDeactivated()
 {
+	m_pVehicle->mDriveDynData.forceGearChange(1);
 	m_pEngineChannel->setPaused(true);
+	if(m_IsPaused)
+		TogglePauseMenu();
+}
+
+void VO_GameScene::InitializeUI()
+{
+	// Font
+	m_pFont = ContentManager::Load<SpriteFont>(L"SpriteFonts/LemonMilk_32.fnt");
+
+	// Pause Panel
+	m_pPausePanel = new GameObject();
+	m_pPausePanel->AddComponent(new SpriteComponent(L"Textures/UI/Panel.png", { 1.f, 1.f }));
+	m_pPausePanel->GetTransform()->Scale(4.8f, 1.2f, 1.f);
+	m_pPausePanel->GetTransform()->Translate(m_SceneContext.windowWidth - 20.f, m_SceneContext.windowHeight - 30.f, 0.1f);
+
+	// Resume button
+	m_pResumeButton = new GameObject();
+	auto pButton = m_pResumeButton->AddComponent(new ButtonComponent(std::bind(&VO_GameScene::TogglePauseMenu, this), L"Textures/UI/ButtonBase.png", { m_SceneContext.windowWidth - 240.f, m_SceneContext.windowHeight - 130.f }, { 3.f, 2.7f }));
+	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
+	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
+	pButton->SetSelectedColor({ .95f, .95f, .95f, 1.f });
+	pButton->SetPressedColor({ .92f, .92f, .92f, 1.f });
+
+	// Back Button
+	m_pBackButton = new GameObject();
+	pButton = m_pBackButton->AddComponent(new ButtonComponent(std::bind(&VO_GameScene::LoadMainMenu, this), L"Textures/UI/ButtonBase.png", { m_SceneContext.windowWidth - 450.f, m_SceneContext.windowHeight - 130.f }, { 3.f, 2.7f }));
+	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
+	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
+	pButton->SetSelectedColor({ .95f, .95f, .95f, 1.f });
+	pButton->SetPressedColor({ .92f, .92f, .92f, 1.f });
+
+	// Banner Lap
+	m_pBannerLap = new GameObject();
+	m_pBannerLap->AddComponent(new SpriteComponent(L"Textures/UI/BannerSpecial.png", { 1.f, 0.f }));
+	m_pBannerLap->GetTransform()->Scale(3.f, 3.f, 1.f);
+	m_pBannerLap->GetTransform()->Translate(m_SceneContext.windowWidth - 30.f, 20.f, 0.1f);
+	AddChild(m_pBannerLap);
+
+	// Banner Best
+	m_pBannerBest = new GameObject();
+	m_pBannerBest->AddComponent(new SpriteComponent(L"Textures/UI/BannerSpecial.png", { 1.f, 0.f }));
+	m_pBannerBest->GetTransform()->Scale(3.f, 3.f, 1.f);
+	m_pBannerBest->GetTransform()->Translate(m_SceneContext.windowWidth - 30.f, 100.f, 0.1f);
+	AddChild(m_pBannerBest);
 }
 
 void VO_GameScene::TogglePauseMenu()
 {
 	m_IsPaused = !m_IsPaused;
-	m_pEngineChannel->setPaused(m_IsPaused);
 
 	if(m_IsPaused)
 	{
 		AddChild(m_pPausePanel);
+		AddChild(m_pBackButton);
+		AddChild(m_pResumeButton);
 	}
 	else
 	{
 		RemoveChild(m_pPausePanel);
+		RemoveChild(m_pBackButton);
+		RemoveChild(m_pResumeButton);
 	}
+}
+
+void VO_GameScene::LoadMainMenu()
+{
+	SceneManager::Get()->PreviousScene();
 }
 
 void VO_GameScene::ConstructScene()
@@ -276,6 +334,24 @@ void VO_GameScene::ConstructScene()
 	auto pGroundMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow>();
 	pGroundMat->SetDiffuseTexture(L"Textures/F1_Ground.png");
 
+	// CROWD
+	for (int i = 0; i < 8; i++)
+	{
+		const auto pSkinnedMaterial = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow_Skinned>();
+		pSkinnedMaterial->SetDiffuseTexture(L"Textures/Character_Diffuse.png");
+
+		const auto pObject = AddChild(new GameObject);
+		const auto pModel = pObject->AddComponent(new ModelComponent(L"Meshes/Character.ovm"));
+		pModel->SetMaterial(pSkinnedMaterial);
+
+		pObject->GetTransform()->Scale(0.02f);
+		pObject->GetTransform()->Translate(-15.5f - i * 2, 1.f, -71.f);
+
+		auto pAnimator = pModel->GetAnimator();
+		pAnimator->SetAnimation(rand()%2);
+		pAnimator->Play();
+	}
+	
 
 	// GROUND PLANE
 	GameSceneExt::CreatePhysXGroundPlane(*this, pDefaultMaterial);

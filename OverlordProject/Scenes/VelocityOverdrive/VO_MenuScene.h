@@ -14,6 +14,8 @@ protected:
 	void Draw() override;
 	void OnGUI() override;
 
+	void OnSceneActivated() override;
+
 private:
 #pragma region UI
 	// FONT
@@ -36,5 +38,6 @@ private:
 #pragma endregion
 
 	void LoadGame();
+	void QuitGame();
 };
 

@@ -27,6 +27,10 @@ void ShadowMapRenderer::Initialize()
 	desc.height = 4096;
 	m_pShadowRenderTarget = new RenderTarget(m_GameContext.d3dContext);
 	m_pShadowRenderTarget->Create(desc);
+
+	// Set view width and height
+	m_ViewWidth = 155.f;
+	m_ViewHeight = 155.f;
 	
 	//2. Create a new ShadowMapMaterial, this will be the material that 'generated' the ShadowMap, store in m_pShadowMapGenerator
 	//	- The effect has two techniques, one for static meshes, and another for skinned meshes (both very similar, the skinned version also transforms the vertices based on a given set of boneTransforms)
@@ -105,7 +109,7 @@ void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 	//- Use the Projection & View Matrix to calculate the ViewProjection of this Light, store in m_LightVP
 
 	// Change the projection matrix when baking shadows to fit the entire scene
-	const auto projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * 155.f, 155.f, 0.1f, 400.f);
+	const auto projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * m_ViewWidth, m_ViewHeight, 0.1f, 400.f);
 
 	const Light& dirLight = sceneContext.pLights->GetDirectionalLight();
 	const auto lightDir = XMLoadFloat4(&dirLight.direction);

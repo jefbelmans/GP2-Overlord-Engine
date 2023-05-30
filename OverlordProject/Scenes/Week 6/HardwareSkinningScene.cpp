@@ -24,7 +24,7 @@ void HardwareSkinningScene::Initialize()
 	const auto pModel = pObject->AddComponent(new ModelComponent(L"Meshes/PeasantGirl.ovm"));
 	pModel->SetMaterial(pSkinnedMaterial);
 
-	pObject->GetTransform()->Scale(0.15f);
+	pObject->GetTransform()->Scale(0.05f);
 
 	pAnimator = pModel->GetAnimator();
 	pAnimator->SetAnimation(m_AnimationClipId);

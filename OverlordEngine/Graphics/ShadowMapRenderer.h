@@ -21,8 +21,9 @@ public:
 	const XMFLOAT4X4& GetLightVP() const { return m_LightVP; }
 	const XMFLOAT4X4& GetBakedLightVP() const { return m_BakedLightVP; }
 
-	void CalculateBakedLightVP(const XMFLOAT4& position, const XMFLOAT4& direction);
+	void SetViewWidthHeight(float width, float height) { m_ViewWidth = width; m_ViewHeight = height; }
 
+	void CalculateBakedLightVP(const XMFLOAT4& position, const XMFLOAT4& direction);
 	void Debug_DrawDepthSRV(const XMFLOAT2& position = { 0.f,0.f }, const XMFLOAT2& scale = { 1.f,1.f }, const XMFLOAT2& pivot = {0.f,0.f}) const;
 	void Debug_DrawBakedDepthSRV(const XMFLOAT2& position = { 0.f,0.f }, const XMFLOAT2& scale = { 1.f,1.f }, const XMFLOAT2& pivot = {0.f,0.f}) const;
 
@@ -56,5 +57,7 @@ private:
 	//This information is automatically create by the Material class, we only store it in a local array for fast retrieval 
 	static int const NUM_TYPES{ 2 };
 	MaterialTechniqueContext m_GeneratorTechniqueContexts[NUM_TYPES];
+
+	float m_ViewWidth{}, m_ViewHeight{}; //Width and Height of the ShadowMap
 };
 

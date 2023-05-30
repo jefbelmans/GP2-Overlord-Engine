@@ -11,6 +11,8 @@ public:
 	DiffuseMaterial_Shadow& operator=(DiffuseMaterial_Shadow&& other) noexcept = delete;
 
 	void SetDiffuseTexture(const std::wstring& assetFile);
+	void SetDiffuseColor(const XMFLOAT4& color);
+	void UseDiffuseMap(bool useMap);
 
 protected:
 	void InitializeEffectVariables() override;

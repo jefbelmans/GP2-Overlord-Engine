@@ -11,6 +11,16 @@ void DiffuseMaterial_Shadow::SetDiffuseTexture(const std::wstring& assetFile)
 	SetVariable_Texture(L"gDiffuseMap", m_pDiffuseTexture);
 }
 
+void DiffuseMaterial_Shadow::SetDiffuseColor(const XMFLOAT4& color)
+{
+	SetVariable_Vector(L"gDiffuseColor", color);
+}
+
+void DiffuseMaterial_Shadow::UseDiffuseMap(bool useMap)
+{
+	SetVariable_Scalar(L"gUseDiffuseMap", useMap);
+}
+
 void DiffuseMaterial_Shadow::InitializeEffectVariables()
 {
 	const auto pShadowMapRenderer = ShadowMapRenderer::Get();

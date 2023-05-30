@@ -14,6 +14,7 @@ public:
 protected:
 	void Initialize() override;
 	void Update() override;
+	void Draw() override;
 	void PostDraw() override;
 	void OnGUI() override;
 
@@ -28,13 +29,18 @@ private:
 #pragma endregion
 
 #pragma region UI
+	SpriteFont* m_pFont{};
+
 	GameObject* m_pBannerLap{};
 	GameObject* m_pBannerBest{};
 
 	GameObject* m_pPausePanel{};
 	GameObject* m_pBackButton{};
+	GameObject* m_pResumeButton{};
 
+	void InitializeUI();
 	void TogglePauseMenu();
+	void LoadMainMenu();
 #pragma endregion
 
 #pragma region Sound Settings
@@ -118,6 +124,10 @@ private:
 	5.0f	//fall rate eANALOG_INPUT_STEER_RIGHT
 }
 	};
+#pragma endregion
+
+#pragma region Crowd Settings
+std::vector<GameObject*> m_pCrowd{};
 #pragma endregion
 
 #pragma region Input Settings
