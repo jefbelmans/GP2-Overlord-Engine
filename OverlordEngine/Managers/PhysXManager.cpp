@@ -68,6 +68,8 @@ PhysXManager::~PhysXManager()
 		PxCloseExtensions();
 	}
 
+	m_pVehicleSceneQueryData->free(*m_pDefaultAllocator);
+	m_pFrictionPairs->release();
 	if (m_pPvd && m_pPvd->getTransport())
 	{
 		if (m_pPvd->isConnected())

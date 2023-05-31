@@ -11,7 +11,7 @@ DepthStencilState depthStencilState
 RasterizerState rasterizerState
 {
 	FillMode = SOLID;
-	CullMode = None;
+	CullMode = FRONT;
 };
 
 //--------------------------------------------------------------------------------------

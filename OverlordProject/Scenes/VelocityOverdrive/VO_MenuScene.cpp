@@ -114,5 +114,5 @@ void VO_MenuScene::LoadGame()
 
 void VO_MenuScene::QuitGame()
 {
-	ExitProcess(0);
+	PostQuitMessage(0);
 }

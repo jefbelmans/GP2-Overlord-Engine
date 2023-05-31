@@ -45,6 +45,11 @@ void ButtonComponent::OnHoverEnd()
 	m_IsSelected = false;
 }
 
+bool ButtonComponent::GetIsActive() const
+{
+	return m_pGameObject->GetIsActive();
+}
+
 void ButtonComponent::Initialize(const SceneContext&)
 {
 	// REGISTER WITH EVENT SYSTEM

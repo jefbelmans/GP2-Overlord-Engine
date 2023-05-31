@@ -5,7 +5,7 @@ float4x4 gWorldViewProj : WORLDVIEWPROJECTION;
 float4x4 gWorldViewProj_Light;
 float4x4 gBakedWorldViewProj_Light;
 float3 gLightDirection = float3(-0.577f, -0.577f, 0.577f);
-float gShadowMapBias = 0.0008f;
+float gShadowMapBias = 0.0002f;
 bool gUseBakedShadows = false;
 
 // DIFFUSE COLOR
@@ -75,7 +75,6 @@ VS_OUTPUT VS(VS_INPUT input)
 {
     VS_OUTPUT output = (VS_OUTPUT) 0;
 	
-	//TODO: complete Vertex Shader
 	//Hint: Don't forget to project our position to light clip space and store it in lPos
     output.lPos = mul(float4(input.pos, 1.0f), gWorldViewProj_Light);
     output.lPosBaked = mul(float4(input.pos, 1.0f), gBakedWorldViewProj_Light);

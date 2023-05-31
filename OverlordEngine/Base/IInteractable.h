@@ -13,6 +13,9 @@ public:
 	virtual void OnClickEnd() = 0;
 	virtual void OnHoverBegin() = 0;
 	virtual void OnHoverEnd() = 0;
+	
+	// GETTERS
+	virtual bool GetIsActive() const = 0;
 
 	XMFLOAT2 GetPosition() const { return m_Position; }
 	XMFLOAT2 GetSize() const { return m_Size; }

@@ -27,7 +27,7 @@ float4x4 gWorld : WORLD;
 RasterizerState gRasterizerState
 {
 	FillMode = SOLID;
-	CullMode = BACK;
+	CullMode = FRONT;
 };
 
 BlendState gBlendState

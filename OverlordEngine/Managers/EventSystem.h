@@ -36,5 +36,5 @@ private:
 	void HandleMouseHover(const XMFLOAT2& mousePos);
 	
 	std::vector<IInteractable*> m_pInteractables{};
-	IInteractable* m_pSelectedInteractable{};
+	IInteractable* m_pSelectedInteractable{ nullptr };
 };

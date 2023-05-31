@@ -24,6 +24,8 @@ public:
 	void OnHoverBegin() override;
 	void OnHoverEnd() override;
 
+	bool GetIsActive() const override;
+
 private:
 	void Initialize(const SceneContext&) override;
 

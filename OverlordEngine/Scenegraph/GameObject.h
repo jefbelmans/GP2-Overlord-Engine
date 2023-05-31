@@ -41,6 +41,9 @@ public:
 	const std::wstring& GetTag() const { return m_Tag; }
 	void SetTag(const std::wstring& tag) { m_Tag = tag; }
 
+	void SetActive(bool active) { m_IsActive = active; }
+	bool GetIsActive() const { return m_IsActive; }
+
 	bool GetIsShadowMapStatic() const { return m_IsShadowMapStatic; }
 
 	TransformComponent* GetTransform() const { return m_pTransform; }

@@ -37,6 +37,8 @@ void EventSystem::HandleMouseHover(const XMFLOAT2& mousePos)
 {
 	for (IInteractable* interactable : m_pInteractables)
 	{
+		if (!interactable->GetIsActive()) continue;
+
 		const auto& interactablePos = interactable->GetPosition();
 		const auto& interactableSize = interactable->GetScaledSize();
 

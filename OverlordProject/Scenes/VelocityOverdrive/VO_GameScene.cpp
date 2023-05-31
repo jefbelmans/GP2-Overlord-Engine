@@ -5,6 +5,7 @@
 #include "Materials/Shadow/DiffuseMaterial_Shadow.h"
 #include "Materials/Shadow/DiffuseMaterial_Shadow_Skinned.h"
 #include "Materials/Post/PostMotionBlur.h"
+#include "Materials/BasicMaterial_Deferred.h"
 
 float gSteerVsForwardSpeedData[2 * 8] =
 {
@@ -25,7 +26,7 @@ void VO_GameScene::Initialize()
 	m_SceneContext.settings.drawGrid = false;
 	m_SceneContext.settings.drawPhysXDebug = false;
 	m_SceneContext.settings.enableOnGUI = true;
-	m_SceneContext.useDeferredRendering = false;
+	m_SceneContext.useDeferredRendering = true;
 
 	PhysXManager::Get()->SetVehicleScene(this);
 
@@ -119,6 +120,8 @@ void VO_GameScene::Initialize()
 
 VO_GameScene::~VO_GameScene()
 {
+	m_pVehicleTelemetryData->free();
+	SafeDelete(m_pVehicleInputData);
 	PxCloseVehicleSDK();
 }
 
@@ -259,25 +262,31 @@ void VO_GameScene::InitializeUI()
 
 	// Pause Panel
 	m_pPausePanel = new GameObject();
+	m_pPausePanel->SetActive(false);
 	m_pPausePanel->AddComponent(new SpriteComponent(L"Textures/UI/Panel.png", { 1.f, 1.f }));
 	m_pPausePanel->GetTransform()->Scale(4.8f, 1.2f, 1.f);
 	m_pPausePanel->GetTransform()->Translate(m_SceneContext.windowWidth - 20.f, m_SceneContext.windowHeight - 30.f, 0.1f);
+	AddChild(m_pPausePanel);
 
 	// Resume button
 	m_pResumeButton = new GameObject();
+	m_pResumeButton->SetActive(false);
 	auto pButton = m_pResumeButton->AddComponent(new ButtonComponent(std::bind(&VO_GameScene::TogglePauseMenu, this), L"Textures/UI/ButtonBase.png", { m_SceneContext.windowWidth - 240.f, m_SceneContext.windowHeight - 130.f }, { 3.f, 2.7f }));
 	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
 	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
 	pButton->SetSelectedColor({ .95f, .95f, .95f, 1.f });
 	pButton->SetPressedColor({ .92f, .92f, .92f, 1.f });
+	AddChild(m_pResumeButton);
 
 	// Back Button
 	m_pBackButton = new GameObject();
+	m_pBackButton->SetActive(false);
 	pButton = m_pBackButton->AddComponent(new ButtonComponent(std::bind(&VO_GameScene::LoadMainMenu, this), L"Textures/UI/ButtonBase.png", { m_SceneContext.windowWidth - 450.f, m_SceneContext.windowHeight - 130.f }, { 3.f, 2.7f }));
 	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
 	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
 	pButton->SetSelectedColor({ .95f, .95f, .95f, 1.f });
 	pButton->SetPressedColor({ .92f, .92f, .92f, 1.f });
+	AddChild(m_pBackButton);
 
 	// Banner Lap
 	m_pBannerLap = new GameObject();
@@ -298,18 +307,9 @@ void VO_GameScene::TogglePauseMenu()
 {
 	m_IsPaused = !m_IsPaused;
 
-	if(m_IsPaused)
-	{
-		AddChild(m_pPausePanel);
-		AddChild(m_pBackButton);
-		AddChild(m_pResumeButton);
-	}
-	else
-	{
-		RemoveChild(m_pPausePanel);
-		RemoveChild(m_pBackButton);
-		RemoveChild(m_pResumeButton);
-	}
+	m_pPausePanel->SetActive(m_IsPaused);
+	m_pBackButton->SetActive(m_IsPaused);
+	m_pResumeButton->SetActive(m_IsPaused);
 }
 
 void VO_GameScene::LoadMainMenu()
@@ -324,17 +324,17 @@ void VO_GameScene::ConstructScene()
 	auto pConeMaterial = PhysXManager::Get()->GetPhysics()->createMaterial(0.7f, 0.7f, 0.4f);
 
 	// MATERIALS
-	auto pVehicleMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow>();
-	pVehicleMat->SetDiffuseTexture(L"Textures/F1_Car.png");
+	auto pVehicleMat = MaterialManager::Get()->CreateMaterial<BasicMaterial_Deferred>();
+	pVehicleMat->SetDiffuseMap(L"Textures/F1_Car.png");
 
-	auto pTrackMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow>();
-	pTrackMat->SetDiffuseTexture(L"Textures/F1_Track.png");
+	auto pTrackMat = MaterialManager::Get()->CreateMaterial<BasicMaterial_Deferred>();
+	pTrackMat->SetDiffuseMap(L"Textures/F1_Track.png");
 
-	auto pBuildingMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow>();
-	pBuildingMat->SetDiffuseTexture(L"Textures/F1_Building.png");
+	auto pBuildingMat = MaterialManager::Get()->CreateMaterial<BasicMaterial_Deferred>();
+	pBuildingMat->SetDiffuseMap(L"Textures/F1_Building.png");
 
-	auto pGroundMat = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow>();
-	pGroundMat->SetDiffuseTexture(L"Textures/F1_Ground.png");
+	auto pGroundMat = MaterialManager::Get()->CreateMaterial<BasicMaterial_Deferred>();
+	pGroundMat->SetDiffuseMap(L"Textures/F1_Ground.png");
 
 	// CROWD
 	for (int i = 0; i < 8; i++)

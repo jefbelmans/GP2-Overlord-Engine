@@ -252,46 +252,35 @@ void RenderTarget::SaveDepthToFile(const SceneContext& sceneContext, const std::
 		HRESULT hr = SaveToDDSFile(image.GetImages(), image.GetImageCount(),
 			metadata, DDS_FLAGS_NONE, fileName.c_str());
 		if (FAILED(hr))
-			Logger::LogWarning(L"RenderTarget::SaveTextureToFile(...) > Failed to save texture to file! (Error: %s)", hr);
+			Logger::LogWarning(L"RenderTarget::SaveTextureToFile(...) > Failed to save texture to file!");
 	}
 	else
-	{
 		Logger::LogWarning(L"RenderTarget::SaveTextureToFile(...) > Failed to capture texture!");
-	}
-
 }
 
 void RenderTarget::LoadDepthFromFile(const D3D11Context& d3dContext, const std::wstring& fileName)
 {
-	TexMetadata info{};
-	info.width = m_Desc.width;
-	info.height = m_Desc.height;
-	info.format = DXGI_FORMAT_R32_FLOAT;
-	info.miscFlags = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
+	TexMetadata meta{};
+	meta.width = m_Desc.width;
+	meta.height = m_Desc.height;
+	meta.format = DXGI_FORMAT_R32_FLOAT;
+	meta.miscFlags = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
 
 	ScratchImage image;
 	HRESULT hr = LoadFromDDSFile(fileName.c_str(),
-		DDS_FLAGS_NONE, &info, image);
+		DDS_FLAGS_NONE, &meta, image);
 
 	if (SUCCEEDED(hr))
 	{
-		auto meta{ image.GetMetadata() };
-		meta.miscFlags = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
-		meta.miscFlags2 = D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS;
-		meta.format = DXGI_FORMAT_R32_FLOAT;
 		hr = CreateShaderResourceView(d3dContext.pDevice,
 			image.GetImages(), image.GetImageCount(),
-			info, &m_pDepthShaderResourceView);
+			meta, &m_pDepthShaderResourceView);
 		
 		if (FAILED(hr))
-		{
-			Logger::LogWarning(L"RenderTarget::GetDepthShaderResourceView(...) > Failed to create SRV from texture! (Error: %s)", hr);
-		}
+			Logger::LogWarning(L"RenderTarget::LoadDepthFromFile(...) > Failed to create SRV from texture!");
 	}
 	else
-	{
-		Logger::LogWarning(L"RenderTarget::GetDepthShaderResourceView(...) > Failed to load texture from file! (Error: %s)", hr);
-	}
+		Logger::LogWarning(L"RenderTarget::LoadDepthFromFile(...) > Failed to load texture from file!");
 }
 
 void RenderTarget::Clear(XMFLOAT4 clearColor) const
