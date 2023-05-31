@@ -63,6 +63,9 @@
     <ClCompile Include="Components\TimerComponent.cpp" />
     <ClCompile Include="Managers\EventSystem.cpp" />
     <ClCompile Include="Components\ButtonComponent.cpp" />
+    <ClCompile Include="Deferred\DeferredLightRenderer.cpp" />
+    <ClCompile Include="Deferred\DeferredRenderer.cpp" />
+    <ClCompile Include="Deferred\QuadRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -139,6 +142,9 @@
     <ClInclude Include="Managers\EventSystem.h" />
     <ClInclude Include="Base\IInteractable.h" />
     <ClInclude Include="Components\ButtonComponent.h" />
+    <ClInclude Include="Deferred\DeferredLightRenderer.h" />
+    <ClInclude Include="Deferred\DeferredRenderer.h" />
+    <ClInclude Include="Deferred\QuadRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

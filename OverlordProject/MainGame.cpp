@@ -14,7 +14,8 @@
 /*MILESTONE Content*/
 // #define MILESTONE_1
 // #define MILESTONE_2
-#define VelocityOverdrive
+#define Deferred
+// #define VelocityOverdrive
 
 #pragma region Lab/Milestone Includes
 #ifdef W3
@@ -80,6 +81,10 @@
 #ifdef VelocityOverdrive
 #include "Scenes/VelocityOverdrive/VO_MenuScene.h"
 #include "Scenes/VelocityOverdrive/VO_GameScene.h"
+#endif
+
+#ifdef Deferred
+#include "Scenes/Week 11/DeferredRenderingScene.h"
 #endif
 
 #pragma endregion
@@ -164,6 +169,9 @@ void MainGame::Initialize()
 	SceneManager::Get()->AddGameScene(new VO_GameScene());
 #endif // RacePace
 
+#ifdef Deferred
+		SceneManager::Get()->AddGameScene(new DeferredRenderingScene);
+#endif
 }
 
 LRESULT MainGame::WindowProcedureHook(HWND /*hWnd*/, UINT message, WPARAM wParam, LPARAM lParam)

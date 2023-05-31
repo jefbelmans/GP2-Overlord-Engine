@@ -44,6 +44,8 @@ struct SceneContext
 	float aspectRatio{};
 	UINT frameNumber{};
 
+	bool useDeferredRendering{false};
+
 	SceneSettings settings{};
 };
 

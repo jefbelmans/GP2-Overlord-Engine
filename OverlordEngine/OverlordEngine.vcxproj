@@ -110,6 +110,9 @@
     <ClInclude Include="Components\ControllerComponent.h" />
     <ClInclude Include="Base\IInteractable.h" />
     <ClInclude Include="Components\ParticleEmitterComponent.h" />
+    <ClInclude Include="Deferred\DeferredLightRenderer.h" />
+    <ClInclude Include="Deferred\DeferredRenderer.h" />
+    <ClInclude Include="Deferred\QuadRenderer.h" />
     <ClInclude Include="Managers\EventSystem.h" />
     <ClInclude Include="Prefabs\FollowCamera.h" />
     <ClInclude Include="Graphics\ShadowMapRenderer.h" />
@@ -190,6 +193,9 @@
     <ClCompile Include="Components\ButtonComponent.cpp" />
     <ClCompile Include="Components\ControllerComponent.cpp" />
     <ClCompile Include="Components\ParticleEmitterComponent.cpp" />
+    <ClCompile Include="Deferred\DeferredLightRenderer.cpp" />
+    <ClCompile Include="Deferred\DeferredRenderer.cpp" />
+    <ClCompile Include="Deferred\QuadRenderer.cpp" />
     <ClCompile Include="Managers\EventSystem.cpp" />
     <ClCompile Include="Prefabs\FollowCamera.cpp" />
     <ClCompile Include="Graphics\ShadowMapRenderer.cpp" />

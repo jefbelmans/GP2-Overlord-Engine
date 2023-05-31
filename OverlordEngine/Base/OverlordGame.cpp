@@ -28,6 +28,9 @@ OverlordGame::~OverlordGame()
 	EventSystem::Destroy();
 	Logger::Release(); //TODO > Singleton
 
+	DeferredRenderer::Destroy();
+	QuadRenderer::Destroy();
+
 	//ImGui Cleanup
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
@@ -235,9 +238,9 @@ HRESULT OverlordGame::InitializeDirectX()
 
 	RENDERTARGET_DESC rtDesc;
 	rtDesc.pColor = pBackbuffer;
-
-	rtDesc.enableDepthBuffer = true;
+	rtDesc.enableColorSRV = true;
 	rtDesc.enableDepthSRV = true;
+	rtDesc.depthFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	HANDLE_ERROR(m_pDefaultRenderTarget->Create(rtDesc))
 
@@ -334,6 +337,9 @@ HRESULT OverlordGame::InitializeGame()
 	TextRenderer::Create(m_GameContext);
 	ShadowMapRenderer::Create(m_GameContext);
 	EventSystem::Create(m_GameContext);
+
+	DeferredRenderer::Create(m_GameContext);
+	QuadRenderer::Create(m_GameContext);
 
 	//***************
 	//GAME INITIALIZE

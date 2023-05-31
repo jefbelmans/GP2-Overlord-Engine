@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "VO_MenuScene.h"
-#include "Prefabs/CubePrefab.h"
 
 #include "Materials/Shadow/DiffuseMaterial_Shadow.h"
 #include "Materials/Shadow/DiffuseMaterial_Shadow_Skinned.h"

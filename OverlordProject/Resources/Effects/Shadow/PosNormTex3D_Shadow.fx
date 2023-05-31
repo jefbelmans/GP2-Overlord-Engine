@@ -142,7 +142,10 @@ float4 PS(VS_OUTPUT input) : SV_TARGET
         shadowValue = min(shadowValue, bakedShadowValue);
     }
 
-    float4 diffuseColor = gUseDiffuseMap ? gDiffuseMap.Sample(samLinear, input.texCoord) : gDiffuseColor;
+    float4 diffuseColor = gDiffuseColor;
+    if(gUseDiffuseMap)
+        diffuseColor *= gDiffuseMap.Sample(samLinear, input.texCoord);
+
     float3 color_rgb = diffuseColor.rgb;
     float color_a = diffuseColor.a;
 	
