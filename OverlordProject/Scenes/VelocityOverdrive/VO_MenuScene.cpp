@@ -12,6 +12,7 @@ void VO_MenuScene::Initialize()
 	m_SceneContext.settings.clearColor = XMFLOAT4{ 112.f / 255.f, 139.f / 255.f, 196.f / 255.f, 1.f };
 	m_SceneContext.pLights->SetDirectionalLight({ 10.f, 10.f, -10.f }, { .85f, -.74f, 0.34f });
 	m_SceneContext.settings.showInfoOverlay = false;
+	m_SceneContext.useDeferredRendering = false;
 
 	// UI
 	// FONT

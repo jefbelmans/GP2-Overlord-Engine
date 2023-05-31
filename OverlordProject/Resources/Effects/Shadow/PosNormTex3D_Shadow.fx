@@ -10,7 +10,7 @@ bool gUseBakedShadows = false;
 
 // DIFFUSE COLOR
 bool gUseDiffuseMap = true;
-float4 gDiffuseColor;
+float4 gDiffuseColor = float4(1.f, 1.f, 1.f, 1.f);
 Texture2D gDiffuseMap;
 
 // SHADOWS
@@ -143,6 +143,7 @@ float4 PS(VS_OUTPUT input) : SV_TARGET
     }
 
     float4 diffuseColor = gDiffuseColor;
+    
     if(gUseDiffuseMap)
         diffuseColor *= gDiffuseMap.Sample(samLinear, input.texCoord);
 

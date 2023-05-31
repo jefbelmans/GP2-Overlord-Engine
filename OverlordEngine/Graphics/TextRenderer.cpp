@@ -171,9 +171,4 @@ void TextRenderer::CreateTextVertices(SpriteFont* pFont, const TextCache& textCa
 
 		totalAdvanceX += metric.advanceX;
 	}
-
-
-	
-
-
 }

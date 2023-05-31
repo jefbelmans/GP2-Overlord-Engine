@@ -240,7 +240,7 @@ ID3D11ShaderResourceView* RenderTarget::GetDepthShaderResourceView() const
 	return m_pDepthShaderResourceView;
 }
 
-void RenderTarget::SaveTextureToFile(const SceneContext& sceneContext, const std::wstring& fileName) const
+void RenderTarget::SaveDepthToFile(const SceneContext& sceneContext, const std::wstring& fileName) const
 {
 	// Save the pixel data to a file using the DirectXTex library
 	ScratchImage image;
@@ -258,9 +258,10 @@ void RenderTarget::SaveTextureToFile(const SceneContext& sceneContext, const std
 	{
 		Logger::LogWarning(L"RenderTarget::SaveTextureToFile(...) > Failed to capture texture!");
 	}
+
 }
 
-void RenderTarget::LoadTextureFromFile(const D3D11Context& d3dContext, const std::wstring& fileName)
+void RenderTarget::LoadDepthFromFile(const D3D11Context& d3dContext, const std::wstring& fileName)
 {
 	TexMetadata info{};
 	info.width = m_Desc.width;
@@ -282,7 +283,6 @@ void RenderTarget::LoadTextureFromFile(const D3D11Context& d3dContext, const std
 			image.GetImages(), image.GetImageCount(),
 			info, &m_pDepthShaderResourceView);
 		
-
 		if (FAILED(hr))
 		{
 			Logger::LogWarning(L"RenderTarget::GetDepthShaderResourceView(...) > Failed to create SRV from texture! (Error: %s)", hr);

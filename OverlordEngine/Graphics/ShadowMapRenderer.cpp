@@ -4,7 +4,8 @@
 
 ShadowMapRenderer::~ShadowMapRenderer()
 {
-	SafeDelete(m_pShadowRenderTarget)
+	SafeDelete(m_pShadowRenderTarget);
+	SafeDelete(m_pBakedShadowRenderTarget);
 }
 
 void ShadowMapRenderer::Initialize()
@@ -45,7 +46,7 @@ void ShadowMapRenderer::Initialize()
 		= m_pShadowMapGenerator->GetTechniqueContext((int)ShadowGeneratorType::Skinned);
 
 	// Load shadowmap
-	m_pBakedShadowRenderTarget->LoadTextureFromFile(m_GameContext.d3dContext, L"Resources/Textures/Baked Maps/ShadowMap.dds");
+	m_pBakedShadowRenderTarget->LoadDepthFromFile(m_GameContext.d3dContext, L"Resources/Textures/Baked Maps/ShadowMap.dds");
 }
 
 void ShadowMapRenderer::UpdateMeshFilter(const SceneContext& sceneContext, MeshFilter* pMeshFilter) const
@@ -208,7 +209,7 @@ void ShadowMapRenderer::End(const SceneContext& sceneContext) const
 
 	if (sceneContext.pLights->GetBakeShadows())
 	{
-		m_pBakedShadowRenderTarget->SaveTextureToFile(sceneContext, L"Resources/Textures/Baked Maps/ShadowMap.dds");
+		m_pBakedShadowRenderTarget->SaveDepthToFile(sceneContext, L"Resources/Textures/Baked Maps/ShadowMap.dds");
 		sceneContext.pLights->SetBakeShadows(false);
 
 		Logger::LogInfo(L"Successfully baked shadow map!");

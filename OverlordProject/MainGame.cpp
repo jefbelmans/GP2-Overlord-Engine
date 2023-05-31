@@ -14,8 +14,8 @@
 /*MILESTONE Content*/
 // #define MILESTONE_1
 // #define MILESTONE_2
-#define Deferred
-// #define VelocityOverdrive
+// #define Deferred
+#define VelocityOverdrive
 
 #pragma region Lab/Milestone Includes
 #ifdef W3

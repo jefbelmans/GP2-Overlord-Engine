@@ -25,6 +25,7 @@ void VO_GameScene::Initialize()
 	m_SceneContext.settings.drawGrid = false;
 	m_SceneContext.settings.drawPhysXDebug = false;
 	m_SceneContext.settings.enableOnGUI = true;
+	m_SceneContext.useDeferredRendering = false;
 
 	PhysXManager::Get()->SetVehicleScene(this);
 
