@@ -3,6 +3,7 @@
 
 void EventSystem::Initialize()
 {
+	
 }
 
 void EventSystem::Update()
@@ -19,6 +20,8 @@ void EventSystem::Update()
 		HandleMouseClick(0);
 	else if(InputManager::IsMouseButton(InputState::released, 1))
 		HandleMouseRelease(0);
+
+	HandleNavigation();
 }
 
 void EventSystem::HandleMouseClick(int /*button*/)
@@ -60,9 +63,44 @@ void EventSystem::HandleMouseHover(const XMFLOAT2& mousePos)
 	}
 
 	//  We are not hovering over any interactable
-	if (m_pSelectedInteractable != nullptr)
+	if (m_pSelectedInteractable != nullptr && m_SelectedIndex == -1)
 	{
 		m_pSelectedInteractable->OnHoverEnd();
 		m_pSelectedInteractable = nullptr;
+	}
+}
+
+void EventSystem::HandleNavigation()
+{
+	if (InputManager::IsGamepadButton(InputState::pressed, XINPUT_GAMEPAD_DPAD_DOWN) ||
+		InputManager::IsKeyboardKey(InputState::pressed, VK_DOWN))
+	{
+		Logger::LogInfo(L"Pressed down!");
+
+		if(m_pSelectedInteractable != nullptr)
+			m_pSelectedInteractable->OnHoverEnd();
+
+		m_SelectedIndex = (m_SelectedIndex + 1) % m_pInteractables.size();
+		m_pSelectedInteractable = m_pInteractables[m_SelectedIndex];
+		m_pSelectedInteractable->OnHoverBegin();
+	}
+	else if (InputManager::IsGamepadButton(InputState::pressed, XINPUT_GAMEPAD_DPAD_UP) ||
+		InputManager::IsKeyboardKey(InputState::pressed, VK_UP))
+	{
+		Logger::LogInfo(L"Pressed up!");
+
+		if (m_pSelectedInteractable != nullptr)
+			m_pSelectedInteractable->OnHoverEnd();
+
+		m_SelectedIndex = (m_SelectedIndex - 1) % m_pInteractables.size();
+		m_pSelectedInteractable = m_pInteractables[m_SelectedIndex];
+		m_pSelectedInteractable->OnHoverBegin();
+	}
+	else if (InputManager::IsGamepadButton(InputState::pressed, XINPUT_GAMEPAD_A) ||
+		InputManager::IsKeyboardKey(InputState::pressed, VK_RETURN))
+	{
+		Logger::LogInfo(L"Pressed A!");
+		if (m_pSelectedInteractable != nullptr)
+			m_pSelectedInteractable->OnClickBegin();
 	}
 }

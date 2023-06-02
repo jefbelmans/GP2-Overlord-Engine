@@ -31,10 +31,15 @@ private:
 
 	void Update();
 
+	// MOUSE
 	void HandleMouseClick(int button);
 	void HandleMouseRelease(int button);
 	void HandleMouseHover(const XMFLOAT2& mousePos);
 	
+	// KEYBOARD + CONTROLLER
+	int m_SelectedIndex{ -1 };
+	void HandleNavigation();
+
 	std::vector<IInteractable*> m_pInteractables{};
 	IInteractable* m_pSelectedInteractable{ nullptr };
 };

@@ -58,6 +58,11 @@ private:
 	ParticleEmitterSettings m_EmitterSettings{};
 #pragma endregion
 
+#pragma region Lighting Settings
+	void InitializeLighting();
+	void UpdateLighting();
+#pragma endregion
+
 #pragma region Shadow Settings
 	bool m_DebugShadowMap{ false };
 	bool m_DebugBakedShadowMap{ false };
@@ -74,6 +79,8 @@ private:
 #pragma endregion
 	
 #pragma region Vehicle Settings
+	const XMFLOAT3 m_ChassisDim{ 2.09f, 1.38f, 6.37f };
+
 	GameObject* m_pChassis{ nullptr };
 	GameObject* m_pWheels[4]{ nullptr };
 

@@ -13,7 +13,7 @@ Texture2D gTextureBakedShadowMap;
 
 float4x4 gLightViewProj; // Used to transform from world to realtime light space
 float4x4 gBakedLightViewProj; // Used to transform from world to baked light space
-float gShadowMapBias = 0.0002f;
+float gShadowMapBias = 0.00025f;
 bool gUseBakedShadowMap = false;
 
 //G-BUFFER DATA

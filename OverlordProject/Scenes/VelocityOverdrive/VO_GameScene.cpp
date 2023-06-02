@@ -66,6 +66,9 @@ void VO_GameScene::Initialize()
 	m_pTimer = pTimerGO->AddComponent(new TimerComponent());
 	AddChild(pTimerGO);
 
+	// LIGHTING
+	InitializeLighting();
+
 	// Constructs the entire scene with all the GO's
 	ConstructScene();
 
@@ -129,6 +132,7 @@ void VO_GameScene::Update()
 {
 	UpdateVehicle();
 	UpdateInput();
+	UpdateLighting();
 
 	const float pitch = MathHelper::remap(m_pVehicle->mDriveDynData.mEnginespeed, 0.f, 1500.f, 0.6f, 1.f);
 	m_pEngineChannel->setPitch(pitch);
@@ -315,6 +319,25 @@ void VO_GameScene::TogglePauseMenu()
 void VO_GameScene::LoadMainMenu()
 {
 	SceneManager::Get()->PreviousScene();
+}
+
+void VO_GameScene::InitializeLighting()
+{
+	//Point Light
+	Light light = {};
+	light.isEnabled = true;
+	light.position = { 0.f,10.f,0.f,1.0f };
+	light.direction = { 0.f,0.f,1.f,0.f };
+	light.color = { 1.f, 0.1f, 0.1f, 1.f };
+	light.intensity = 1.f;
+	light.range = 5.0f;
+	light.type = LightType::Spot;
+	m_SceneContext.pLights->AddLight(light);
+}
+
+void VO_GameScene::UpdateLighting()
+{
+
 }
 
 void VO_GameScene::ConstructScene()

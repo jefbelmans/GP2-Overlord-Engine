@@ -29,7 +29,8 @@ struct Light
 		range(50.f),
 		spotLightAngle(45.f),
 		type(LightType::Point),
-		isEnabled(true) {}
+		isEnabled(true),
+		isDirty(true) {}
 };
 
 class LightManager
