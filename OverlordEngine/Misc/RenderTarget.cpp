@@ -252,10 +252,10 @@ void RenderTarget::SaveDepthToFile(const SceneContext& sceneContext, const std::
 		HRESULT hr = SaveToDDSFile(image.GetImages(), image.GetImageCount(),
 			metadata, DDS_FLAGS_NONE, fileName.c_str());
 		if (FAILED(hr))
-			Logger::LogWarning(L"RenderTarget::SaveTextureToFile(...) > Failed to save texture to file!");
+			Logger::LogWarning(L"RenderTarget::SaveDepthToFile(...) > Failed to save depth to file!");
 	}
 	else
-		Logger::LogWarning(L"RenderTarget::SaveTextureToFile(...) > Failed to capture texture!");
+		Logger::LogWarning(L"RenderTarget::SaveDepthToFile(...) > Failed to capture texture!");
 }
 
 void RenderTarget::LoadDepthFromFile(const D3D11Context& d3dContext, const std::wstring& fileName)
@@ -272,6 +272,7 @@ void RenderTarget::LoadDepthFromFile(const D3D11Context& d3dContext, const std::
 
 	if (SUCCEEDED(hr))
 	{
+		m_pDepthShaderResourceView->Release();
 		hr = CreateShaderResourceView(d3dContext.pDevice,
 			image.GetImages(), image.GetImageCount(),
 			meta, &m_pDepthShaderResourceView);

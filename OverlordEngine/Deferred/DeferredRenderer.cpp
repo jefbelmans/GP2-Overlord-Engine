@@ -17,7 +17,6 @@ DeferredRenderer::~DeferredRenderer()
 
 void DeferredRenderer::Initialize()
 {
-	
 	//Create & Collect GBuffer RTs
 	const auto w = m_GameContext.windowWidth;
 	const auto h = m_GameContext.windowHeight;
