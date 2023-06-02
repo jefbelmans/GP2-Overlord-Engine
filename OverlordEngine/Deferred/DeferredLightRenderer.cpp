@@ -55,6 +55,20 @@ void DeferredLightRenderer::DirectionalLightPass(const SceneContext& sceneContex
 		m_pDirectionalLightMaterial->SetVariable_Vector(L"gEyePos", sceneContext.pCamera->GetTransform()->GetWorldPosition());
 		m_pDirectionalLightMaterial->SetVariable(L"gDirectionalLight", &light, 0, sizeof(Light) - 4);
 
+		// Realtime Shadow map
+		const auto& pShadowMapRenderer = ShadowMapRenderer::Get();
+		m_pDirectionalLightMaterial->SetVariable_Texture(L"gTextureShadowMap", pShadowMapRenderer->GetShadowMap());
+		m_pDirectionalLightMaterial->SetVariable_Matrix(L"gLightViewProj", pShadowMapRenderer->GetLightVP());
+
+		// Baked shadow map
+		m_pDirectionalLightMaterial->SetVariable_Scalar(L"gUseBakedShadowMap", sceneContext.pLights->GetUseBakedShadows());
+		if (m_pDirectionalLightMaterial->IsBakedDirty())
+		{
+			m_pDirectionalLightMaterial->SetVariable_Matrix(L"gBakedLightViewProj", pShadowMapRenderer->GetBakedLightVP());
+			m_pDirectionalLightMaterial->SetVariable_Texture(L"gTextureBakedShadowMap", pShadowMapRenderer->GetBakedShadowMap());
+			m_pDirectionalLightMaterial->IsBakedDirty(false);
+		}
+
 		//Draw Effect (Full Screen Quad)
 		QuadRenderer::Get()->Draw(m_pDirectionalLightMaterial);
 	}

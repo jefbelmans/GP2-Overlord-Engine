@@ -18,11 +18,12 @@ void LightManager::SetDirectionalLight(const XMFLOAT3& position, const XMFLOAT3&
 {
 	m_DirectionalLight.direction = { direction.x, direction.y, direction.z , 1.0f };
 	m_DirectionalLight.position = { position.x, position.y, position.z , 1.0f };
+	m_DirectionalLight.isDirty = true;
 }
 
 void LightManager::SetBakedDirectionalLight(const XMFLOAT3& position, const XMFLOAT3& direction)
 {
 	m_BakedDirectionalLight.direction = { direction.x, direction.y, direction.z , 1.0f };
 	m_BakedDirectionalLight.position = { position.x, position.y, position.z , 1.0f };
-	ShadowMapRenderer::Get()->CalculateBakedLightVP(m_BakedDirectionalLight.position, m_BakedDirectionalLight.direction);
+	m_BakedDirectionalLight.isDirty = true;
 }

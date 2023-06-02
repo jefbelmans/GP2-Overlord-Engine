@@ -57,7 +57,6 @@ void ShadowMapRenderer::UpdateMeshFilter(const SceneContext& sceneContext, MeshF
 	//1. Figure out the correct ShadowGeneratorType (either Static, or Skinned) with information from the incoming MeshFilter
 	//2. Retrieve the corresponding TechniqueContext from m_GeneratorTechniqueContexts array (Static/Skinned)
 	//3. Build a corresponding VertexBuffer with data from the relevant TechniqueContext you retrieved in Step2 (MeshFilter::BuildVertexBuffer)
-
 	int shadowGenType = static_cast<int>(pMeshFilter->HasAnimations() ? ShadowGeneratorType::Skinned : ShadowGeneratorType::Static);
 	const auto techniqueContext = m_GeneratorTechniqueContexts[shadowGenType];
 	pMeshFilter->BuildVertexBuffer(sceneContext, techniqueContext.inputLayoutID, techniqueContext.inputLayoutSize, techniqueContext.pInputLayoutDescriptions);
@@ -98,26 +97,9 @@ void ShadowMapRenderer::Begin(const SceneContext& sceneContext)
 	constexpr ID3D11ShaderResourceView* const pSRV[] = { nullptr };
 	sceneContext.d3dContext.pDeviceContext->PSSetShaderResources(1, 1, pSRV);
 
-	//2. Calculate the Light ViewProjection and store in m_LightVP
-	// - Use XMMatrixOrtographicLH to create Projection Matrix (constants used for the demo below - feel free to change)
-	//		*viewWidth> 100.f * aspectRatio
-	//		*viewHeight> 100.f
-	//		*nearZ>0.1f
-	//		*farZ>500.f
-	//- Use XMMatrixLookAtLH to create a View Matrix
-	//		*eyePosition: Position of the Direction Light (SceneContext::pLights > Retrieve Directional Light)
-	//		*focusPosition: Calculate using the Direction Light position and direction
-	//- Use the Projection & View Matrix to calculate the ViewProjection of this Light, store in m_LightVP
-
-	// Change the projection matrix when baking shadows to fit the entire scene
-	const auto projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * m_ViewWidth, m_ViewHeight, 0.1f, 400.f);
-
-	const Light& dirLight = sceneContext.pLights->GetDirectionalLight();
-	const auto lightDir = XMLoadFloat4(&dirLight.direction);
-	const auto lightPos = XMLoadFloat4(&dirLight.position);
-	const XMMATRIX view = XMMatrixLookAtLH(lightPos, lightPos + lightDir, XMVectorSet(0.f, 1.f, 0.f, 0.f));
-
-	XMStoreFloat4x4(&m_LightVP, XMMatrixMultiply(view, projection));
+	// Update light VP
+	CalculateLightVP(sceneContext);
+	CalculateBakedLightVP(sceneContext);
 
 	// 3. Update this matrix (m_LightVP) on the ShadowMapMaterial effect, or m_BakedLightVP when baking shadows
 	m_pShadowMapGenerator->SetVariable_Matrix(L"gLightViewProj", reinterpret_cast<const float*>(bakeShadowMap ? &m_BakedLightVP : &m_LightVP));
@@ -226,16 +208,38 @@ ID3D11ShaderResourceView* ShadowMapRenderer::GetBakedShadowMap() const
 	return m_pBakedShadowRenderTarget->GetDepthShaderResourceView();
 }
 
-void ShadowMapRenderer::CalculateBakedLightVP(const XMFLOAT4& position, const XMFLOAT4& direction)
+void ShadowMapRenderer::CalculateLightVP(const SceneContext& sceneContext)
 {
-	const float aspectRatio = float(m_GameContext.windowWidth / m_GameContext.windowHeight);
-	const auto projection = XMMatrixOrthographicLH(aspectRatio * 400.f, 400.f, 0.1f, 400.f);
+	Light& dirLight = sceneContext.pLights->GetDirectionalLight();
+	if (!dirLight.isDirty) return;
 
-	const auto lightDir = XMLoadFloat4(&direction);
-	const auto lightPos = XMLoadFloat4(&position);
+	// Projection
+	const auto projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * m_ViewWidth, m_ViewHeight, 0.1f, 400.f);
+
+	// View
+	const auto lightDir = XMLoadFloat4(&dirLight.direction);
+	const auto lightPos = XMLoadFloat4(&dirLight.position);
 	const XMMATRIX view = XMMatrixLookAtLH(lightPos, lightPos + lightDir, XMVectorSet(0.f, 1.f, 0.f, 0.f));
+	XMStoreFloat4x4(&m_LightVP, XMMatrixMultiply(view, projection));
 
+	dirLight.isDirty = false;
+}
+
+void ShadowMapRenderer::CalculateBakedLightVP(const SceneContext& sceneContext)
+{
+	Light& dirLight = sceneContext.pLights->GetBakedDirectionalLight();
+	if (!dirLight.isDirty) return;
+
+	// Projection
+	const auto projection = XMMatrixOrthographicLH(sceneContext.aspectRatio * 400.f, 400.f, 0.1f, 400.f);
+
+	// View
+	const auto lightDir = XMLoadFloat4(&dirLight.direction);
+	const auto lightPos = XMLoadFloat4(&dirLight.position);
+	const XMMATRIX view = XMMatrixLookAtLH(lightPos, lightPos + lightDir, XMVectorSet(0.f, 1.f, 0.f, 0.f));
 	XMStoreFloat4x4(&m_BakedLightVP, XMMatrixMultiply(view, projection));
+
+	dirLight.isDirty = false;
 }
 
 void ShadowMapRenderer::Debug_DrawDepthSRV(const XMFLOAT2& position, const XMFLOAT2& scale, const XMFLOAT2& pivot) const

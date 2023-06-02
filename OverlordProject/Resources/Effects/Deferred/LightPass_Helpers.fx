@@ -24,6 +24,17 @@ struct LightingResult
 	float3 Specular;
 };
 
+SamplerComparisonState cmpSampler // Used to sample the shadow map
+{
+	// sampler state
+    Filter = COMPARISON_MIN_MAG_MIP_LINEAR;
+    AddressU = MIRROR;
+    AddressV = MIRROR;
+
+	// sampler comparison state
+    ComparisonFunc = LESS_EQUAL;
+};
+
 //CONVERSION
 //**********
 float3 DepthToWorldPosition(float depth, float2 screenCoordinate, float2 screenDimension, float4x4 matrixViewProjectionInverse)
@@ -101,6 +112,44 @@ LightingResult DoDirectionalLighting(Light light, Material mat, float3 L, float3
 	result.Specular = DoSpecular(light, mat, V, L, N) * light.Intensity;
 
 	return result;
+}
+
+float2 texOffset(int u, int v, int w, int h)
+{
+    return float2(u * 1.0f / w, v * 1.0f / h);
+}
+
+float EvaluateShadowMap(float4 lpos, Texture2D shadowMap, float bias)
+{
+	//re-homogenize position after interpolation
+    lpos.xyz /= lpos.w;
+ 
+    //if position is not visible to the light - dont illuminate it
+    //results in hard light frustum
+    if (lpos.x < -1.0f || lpos.x > 1.0f ||
+        lpos.y < -1.0f || lpos.y > 1.0f ||
+        lpos.z < 0.0f || lpos.z > 1.0f)
+        return 1.0f;
+ 
+    //transform clip space coords to texture space coords (-1:1 to 0:1)
+    lpos.x = lpos.x / 2 + 0.5;
+    lpos.y = lpos.y / -2 + 0.5;
+ 
+	// Apply shadow map bias
+    lpos.z -= bias;
+ 
+	//PCF sampling for shadow map
+    float sum = 0;
+    float x, y;
+    int width, height;
+    shadowMap.GetDimensions(width, height);
+    
+    //perform PCF filtering on a 4 x 4 texel neighborhood
+    for (y = -1.5f; y <= 1.5f; ++y)
+        for (x = -1.5f; x <= 1.5f; ++x)
+            sum += shadowMap.SampleCmpLevelZero(cmpSampler, lpos.xy + texOffset(x, y, width, height), lpos.z);
+            
+    return (sum / 16.0f) * 0.5f + 0.5f;
 }
 
 //PointLight

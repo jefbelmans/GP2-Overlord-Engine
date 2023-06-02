@@ -134,7 +134,6 @@ float EvaluateShadowMap(float4 lpos, Texture2D shadowMap)
 float4 PS(VS_OUTPUT input) : SV_TARGET
 {
     float shadowValue = EvaluateShadowMap(input.lPos, gShadowMap);
-   
     if (gUseBakedShadows)
     {
         float bakedShadowValue = EvaluateShadowMap(input.lPosBaked, gBakedShadowMap);
@@ -142,7 +141,6 @@ float4 PS(VS_OUTPUT input) : SV_TARGET
     }
 
     float4 diffuseColor = gDiffuseColor;
-    
     if(gUseDiffuseMap)
         diffuseColor *= gDiffuseMap.Sample(samLinear, input.texCoord);
 

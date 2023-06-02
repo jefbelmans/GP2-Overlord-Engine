@@ -23,7 +23,6 @@ public:
 
 	void SetViewWidthHeight(float width, float height) { m_ViewWidth = width; m_ViewHeight = height; }
 
-	void CalculateBakedLightVP(const XMFLOAT4& position, const XMFLOAT4& direction);
 	void Debug_DrawDepthSRV(const XMFLOAT2& position = { 0.f,0.f }, const XMFLOAT2& scale = { 1.f,1.f }, const XMFLOAT2& pivot = {0.f,0.f}) const;
 	void Debug_DrawBakedDepthSRV(const XMFLOAT2& position = { 0.f,0.f }, const XMFLOAT2& scale = { 1.f,1.f }, const XMFLOAT2& pivot = {0.f,0.f}) const;
 
@@ -59,5 +58,8 @@ private:
 	MaterialTechniqueContext m_GeneratorTechniqueContexts[NUM_TYPES];
 
 	float m_ViewWidth{}, m_ViewHeight{}; //Width and Height of the ShadowMap
+
+	void CalculateLightVP(const SceneContext& sceneContext);
+	void CalculateBakedLightVP(const SceneContext& sceneContext);
 };
 

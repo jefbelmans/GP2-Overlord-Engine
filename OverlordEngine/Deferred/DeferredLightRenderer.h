@@ -5,15 +5,20 @@
 class DirectionalLightMaterial : public Material<DirectionalLightMaterial>
 {
 public:
-	DirectionalLightMaterial():Material(L"Effects/Deferred/LightPass_Directional.fx"){}
+	DirectionalLightMaterial():Material(L"Effects/Deferred/LightPass_Directional.fx") {};
 	~DirectionalLightMaterial() override = default;
 	DirectionalLightMaterial(const DirectionalLightMaterial& other) = delete;
 	DirectionalLightMaterial(DirectionalLightMaterial&& other) noexcept = delete;
 	DirectionalLightMaterial& operator=(const DirectionalLightMaterial& other) = delete;
 	DirectionalLightMaterial& operator=(DirectionalLightMaterial&& other) noexcept = delete;
 
+	bool IsBakedDirty() const { return m_IsBakedDirty; }
+	bool IsBakedDirty(bool isDirty) { return m_IsBakedDirty = isDirty; }
+
 protected:
-	void InitializeEffectVariables() override {}
+	void InitializeEffectVariables() override {};
+
+	bool m_IsBakedDirty = true;
 };
 #pragma endregion
 

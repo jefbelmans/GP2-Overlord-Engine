@@ -3,9 +3,18 @@
 
 //VARIABLES
 //*********
-float4x4 gMatrixViewProjInv;
+float4x4 gMatrixViewProjInv; // Used to transform from screen to world space
 float3 gEyePos = float3(0, 0, 0);
 Light gDirectionalLight;
+
+// Shadow mapping
+Texture2D gTextureShadowMap;
+Texture2D gTextureBakedShadowMap;
+
+float4x4 gLightViewProj; // Used to transform from world to realtime light space
+float4x4 gBakedLightViewProj; // Used to transform from world to baked light space
+float gShadowMapBias = 0.0002f;
+bool gUseBakedShadowMap = false;
 
 //G-BUFFER DATA
 //Texture2D gTextureAmbient; >> Already on Main RenderTarget
@@ -94,10 +103,18 @@ float4 PS(VS_OUTPUT input) :SV_TARGET
 	mat.Specular = specular.rgb;
 	mat.Shininess = shinines;
 	
+	// Shadow mapping
+    float4 lPos = mul(float4(P, 1.0f), gLightViewProj);
+    float4 lPosBaked = mul(float4(P, 1.0f), gBakedLightViewProj);
+	
+    float shadowValue = EvaluateShadowMap(lPos, gTextureShadowMap, gShadowMapBias);
+	if(gUseBakedShadowMap)
+        shadowValue = min(shadowValue, EvaluateShadowMap(lPosBaked, gTextureBakedShadowMap, gShadowMapBias));
+	
 	// Do Lighting
     LightingResult result = DoDirectionalLighting(gDirectionalLight, mat, L, V, N);
 	
-    return float4((mat.Diffuse * result.Diffuse) + (mat.Specular * result.Specular), 1.0f); 
+    return float4(((mat.Diffuse * result.Diffuse) + (mat.Specular * result.Specular)) * shadowValue, 1.0f);
 }
 
 //TECHNIQUE

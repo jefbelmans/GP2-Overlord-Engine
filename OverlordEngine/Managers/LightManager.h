@@ -19,6 +19,7 @@ struct Light
 	//4 * 16B (To Shader)
 
 	bool isEnabled; //4B (Discard)
+	bool isDirty;
 
 	Light() :
 		direction({ 0.f, 1.f, 0.f, 1.f }),
