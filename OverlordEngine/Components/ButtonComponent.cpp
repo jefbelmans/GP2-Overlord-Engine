@@ -6,7 +6,8 @@ ButtonComponent::ButtonComponent(std::function<void()> onPressed, const std::wst
 	, m_OnPressed(onPressed)
 	, m_BaseAssetPath(assetPath)
 	, m_SelectedAssetPath(assetPath)
-	, m_PressedAssetPath(assetPath)
+	, m_SelectedColor({ .95f, .95f, .95f, 1.f })
+	, m_PressedColor({ .92f, .92f, .92f, 1.f })
 {}
 
 void ButtonComponent::OnClickBegin()
@@ -53,7 +54,7 @@ bool ButtonComponent::GetIsActive() const
 void ButtonComponent::Initialize(const SceneContext&)
 {
 	// REGISTER WITH EVENT SYSTEM
-	EventSystem::Get()->RegisterInteractable(this);
+	// EventSystem::Get()->RegisterInteractable(this);
 
 	// GET SPRITE COMPONENT
 	m_pSpriteComponent = m_pGameObject->GetComponent<SpriteComponent>();

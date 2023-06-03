@@ -34,18 +34,29 @@ private:
 	GameObject* m_pBannerLap{};
 	GameObject* m_pBannerBest{};
 
+	GameObject* m_pControllerLayout{};
+
 	GameObject* m_pPausePanel{};
 	GameObject* m_pBackButton{};
-	GameObject* m_pResumeButton{};
+	GameObject* m_pQuitButton{};
+	GameObject* m_pRestartButton{};
+
+	bool m_DoShowControls{ true };
 
 	void InitializeUI();
 	void TogglePauseMenu();
+
+	void RestartGame();
 	void LoadMainMenu();
+	void QuitGame();
 #pragma endregion
 
 #pragma region Sound Settings
 	FMOD::Channel* m_pEngineChannel{ nullptr };
 	FMOD::Sound* m_pEngineSound{ nullptr };
+
+	void InitializeSound();
+	void UpdateSound();
 #pragma endregion
 
 #pragma region Post Processing Settings
@@ -145,7 +156,8 @@ std::vector<GameObject*> m_pCrowd{};
 		Accelerate,
 		Deaccelerate,
 		HandBrake,
-		TogglePause
+		TogglePause,
+		Confirm
 	};
 #pragma endregion
 

@@ -14,9 +14,25 @@ public:
 		if (it != m_pInteractables.end())
 		{
 			m_pInteractables.erase(it);
-			if(m_pSelectedInteractable == pInteractable)
+			if (m_pSelectedInteractable == pInteractable)
+			{
+				m_pSelectedInteractable->OnHoverEnd();
+				m_pSelectedInteractable->OnClickEnd();
 				m_pSelectedInteractable = nullptr;
+			}
+				
 		}
+	}
+
+	void SetSelectedInteractable(IInteractable* pInteractable)
+	{
+		if (m_pSelectedInteractable != nullptr)
+		{
+			m_pSelectedInteractable->OnHoverEnd();
+			m_pSelectedInteractable->OnClickEnd();
+		}
+		
+		m_pSelectedInteractable = pInteractable;
 	}
 
 protected:

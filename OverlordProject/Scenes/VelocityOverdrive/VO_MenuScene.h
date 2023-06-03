@@ -15,6 +15,7 @@ protected:
 	void OnGUI() override;
 
 	void OnSceneActivated() override;
+	void OnSceneDeactivated() override;
 
 private:
 #pragma region UI

@@ -43,28 +43,12 @@ void VO_GameScene::Initialize()
 	InitializeUI();
 
 	// AUDIO
-	auto pFmodSystem = SoundManager::Get()->GetSystem();
-	auto result = pFmodSystem->createStream("Resources/Sounds/Engine.wav", FMOD_LOOP_NORMAL, nullptr, &m_pEngineSound);
-	if (result != FMOD_OK)
-	{
-		std::wstringstream strstr;
-		strstr << L"FMOD error! \n[" << result << L"] " << FMOD_ErrorString(result) << std::endl;
-		Logger::LogError(strstr.str());
-	}
-
-	result = pFmodSystem->playSound(m_pEngineSound, nullptr, true, &m_pEngineChannel);
-	if (result != FMOD_OK)
-	{
-		std::wstringstream strstr;
-		strstr << L"FMOD error! \n[" << result << L"] " << FMOD_ErrorString(result) << std::endl;
-		Logger::LogError(strstr.str());
-	}
+	InitializeSound();
 
 	// TIMER
-	auto pTimerGO = new GameObject();
-	pTimerGO->SetTag(L"Timer");
+	auto pTimerGO = AddChild(new GameObject);
 	m_pTimer = pTimerGO->AddComponent(new TimerComponent());
-	AddChild(pTimerGO);
+	m_pTimer->EnableDrawing(!m_DoShowControls);
 
 	// LIGHTING
 	InitializeLighting();
@@ -119,6 +103,9 @@ void VO_GameScene::Initialize()
 
 	inputAction = InputAction(TogglePause, InputState::pressed, VK_ESCAPE, -1, XINPUT_GAMEPAD_START);
 	m_SceneContext.pInput->AddInputAction(inputAction);
+
+	inputAction = InputAction(Confirm, InputState::pressed, VK_RETURN, -1, XINPUT_GAMEPAD_A);
+	m_SceneContext.pInput->AddInputAction(inputAction);
 }
 
 VO_GameScene::~VO_GameScene()
@@ -130,20 +117,19 @@ VO_GameScene::~VO_GameScene()
 
 void VO_GameScene::Update()
 {
-	UpdateVehicle();
 	UpdateInput();
 	UpdateLighting();
-
-	const float pitch = MathHelper::remap(m_pVehicle->mDriveDynData.mEnginespeed, 0.f, 1500.f, 0.6f, 1.f);
-	m_pEngineChannel->setPitch(pitch);
+	UpdateSound();
+	UpdateVehicle();
 }
 
 void VO_GameScene::Draw()
 {
 	if(m_IsPaused)
 	{
-		TextRenderer::Get()->DrawText(m_pFont, L"RESUME GAME", { m_SceneContext.windowWidth - 227.f, m_SceneContext.windowHeight - 105.f }, XMFLOAT4{ Colors::Orange });
-		TextRenderer::Get()->DrawText(m_pFont, L"BACK TO MENU", { m_SceneContext.windowWidth - 440.f, m_SceneContext.windowHeight - 105.f }, XMFLOAT4{ Colors::Orange });
+		TextRenderer::Get()->DrawText(m_pFont, L"RESTART GAME", { m_SceneContext.windowWidth - 230.f, m_SceneContext.windowHeight - 305.f }, XMFLOAT4{ Colors::Orange });
+		TextRenderer::Get()->DrawText(m_pFont, L"BACK TO MENU", { m_SceneContext.windowWidth - 230.f, m_SceneContext.windowHeight - 205.f }, XMFLOAT4{ Colors::Orange });
+		TextRenderer::Get()->DrawText(m_pFont, L"QUIT GAME", { m_SceneContext.windowWidth - 210.f, m_SceneContext.windowHeight - 105.f }, XMFLOAT4{ Colors::Orange });
 	}
 }
 
@@ -264,47 +250,55 @@ void VO_GameScene::InitializeUI()
 	// Font
 	m_pFont = ContentManager::Load<SpriteFont>(L"SpriteFonts/LemonMilk_32.fnt");
 
+	// Controller Layout
+	m_pControllerLayout = AddChild(new GameObject);
+	m_pControllerLayout->AddComponent(new SpriteComponent(L"Textures/UI/ControllerLayout_Colored.png", { .5f, .5f }));
+	m_pControllerLayout->GetTransform()->Scale(.8f, .8f, 1.f);
+	m_pControllerLayout->GetTransform()->Translate(m_SceneContext.windowWidth * 0.5f, m_SceneContext.windowHeight * 0.5f, 0.1f);
+
 	// Pause Panel
-	m_pPausePanel = new GameObject();
+	m_pPausePanel = AddChild(new GameObject);
 	m_pPausePanel->SetActive(false);
 	m_pPausePanel->AddComponent(new SpriteComponent(L"Textures/UI/Panel.png", { 1.f, 1.f }));
-	m_pPausePanel->GetTransform()->Scale(4.8f, 1.2f, 1.f);
-	m_pPausePanel->GetTransform()->Translate(m_SceneContext.windowWidth - 20.f, m_SceneContext.windowHeight - 30.f, 0.1f);
-	AddChild(m_pPausePanel);
+	m_pPausePanel->GetTransform()->Scale(2.6f, 3.5f, 1.f);
+	m_pPausePanel->GetTransform()->Translate(m_SceneContext.windowWidth - 20.f, m_SceneContext.windowHeight - 20.f, 0.1f);
 
-	// Resume button
-	m_pResumeButton = new GameObject();
-	m_pResumeButton->SetActive(false);
-	auto pButton = m_pResumeButton->AddComponent(new ButtonComponent(std::bind(&VO_GameScene::TogglePauseMenu, this), L"Textures/UI/ButtonBase.png", { m_SceneContext.windowWidth - 240.f, m_SceneContext.windowHeight - 130.f }, { 3.f, 2.7f }));
+#pragma region Buttons
+	// Restart button
+	m_pRestartButton = AddChild(new GameObject);
+	m_pRestartButton->SetActive(false);
+	auto pButton = m_pRestartButton->AddComponent(new ButtonComponent(std::bind(&VO_GameScene::RestartGame, this), L"Textures/UI/ButtonBase.png", { m_SceneContext.windowWidth - 240.f, m_SceneContext.windowHeight - 330.f }, { 3.f, 2.7f }));
 	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
 	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
-	pButton->SetSelectedColor({ .95f, .95f, .95f, 1.f });
-	pButton->SetPressedColor({ .92f, .92f, .92f, 1.f });
-	AddChild(m_pResumeButton);
 
 	// Back Button
-	m_pBackButton = new GameObject();
+	m_pBackButton = AddChild(new GameObject);
 	m_pBackButton->SetActive(false);
-	pButton = m_pBackButton->AddComponent(new ButtonComponent(std::bind(&VO_GameScene::LoadMainMenu, this), L"Textures/UI/ButtonBase.png", { m_SceneContext.windowWidth - 450.f, m_SceneContext.windowHeight - 130.f }, { 3.f, 2.7f }));
+	pButton = m_pBackButton->AddComponent(new ButtonComponent(std::bind(&VO_GameScene::LoadMainMenu, this), L"Textures/UI/ButtonBase.png", { m_SceneContext.windowWidth - 240.f, m_SceneContext.windowHeight - 230.f }, { 3.f, 2.7f }));
 	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
 	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
-	pButton->SetSelectedColor({ .95f, .95f, .95f, 1.f });
-	pButton->SetPressedColor({ .92f, .92f, .92f, 1.f });
-	AddChild(m_pBackButton);
+
+	// Quit Button
+	m_pQuitButton = AddChild(new GameObject);
+	m_pQuitButton->SetActive(false);
+	pButton = m_pQuitButton->AddComponent(new ButtonComponent(std::bind(&VO_GameScene::QuitGame, this), L"Textures/UI/ButtonBase.png", { m_SceneContext.windowWidth - 240.f, m_SceneContext.windowHeight - 130.f }, { 3.f, 2.7f }));
+	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
+	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
+#pragma endregion
 
 	// Banner Lap
-	m_pBannerLap = new GameObject();
+	m_pBannerLap = AddChild(new GameObject);
+	m_pBannerLap->SetActive(false);
 	m_pBannerLap->AddComponent(new SpriteComponent(L"Textures/UI/BannerSpecial.png", { 1.f, 0.f }));
 	m_pBannerLap->GetTransform()->Scale(3.f, 3.f, 1.f);
 	m_pBannerLap->GetTransform()->Translate(m_SceneContext.windowWidth - 30.f, 20.f, 0.1f);
-	AddChild(m_pBannerLap);
 
 	// Banner Best
-	m_pBannerBest = new GameObject();
+	m_pBannerBest = AddChild(new GameObject);
+	m_pBannerBest->SetActive(false);
 	m_pBannerBest->AddComponent(new SpriteComponent(L"Textures/UI/BannerSpecial.png", { 1.f, 0.f }));
 	m_pBannerBest->GetTransform()->Scale(3.f, 3.f, 1.f);
 	m_pBannerBest->GetTransform()->Translate(m_SceneContext.windowWidth - 30.f, 100.f, 0.1f);
-	AddChild(m_pBannerBest);
 }
 
 void VO_GameScene::TogglePauseMenu()
@@ -313,12 +307,83 @@ void VO_GameScene::TogglePauseMenu()
 
 	m_pPausePanel->SetActive(m_IsPaused);
 	m_pBackButton->SetActive(m_IsPaused);
-	m_pResumeButton->SetActive(m_IsPaused);
+	m_pRestartButton->SetActive(m_IsPaused);
+	m_pQuitButton->SetActive(m_IsPaused);
+
+	if (m_IsPaused)
+	{
+		// Register buttons
+		EventSystem::Get()->RegisterInteractable(m_pRestartButton->GetComponent<ButtonComponent>());
+		EventSystem::Get()->RegisterInteractable(m_pBackButton->GetComponent<ButtonComponent>());
+		EventSystem::Get()->RegisterInteractable(m_pQuitButton->GetComponent<ButtonComponent>());
+	}
+	else
+	{
+		// Unregister buttons
+		EventSystem::Get()->UnregisterInteractable(m_pBackButton->GetComponent<ButtonComponent>());
+		EventSystem::Get()->UnregisterInteractable(m_pRestartButton->GetComponent<ButtonComponent>());
+		EventSystem::Get()->UnregisterInteractable(m_pQuitButton->GetComponent<ButtonComponent>());
+	}
+}
+
+void VO_GameScene::RestartGame()
+{
+	// RESET VEHICLE
+	m_pChassis->GetTransform()->Translate(XMFLOAT3{ -48.f, 0.2f, -100.f });
+	m_pChassis->GetTransform()->Rotate(0.f, -90.f, 0.f);
+
+	m_pTimer->Pause();
+	m_pTimer->Reset();
+	m_pTimer->EnableDrawing(false);
+
+	m_NextCheckpoint = 0;
+	TogglePauseMenu();
+
+	// SHOW CONTROLLER LAYOUT
+	m_DoShowControls = true;
+
+	m_pControllerLayout->SetActive(true);
+	m_pBannerBest->SetActive(!m_DoShowControls);
+	m_pBannerLap->SetActive(!m_DoShowControls);
+
+	// DESELECT INTERACTABLE
+	EventSystem::Get()->SetSelectedInteractable(nullptr);
 }
 
 void VO_GameScene::LoadMainMenu()
 {
 	SceneManager::Get()->PreviousScene();
+}
+
+void VO_GameScene::QuitGame()
+{
+	PostQuitMessage(0);
+}
+
+void VO_GameScene::InitializeSound()
+{
+	auto pFmodSystem = SoundManager::Get()->GetSystem();
+	auto result = pFmodSystem->createStream("Resources/Sounds/Engine.wav", FMOD_LOOP_NORMAL, nullptr, &m_pEngineSound);
+	if (result != FMOD_OK)
+	{
+		std::wstringstream strstr;
+		strstr << L"FMOD error! \n[" << result << L"] " << FMOD_ErrorString(result) << std::endl;
+		Logger::LogError(strstr.str());
+	}
+
+	result = pFmodSystem->playSound(m_pEngineSound, nullptr, true, &m_pEngineChannel);
+	if (result != FMOD_OK)
+	{
+		std::wstringstream strstr;
+		strstr << L"FMOD error! \n[" << result << L"] " << FMOD_ErrorString(result) << std::endl;
+		Logger::LogError(strstr.str());
+	}
+}
+
+void VO_GameScene::UpdateSound()
+{
+	const float pitch = MathHelper::remap(m_pVehicle->mDriveDynData.mEnginespeed, 0.f, 1500.f, 0.6f, 1.f);
+	m_pEngineChannel->setPitch(pitch);
 }
 
 void VO_GameScene::InitializeLighting()
@@ -597,6 +662,20 @@ void VO_GameScene::UpdateInput()
 	if (input->IsActionTriggered(TogglePause))
 		TogglePauseMenu();
 
+	// Close controller layout
+	if (input->IsActionTriggered(Confirm))
+	{
+		m_DoShowControls = false;
+		m_pControllerLayout->SetActive(false);
+
+		m_pBannerBest->SetActive(true);
+		m_pBannerLap->SetActive(true);
+
+		m_pTimer->EnableDrawing(true);
+	}
+
+	if (m_DoShowControls || m_IsPaused) return;
+
 	// Vibrations
 	// Calculate the average  lateral slip of all wheels
 	const float avgLateralSlip = std::accumulate(m_WheelQueryResults, m_WheelQueryResults + 4, 0.0f,
@@ -723,6 +802,7 @@ void VO_GameScene::OnTriggerCallback(GameObject* trigger, GameObject* other, PxT
 	}
 }
 
+#pragma region Vehicle Controls
 void VO_GameScene::AccelerateForward(float analogAcc)
 {
 	//If I am going reverse, change to first gear
@@ -813,3 +893,4 @@ void VO_GameScene::ReleaseAllControls()
 		m_pVehicleInputData->setAnalogHandbrake(0.0f);
 	}
 }
+#pragma endregion

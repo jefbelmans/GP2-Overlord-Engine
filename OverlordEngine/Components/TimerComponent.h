@@ -15,6 +15,7 @@ public:
 	void Pause();
 	void Reset();
 	void Lap();
+	void EnableDrawing(bool doEnable) { m_IsEnabled = doEnable;}
 
 protected:
 	void Initialize(const SceneContext& sceneContext) override;
@@ -23,6 +24,7 @@ protected:
 
 private:
 	bool m_IsPaused{};
+	bool m_IsEnabled{ true };
 	
 	float m_CurrentLap{};
 	float m_LastLap{};

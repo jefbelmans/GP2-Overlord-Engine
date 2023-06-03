@@ -10,7 +10,6 @@ void VO_MenuScene::Initialize()
 	m_SceneContext.settings.drawGrid = false;
 	m_SceneContext.settings.drawPhysXDebug = false;
 	m_SceneContext.settings.clearColor = XMFLOAT4{ 112.f / 255.f, 139.f / 255.f, 196.f / 255.f, 1.f };
-	m_SceneContext.pLights->SetDirectionalLight({ 10.f, 10.f, -10.f }, { .85f, -.74f, 0.34f });
 	m_SceneContext.settings.showInfoOverlay = false;
 	m_SceneContext.useDeferredRendering = false;
 
@@ -30,16 +29,12 @@ void VO_MenuScene::Initialize()
 	auto pButton = m_pStartButton->AddComponent(new ButtonComponent(std::bind(&VO_MenuScene::LoadGame, this), L"Textures/UI/ButtonBase.png", { 30.f, m_SceneContext.windowHeight - 250.f }, { 2.7f, 2.7f }));
 	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
 	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
-	pButton->SetSelectedColor({ .95f, .95f, .95f, 1.f });
-	pButton->SetPressedColor({ .92f, .92f, .92f, 1.f });
 
 	// QUIT BUTTON
 	m_pQuitButton = AddChild(new GameObject);
 	pButton = m_pQuitButton->AddComponent(new ButtonComponent(std::bind(&VO_MenuScene::QuitGame, this), L"Textures/UI/ButtonBase.png", { 30.f, m_SceneContext.windowHeight - 150.f }, { 2.7f, 2.7f }));
 	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
 	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
-	pButton->SetSelectedColor({ .95f, .95f, .95f, 1.f });
-	pButton->SetPressedColor({ .92f, .92f, .92f, 1.f });
 
 	// 3D SCENE
 	// CAMERA
@@ -105,6 +100,20 @@ void VO_MenuScene::OnGUI()
 void VO_MenuScene::OnSceneActivated()
 {
 	ShadowMapRenderer::Get()->SetViewWidthHeight(30.f, 30.f);
+
+	// Light
+	m_SceneContext.pLights->SetDirectionalLight({ 10.f, 10.f, -10.f }, { .85f, -.74f, 0.34f });
+
+	// Register buttons
+	EventSystem::Get()->RegisterInteractable(m_pStartButton->GetComponent<ButtonComponent>());
+	EventSystem::Get()->RegisterInteractable(m_pQuitButton->GetComponent<ButtonComponent>());
+}
+
+void VO_MenuScene::OnSceneDeactivated()
+{
+	// Unregister buttons
+	EventSystem::Get()->UnregisterInteractable(m_pStartButton->GetComponent<ButtonComponent>());
+	EventSystem::Get()->UnregisterInteractable(m_pQuitButton->GetComponent<ButtonComponent>());
 }
 
 void VO_MenuScene::LoadGame()

@@ -52,6 +52,8 @@ void TimerComponent::Update(const SceneContext& sceneContext)
 
 void TimerComponent::Draw(const SceneContext& sceneContext)
 {
+	if (!m_IsEnabled) return;
+
 	TextRenderer::Get()->DrawText(m_pFont, L"Lap: "  + m_ssCurrentLap.str(), {sceneContext.windowWidth - 265.f, 50.f}, XMFLOAT4{Colors::Orange});
 	TextRenderer::Get()->DrawText(m_pFont, L"Best: " + m_ssBestLap.str(), {sceneContext.windowWidth - 265.f, 130.f}, XMFLOAT4{ Colors::Orange });
 }
