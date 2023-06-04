@@ -3,7 +3,7 @@
 
 void EventSystem::Initialize()
 {
-	
+	InitializeSound();
 }
 
 void EventSystem::Update()
@@ -27,8 +27,12 @@ void EventSystem::Update()
 
 void EventSystem::HandleMouseClick(int /*button*/)
 {
-	if(m_pSelectedInteractable)
+	if (m_pSelectedInteractable)
+	{
 		m_pSelectedInteractable->OnClickBegin();
+		SoundManager::Get()->GetSystem()->playSound(m_pClickSound, nullptr, false, &m_pUIChannel);
+	}
+		
 }
 
 void EventSystem::HandleMouseRelease(int /*button*/)
@@ -57,6 +61,7 @@ void EventSystem::HandleMouseHover(const XMFLOAT2& mousePos)
 
 				m_pSelectedInteractable = interactable;
 				m_pSelectedInteractable->OnHoverBegin();
+				SoundManager::Get()->GetSystem()->playSound(m_pSelectSound, nullptr, false, &m_pUIChannel);
 			}
 			
 			return;
@@ -84,6 +89,7 @@ void EventSystem::HandleNavigation()
 		m_SelectedIndex = (m_SelectedIndex + 1) % m_pInteractables.size();
 		m_pSelectedInteractable = m_pInteractables[m_SelectedIndex];
 		m_pSelectedInteractable->OnHoverBegin();
+		SoundManager::Get()->GetSystem()->playSound(m_pSelectSound, nullptr, false, &m_pUIChannel);
 	}
 
 	else if (InputManager::IsGamepadButton(InputState::pressed, XINPUT_GAMEPAD_DPAD_UP) ||
@@ -99,13 +105,17 @@ void EventSystem::HandleNavigation()
 
 		m_pSelectedInteractable = m_pInteractables[m_SelectedIndex];
 		m_pSelectedInteractable->OnHoverBegin();
+		SoundManager::Get()->GetSystem()->playSound(m_pSelectSound, nullptr, false, &m_pUIChannel);
 	}
 
 	else if (InputManager::IsGamepadButton(InputState::pressed, XINPUT_GAMEPAD_A) ||
 		InputManager::IsKeyboardKey(InputState::pressed, VK_RETURN))
 	{
 		if (m_pSelectedInteractable != nullptr)
+		{
 			m_pSelectedInteractable->OnClickBegin();
+			SoundManager::Get()->GetSystem()->playSound(m_pClickSound, nullptr, false, &m_pUIChannel);
+		}	
 	}
 
 	else if (InputManager::IsGamepadButton(InputState::released, XINPUT_GAMEPAD_A) ||
@@ -113,5 +123,25 @@ void EventSystem::HandleNavigation()
 	{
 		if (m_pSelectedInteractable != nullptr)
 			m_pSelectedInteractable->OnClickEnd();
+	}
+}
+
+void EventSystem::InitializeSound()
+{
+	auto pFmodSystem = SoundManager::Get()->GetSystem();
+	auto result = pFmodSystem->createStream("Resources/Sounds/Confirm.wav", FMOD_LOOP_OFF, nullptr, &m_pClickSound);
+	if (result != FMOD_OK)
+	{
+		std::wstringstream strstr;
+		strstr << L"FMOD error! \n[" << result << L"] " << FMOD_ErrorString(result) << std::endl;
+		Logger::LogError(strstr.str());
+	}
+
+	result = pFmodSystem->createStream("Resources/Sounds/Select.wav", FMOD_LOOP_OFF, nullptr, &m_pSelectSound);
+	if (result != FMOD_OK)
+	{
+		std::wstringstream strstr;
+		strstr << L"FMOD error! \n[" << result << L"] " << FMOD_ErrorString(result) << std::endl;
+		Logger::LogError(strstr.str());
 	}
 }

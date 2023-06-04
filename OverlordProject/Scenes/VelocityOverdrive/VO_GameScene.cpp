@@ -130,9 +130,14 @@ void VO_GameScene::Draw()
 {
 	if(m_IsPaused)
 	{
-		TextRenderer::Get()->DrawText(m_pFont, L"RESTART GAME", { m_SceneContext.windowWidth - 230.f, m_SceneContext.windowHeight - 305.f }, XMFLOAT4{ Colors::Orange });
-		TextRenderer::Get()->DrawText(m_pFont, L"BACK TO MENU", { m_SceneContext.windowWidth - 230.f, m_SceneContext.windowHeight - 205.f }, XMFLOAT4{ Colors::Orange });
-		TextRenderer::Get()->DrawText(m_pFont, L"QUIT GAME", { m_SceneContext.windowWidth - 210.f, m_SceneContext.windowHeight - 105.f }, XMFLOAT4{ Colors::Orange });
+		if(m_SceneContext.pLights->GetUseBakedShadows())
+			TextRenderer::Get()->DrawText(m_pFont24, L"RT SHADOWS", { m_SceneContext.windowWidth - 200.f, m_SceneContext.windowHeight - 405.f }, XMFLOAT4{ Colors::Orange });
+		else
+			TextRenderer::Get()->DrawText(m_pFont24, L"BAKED SHADOWS", { m_SceneContext.windowWidth - 217.f, m_SceneContext.windowHeight - 405.f }, XMFLOAT4{ Colors::Orange });
+		
+		TextRenderer::Get()->DrawText(m_pFont32, L"RESTART GAME", { m_SceneContext.windowWidth - 230.f, m_SceneContext.windowHeight - 305.f }, XMFLOAT4{ Colors::Orange });
+		TextRenderer::Get()->DrawText(m_pFont32, L"BACK TO MENU", { m_SceneContext.windowWidth - 230.f, m_SceneContext.windowHeight - 205.f }, XMFLOAT4{ Colors::Orange });
+		TextRenderer::Get()->DrawText(m_pFont32, L"QUIT GAME", { m_SceneContext.windowWidth - 210.f, m_SceneContext.windowHeight - 105.f }, XMFLOAT4{ Colors::Orange });
 	}
 }
 
@@ -239,13 +244,7 @@ void VO_GameScene::OnSceneActivated()
 	m_pEngineChannel->setPaused(false);
 
 	// RESET VEHICLE
-	m_pChassis->GetTransform()->Translate(XMFLOAT3{ -48.f, 0.2f, -100.f });
-	m_pChassis->GetTransform()->Rotate(0.f, -90.f, 0.f);
-
-	m_pTimer->Pause();
-	m_pTimer->Reset();
-
-	m_NextCheckpoint = 0;
+	RestartGame();
 
 	ShadowMapRenderer::Get()->SetViewWidthHeight(155.f, 155.f);
 }
@@ -261,7 +260,8 @@ void VO_GameScene::OnSceneDeactivated()
 void VO_GameScene::InitializeUI()
 {
 	// Font
-	m_pFont = ContentManager::Load<SpriteFont>(L"SpriteFonts/LemonMilk_32.fnt");
+	m_pFont32 = ContentManager::Load<SpriteFont>(L"SpriteFonts/LemonMilk_32.fnt");
+	m_pFont24 = ContentManager::Load<SpriteFont>(L"SpriteFonts/LemonMilk_24.fnt");
 
 	// Controller Layout
 	m_pControllerLayout = AddChild(new GameObject);
@@ -273,14 +273,26 @@ void VO_GameScene::InitializeUI()
 	m_pPausePanel = AddChild(new GameObject);
 	m_pPausePanel->SetActive(false);
 	m_pPausePanel->AddComponent(new SpriteComponent(L"Textures/UI/Panel.png", { 1.f, 1.f }));
-	m_pPausePanel->GetTransform()->Scale(2.6f, 3.5f, 1.f);
+	m_pPausePanel->GetTransform()->Scale(2.6f, 4.5f, 1.f);
 	m_pPausePanel->GetTransform()->Translate(m_SceneContext.windowWidth - 20.f, m_SceneContext.windowHeight - 20.f, 0.1f);
 
 #pragma region Buttons
+	auto toggleBakedShadows = [&]()
+	{
+		m_SceneContext.pLights->SetUseBakedShadows(!m_SceneContext.pLights->GetUseBakedShadows());
+	};
+
+	// Baked Shadows Button
+	m_pBakedShadowsButton = AddChild(new GameObject);
+	m_pBakedShadowsButton->SetActive(false);
+	auto pButton = m_pBakedShadowsButton->AddComponent(new ButtonComponent(toggleBakedShadows, L"Textures/UI/ButtonBase.png", { m_SceneContext.windowWidth - 240.f, m_SceneContext.windowHeight - 430.f }, { 3.f, 2.7f }));
+	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
+	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
+
 	// Restart button
 	m_pRestartButton = AddChild(new GameObject);
 	m_pRestartButton->SetActive(false);
-	auto pButton = m_pRestartButton->AddComponent(new ButtonComponent(std::bind(&VO_GameScene::RestartGame, this), L"Textures/UI/ButtonBase.png", { m_SceneContext.windowWidth - 240.f, m_SceneContext.windowHeight - 330.f }, { 3.f, 2.7f }));
+	pButton = m_pRestartButton->AddComponent(new ButtonComponent(std::bind(&VO_GameScene::RestartGame, this), L"Textures/UI/ButtonBase.png", { m_SceneContext.windowWidth - 240.f, m_SceneContext.windowHeight - 330.f }, { 3.f, 2.7f }));
 	pButton->SetSelectedAssetPath(L"Textures/UI/ButtonSelected.png");
 	pButton->SetPressedAssetPath(L"Textures/UI/ButtonPressed.png");
 
@@ -322,6 +334,7 @@ void VO_GameScene::TogglePauseMenu()
 	m_pBackButton->SetActive(m_IsPaused);
 	m_pRestartButton->SetActive(m_IsPaused);
 	m_pQuitButton->SetActive(m_IsPaused);
+	m_pBakedShadowsButton->SetActive(m_IsPaused);
 
 	if (m_IsPaused)
 	{
@@ -329,6 +342,8 @@ void VO_GameScene::TogglePauseMenu()
 		EventSystem::Get()->RegisterInteractable(m_pRestartButton->GetComponent<ButtonComponent>());
 		EventSystem::Get()->RegisterInteractable(m_pBackButton->GetComponent<ButtonComponent>());
 		EventSystem::Get()->RegisterInteractable(m_pQuitButton->GetComponent<ButtonComponent>());
+		EventSystem::Get()->RegisterInteractable(m_pBakedShadowsButton->GetComponent<ButtonComponent>());
+
 	}
 	else
 	{
@@ -336,6 +351,7 @@ void VO_GameScene::TogglePauseMenu()
 		EventSystem::Get()->UnregisterInteractable(m_pBackButton->GetComponent<ButtonComponent>());
 		EventSystem::Get()->UnregisterInteractable(m_pRestartButton->GetComponent<ButtonComponent>());
 		EventSystem::Get()->UnregisterInteractable(m_pQuitButton->GetComponent<ButtonComponent>());
+		EventSystem::Get()->UnregisterInteractable(m_pBakedShadowsButton->GetComponent<ButtonComponent>());
 	}
 }
 
@@ -350,7 +366,8 @@ void VO_GameScene::RestartGame()
 	m_pTimer->EnableDrawing(false);
 
 	m_NextCheckpoint = 0;
-	TogglePauseMenu();
+	if (m_IsPaused)
+		TogglePauseMenu();
 
 	// SHOW CONTROLLER LAYOUT
 	m_DoShowControls = true;

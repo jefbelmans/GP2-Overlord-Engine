@@ -15,7 +15,7 @@ protected:
 	void OnGUI() override;
 
 private:
-	SpriteFont* m_pFont{};
+	SpriteFont* m_pFont32{};
 	SpriteFont* m_pFont2{};
 
 	std::string m_Text{ "Hello World! (Change Text/Position/Color in Scene Parameters)" };

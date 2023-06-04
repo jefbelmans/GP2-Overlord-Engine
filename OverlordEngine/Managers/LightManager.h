@@ -57,7 +57,7 @@ public:
 	void SetBakeShadows(bool doBake) { m_DoBakeShadows = doBake; }
 	bool GetBakeShadows() const { return m_DoBakeShadows; }
 
-	void SetUseBakedShadows(bool useBaked) { m_UseBakedShadows = useBaked; }
+	void SetUseBakedShadows(bool useBaked);
 	bool GetUseBakedShadows() const { return m_UseBakedShadows; }
 
 private:

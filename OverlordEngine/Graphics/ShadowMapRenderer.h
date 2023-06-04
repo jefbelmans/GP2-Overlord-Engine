@@ -13,10 +13,13 @@ public:
 
 	void Begin(const SceneContext&);
 	void DrawMesh(const SceneContext& sceneContext, MeshFilter* pMeshFilter, const XMFLOAT4X4& meshWorld, const std::vector<XMFLOAT4X4>& meshBones = {});
-	void End(const SceneContext&) const;
+	void End(const SceneContext&);
 
 	ID3D11ShaderResourceView* GetShadowMap() const;
 	ID3D11ShaderResourceView* GetBakedShadowMap() const;
+	bool GetIsBakedShadowMapInitialized() const { return m_IsBakedInitialized; }
+
+	void LoadBakedShadowMap();
 
 	const XMFLOAT4X4& GetLightVP() const { return m_LightVP; }
 	const XMFLOAT4X4& GetBakedLightVP() const { return m_BakedLightVP; }
@@ -38,6 +41,7 @@ private:
 	//Contains depth information for all rendered shadow-casting meshes from a light's perspective (usual the main directional light)
 	RenderTarget* m_pShadowRenderTarget{ nullptr };
 	RenderTarget* m_pBakedShadowRenderTarget{ nullptr };
+	bool m_IsBakedInitialized{ false };
 
 	//Light ViewProjection (perspective used to render ShadowMap)
 	XMFLOAT4X4 m_LightVP{}, m_BakedLightVP{};

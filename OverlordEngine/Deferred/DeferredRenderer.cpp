@@ -127,6 +127,11 @@ void DeferredRenderer::DrawImGui()
 		ImGui::SliderInt("RTV ID", &m_VizRTVid, 0, RT_COUNT - 1);
 }
 
+void DeferredRenderer::SetBakedLightmapDirty()
+{
+	m_pLightPassRenderer->SetBakedLightmapDirty(true);
+}
+
 void DeferredRenderer::Debug_DrawGBuffer() const
 {
 	//FULL SCREEN

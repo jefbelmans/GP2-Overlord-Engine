@@ -29,7 +29,8 @@ private:
 #pragma endregion
 
 #pragma region UI
-	SpriteFont* m_pFont{};
+	SpriteFont* m_pFont32{};
+	SpriteFont* m_pFont24{};
 
 	GameObject* m_pBannerLap{};
 	GameObject* m_pBannerBest{};
@@ -40,6 +41,7 @@ private:
 	GameObject* m_pBackButton{};
 	GameObject* m_pQuitButton{};
 	GameObject* m_pRestartButton{};
+	GameObject* m_pBakedShadowsButton{};
 
 	bool m_DoShowControls{ true };
 

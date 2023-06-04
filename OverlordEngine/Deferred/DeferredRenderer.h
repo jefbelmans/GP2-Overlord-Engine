@@ -25,6 +25,7 @@ public:
 
 	void DrawImGui();
 	RenderTarget* GetRenderTarget(eGBufferId id) const { return m_GBuffer[int(id)]; }
+	void SetBakedLightmapDirty();
 
 protected:
 	void Initialize() override;

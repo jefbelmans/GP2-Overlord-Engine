@@ -27,3 +27,10 @@ void LightManager::SetBakedDirectionalLight(const XMFLOAT3& position, const XMFL
 	m_BakedDirectionalLight.position = { position.x, position.y, position.z , 1.0f };
 	m_BakedDirectionalLight.isDirty = true;
 }
+
+void LightManager::SetUseBakedShadows(bool useBaked)
+{
+	m_UseBakedShadows = useBaked;
+	if(useBaked)
+		m_DoBakeShadows = !ShadowMapRenderer::Get()->GetIsBakedShadowMapInitialized();
+}

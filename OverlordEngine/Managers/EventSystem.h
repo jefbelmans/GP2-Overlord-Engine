@@ -58,4 +58,11 @@ private:
 
 	std::vector<IInteractable*> m_pInteractables{};
 	IInteractable* m_pSelectedInteractable{ nullptr };
+
+	// SOUND
+	FMOD::Channel* m_pUIChannel{ nullptr };
+	FMOD::Sound* m_pClickSound{ nullptr };
+	FMOD::Sound* m_pSelectSound{ nullptr };
+
+	void InitializeSound();
 };

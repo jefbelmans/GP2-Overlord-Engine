@@ -13,7 +13,7 @@ void ShadowMapRenderer::Initialize()
 	//1. Create a separate RenderTarget (see RenderTarget class), store in m_pShadowRenderTarget
 	//	- RenderTargets are initialized with the RenderTarget::Create function, requiring a RENDERTARGET_DESC
 	//	- Initialize the relevant fields of the RENDERTARGET_DESC (enableColorBuffer:false, enableDepthSRV:true, width & height
-	RENDERTARGET_DESC desc {};
+	RENDERTARGET_DESC desc{};
 	desc.enableColorBuffer = false;
 	desc.enableDepthSRV = true;
 	desc.width = 8192;
@@ -32,21 +32,21 @@ void ShadowMapRenderer::Initialize()
 	// Set view width and height
 	m_ViewWidth = 155.f;
 	m_ViewHeight = 155.f;
-	
+
 	//2. Create a new ShadowMapMaterial, this will be the material that 'generated' the ShadowMap, store in m_pShadowMapGenerator
 	//	- The effect has two techniques, one for static meshes, and another for skinned meshes (both very similar, the skinned version also transforms the vertices based on a given set of boneTransforms)
 	//	- We want to store the TechniqueContext (struct that contains information about the Technique & InputLayout required for rendering) for both techniques in the m_GeneratorTechniqueContexts array.
 	//	- Use the ShadowGeneratorType enum to retrieve the correct TechniqueContext by ID, and also use that ID to store it inside the array (see BaseMaterial::GetTechniqueContext)
 	m_pShadowMapGenerator = MaterialManager::Get()->CreateMaterial<ShadowMapMaterial>();
 
-	m_GeneratorTechniqueContexts[(int)ShadowGeneratorType::Static] 
+	m_GeneratorTechniqueContexts[(int)ShadowGeneratorType::Static]
 		= m_pShadowMapGenerator->GetTechniqueContext((int)ShadowGeneratorType::Static);
 
-	m_GeneratorTechniqueContexts[(int)ShadowGeneratorType::Skinned] 
+	m_GeneratorTechniqueContexts[(int)ShadowGeneratorType::Skinned]
 		= m_pShadowMapGenerator->GetTechniqueContext((int)ShadowGeneratorType::Skinned);
 
-	// Load shadowmap
-	m_pBakedShadowRenderTarget->LoadDepthFromFile(m_GameContext.d3dContext, L"Resources/Textures/Baked Maps/ShadowMap.dds");
+	// Load baked shadowmap
+	LoadBakedShadowMap();
 }
 
 void ShadowMapRenderer::UpdateMeshFilter(const SceneContext& sceneContext, MeshFilter* pMeshFilter) const
@@ -170,7 +170,7 @@ void ShadowMapRenderer::DrawMesh(const SceneContext& sceneContext, MeshFilter* p
 	}
 }
 
-void ShadowMapRenderer::End(const SceneContext& sceneContext) const
+void ShadowMapRenderer::End(const SceneContext& sceneContext)
 {
 	//This function is called at the end of the Shadow-pass, all shadow-casting meshes should be drawn to the ShadowMap at this point.
 	//Now we can reset the Main Game Rendertarget back to the original RenderTarget, this also Unbinds the ShadowMapRenderTarget as RTV from the Pipeline, and can safely use it as a ShaderResourceView after this point.
@@ -193,6 +193,9 @@ void ShadowMapRenderer::End(const SceneContext& sceneContext) const
 	{
 		m_pBakedShadowRenderTarget->SaveDepthToFile(sceneContext, L"Resources/Textures/Baked Maps/ShadowMap.dds");
 		sceneContext.pLights->SetBakeShadows(false);
+		LoadBakedShadowMap();
+		if (m_IsBakedInitialized && sceneContext.useDeferredRendering)
+			DeferredRenderer::Get()->SetBakedLightmapDirty();
 
 		Logger::LogInfo(L"Successfully baked shadow map!");
 	}
@@ -206,6 +209,11 @@ ID3D11ShaderResourceView* ShadowMapRenderer::GetShadowMap() const
 ID3D11ShaderResourceView* ShadowMapRenderer::GetBakedShadowMap() const
 {
 	return m_pBakedShadowRenderTarget->GetDepthShaderResourceView();
+}
+
+void ShadowMapRenderer::LoadBakedShadowMap()
+{
+	m_IsBakedInitialized = m_pBakedShadowRenderTarget->LoadDepthFromFile(m_GameContext.d3dContext, L"Resources/Textures/Baked Maps/ShadowMap.dds");
 }
 
 void ShadowMapRenderer::CalculateLightVP(const SceneContext& sceneContext)

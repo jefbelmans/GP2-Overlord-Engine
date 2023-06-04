@@ -70,6 +70,8 @@ public:
 
 	void Initialize(const D3D11Context& d3dContext);
 
+	void SetBakedLightmapDirty(bool isDirty) { m_pDirectionalLightMaterial->IsBakedDirty(isDirty); }
+
 	void DirectionalLightPass(const SceneContext& sceneContext, ID3D11ShaderResourceView* const gbufferSRVs[]) const;
 	void VolumetricLightPass(const SceneContext& sceneContext, ID3D11ShaderResourceView* const gbufferSRVs[], ID3D11RenderTargetView* pDefaultRTV) const;
 	void CreateReadOnlyDSV(const D3D11Context& d3dContext, ID3D11Resource* pDepthResource, DXGI_FORMAT format);
