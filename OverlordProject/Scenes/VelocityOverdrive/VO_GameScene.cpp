@@ -6,6 +6,7 @@
 #include "Materials/Shadow/DiffuseMaterial_Shadow_Skinned.h"
 #include "Materials/Post/PostMotionBlur.h"
 #include "Materials/BasicMaterial_Deferred.h"
+#include "Materials/BasicMaterial_Deferred_Skinned.h"
 
 float gSteerVsForwardSpeedData[2 * 8] =
 {
@@ -428,8 +429,8 @@ void VO_GameScene::ConstructScene()
 	// CROWD
 	for (int i = 0; i < 8; i++)
 	{
-		const auto pSkinnedMaterial = MaterialManager::Get()->CreateMaterial<DiffuseMaterial_Shadow_Skinned>();
-		pSkinnedMaterial->SetDiffuseTexture(L"Textures/Character_Diffuse.png");
+		const auto pSkinnedMaterial = MaterialManager::Get()->CreateMaterial<BasicMaterial_Deferred_Skinned>();
+		pSkinnedMaterial->SetDiffuseMap(L"Textures/Character_Diffuse.png");
 
 		const auto pObject = AddChild(new GameObject);
 		const auto pModel = pObject->AddComponent(new ModelComponent(L"Meshes/Character.ovm"));

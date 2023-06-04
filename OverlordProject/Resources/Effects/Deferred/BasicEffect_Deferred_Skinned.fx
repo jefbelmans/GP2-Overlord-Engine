@@ -21,19 +21,23 @@ float4x4 gWorldViewProj : WORLDVIEWPROJECTION;
 float4x4 gViewInverse : VIEWINVERSE;
 // The World Matrix
 float4x4 gWorld : WORLD;
+// Whether or not to write to mask buffer
 bool gWriteToMask = true;
+
+// BONES
+float4x4 gBones[70] : BONES;
 
 //STATES
 //******
 RasterizerState gRasterizerState
 {
-	FillMode = SOLID;
-	CullMode = FRONT;
+    FillMode = SOLID;
+    CullMode = FRONT;
 };
 
 BlendState gBlendState
 {
-	BlendEnable[0] = FALSE;
+    BlendEnable[0] = FALSE;
 };
 
 DepthStencilState gDepthState
@@ -46,16 +50,16 @@ DepthStencilState gDepthState
 //**************
 SamplerState gTextureSampler
 {
-	Filter = MIN_MAG_MIP_LINEAR;
-	//Filter = ANISOTROPIC;
-	AddressU = WRAP;
-	AddressV = WRAP;
-	AddressW = WRAP;
+    Filter = MIN_MAG_MIP_LINEAR;
+
+    AddressU = WRAP;
+    AddressV = WRAP;
+    AddressW = WRAP;
 };
 
 //LIGHT
 //*****
-float3 gLightDirection:DIRECTION
+float3 gLightDirection : DIRECTION
 <
 	string UIName = "Light Direction";
 	string Object = "TargetLight";
@@ -79,7 +83,7 @@ Texture2D gDiffuseMap
 <
 	string UIName = "Diffuse Texture";
 	string UIWidget = "Texture";
-> ;
+>;
 
 //SPECULAR
 //********
@@ -93,7 +97,7 @@ Texture2D gSpecularMap
 <
 	string UIName = "Specular Level Texture";
 	string UIWidget = "Texture";
-> ;
+>;
 
 bool gUseSpecularMap
 <
@@ -143,7 +147,7 @@ Texture2D gNormalMap
 <
 	string UIName = "Normal Texture";
 	string UIWidget = "Texture";
-> ;
+>;
 
 //OPACITY
 //***************
@@ -159,60 +163,77 @@ float gOpacityLevel <
 //***********
 struct VS_Input
 {
-	float3 Position: POSITION;
-	float3 Normal: NORMAL;
-	float3 Tangent: TANGENT;
-	float3 Binormal: BINORMAL;
-	float2 TexCoord: TEXCOORD0;
+    float3 Position : POSITION;
+    float3 Normal : NORMAL;
+    float3 Tangent : TANGENT;
+    float3 Binormal : BINORMAL;
+    float2 TexCoord : TEXCOORD0;
+    float4 BlendIndices : BLENDINDICES;
+    float4 BlendWeights : BLENDWEIGHTS;
 };
 
 struct VS_Output
 {
-	float4 Position: SV_POSITION;
-	float3 Normal: NORMAL;
-	float3 Tangent: TANGENT;
-	float3 Binormal: BINORMAL;
-	float2 TexCoord: TEXCOORD0;
+    float4 Position : SV_POSITION;
+    float3 Normal : NORMAL;
+    float3 Tangent : TANGENT;
+    float3 Binormal : BINORMAL;
+    float2 TexCoord : TEXCOORD0;
 };
 
 struct PS_Output
 {
-	float4 LightAccumulation : SV_TARGET0;
-	float4 Diffuse : SV_TARGET1;
-	float4 Specular : SV_TARGET2;
-	float4 Normal : SV_TARGET3;
+    float4 LightAccumulation : SV_TARGET0;
+    float4 Diffuse : SV_TARGET1;
+    float4 Specular : SV_TARGET2;
+    float4 Normal : SV_TARGET3;
     float Mask : SV_TARGET4;
 };
 
 // The main vertex shader
 VS_Output MainVS(VS_Input input)
 {
-	VS_Output output = (VS_Output)0;
+    VS_Output output = (VS_Output) 0;
 
-	output.Position = mul(float4(input.Position, 1.0), gWorldViewProj);
+    float4 transformedPosition;
+    float3 transformedNormal;
+    for (int i = 0; i < 4; i++)
+    {
+		// GET BONE INDEX
+        int boneIndex = (int) input.BlendIndices[i];
+        if (boneIndex < 0)
+            continue;
+            
+        float4x4 bone = gBones[boneIndex];
+        transformedPosition += mul(float4(input.Position, 1.0f), bone) * input.BlendWeights[i];
+        transformedNormal += mul(input.Normal, (float3x3) bone) * input.BlendWeights[i];
+    }
+	
+    transformedPosition.w = 1.f;
+    output.Position = mul(transformedPosition, gWorldViewProj);
+	
+    output.Normal = normalize(mul(input.Normal, (float3x3) gWorld));
+    output.Tangent = normalize(mul(input.Tangent, (float3x3) gWorld));
+    output.Binormal = normalize(mul(input.Binormal, (float3x3) gWorld));
 
-	output.Normal = normalize(mul(input.Normal, (float3x3)gWorld));
-	output.Tangent = normalize(mul(input.Tangent, (float3x3)gWorld));
-	output.Binormal = normalize(mul(input.Binormal, (float3x3)gWorld));
-
-	output.TexCoord = input.TexCoord;
-
-	return output;
+    output.TexCoord = input.TexCoord;
+    
+    return output;
 }
 
 // The main pixel shader
 PS_Output MainPS(VS_Output input)
 {
-	PS_Output output = (PS_Output)0;
+    PS_Output output = (PS_Output) 0;
 
 	// DIFFUSE
 	//********
-	float4 diffuse = gDiffuseColor;
-	if (gUseDiffuseMap)
+    float4 diffuse = gDiffuseColor;
+    if (gUseDiffuseMap)
         diffuse *= gDiffuseMap.Sample(gTextureSampler, input.TexCoord);
 
 	// SET DIFFUSE
-	output.Diffuse = diffuse;
+    output.Diffuse = diffuse;
 	
 	// ALPHA
     float alpha = diffuse.a * gOpacityLevel;
@@ -220,17 +241,17 @@ PS_Output MainPS(VS_Output input)
 	
 	// AMBIENT
 	//********
-	float4 ambient = gAmbientColor * gAmbientIntensity * diffuse;
+    float4 ambient = gAmbientColor * gAmbientIntensity * diffuse;
 	
 	// SET AMBIENT
-	output.LightAccumulation = ambient;
+    output.LightAccumulation = ambient;
 	
 	// NORMAL
 	//*******
-	float3 normal = input.Normal;
-	if(gUseNormalMap)
+    float3 normal = input.Normal;
+    if (gUseNormalMap)
     {
-		float3x3 TBN = float3x3
+        float3x3 TBN = float3x3
 		(
 			normalize(input.Tangent),
             normalize(input.Binormal),
@@ -246,20 +267,20 @@ PS_Output MainPS(VS_Output input)
 	
 	// SPECULAR
 	//*********
-	float3 specular = gSpecularColor.rgb;
-	if(gUseSpecularMap)
+    float3 specular = gSpecularColor.rgb;
+    if (gUseSpecularMap)
         specular *= gSpecularMap.Sample(gTextureSampler, input.TexCoord).rgb;
 	
     float shininess = log2(gShininess) / 10.5f;
 	
 	// SET SPECULAR
-	output.Specular = float4(specular, shininess);
+    output.Specular = float4(specular, shininess);
 	
 	// MASK
 	//*****
     output.Mask = gWriteToMask;
 	
-	return output;
+    return output;
 }
 
 PS_Output Test_PS(VS_Output input)
@@ -270,15 +291,16 @@ PS_Output Test_PS(VS_Output input)
 }
 
 // Default Technique
-technique11 Default {
-	pass p0
+technique11 Default
 {
-		SetDepthStencilState(gDepthState, 0);
-		SetRasterizerState(gRasterizerState);
-		SetBlendState(gBlendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
+    pass p0
+    {
+        SetDepthStencilState(gDepthState, 0);
+        SetRasterizerState(gRasterizerState);
+        SetBlendState(gBlendState, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xFFFFFFFF);
 
-		SetVertexShader(CompileShader(vs_4_0, MainVS()));
-		SetGeometryShader(NULL);
-		SetPixelShader(CompileShader(ps_4_0, MainPS()));
-	}
+        SetVertexShader(CompileShader(vs_4_0, MainVS()));
+        SetGeometryShader(NULL);
+        SetPixelShader(CompileShader(ps_4_0, MainPS()));
+    }
 }
