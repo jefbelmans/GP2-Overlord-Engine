@@ -7,7 +7,7 @@ Texture2D gMaskTexture;
 float4x4 gInverseViewProj;
 float4x4 gPreviousViewProj;
 
-int gNumSamples = 4;
+int gNumSamples = 6;
 
 SamplerState samPoint
 {

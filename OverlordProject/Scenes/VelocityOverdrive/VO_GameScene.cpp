@@ -26,6 +26,7 @@ void VO_GameScene::Initialize()
 	// SCENE SETTINGS
 	m_SceneContext.settings.drawGrid = false;
 	m_SceneContext.settings.drawPhysXDebug = false;
+	m_SceneContext.settings.showInfoOverlay = false;
 	m_SceneContext.settings.enableOnGUI = true;
 	m_SceneContext.useDeferredRendering = true;
 
@@ -36,7 +37,6 @@ void VO_GameScene::Initialize()
 	
 	// POST PROCESSING STACK
 	m_pPostMotionBlur = MaterialManager::Get()->CreateMaterial<PostMotionBlur>();
-	m_pPostMotionBlur->SetIsEnabled(false);
 
 	AddPostProcessingEffect(m_pPostMotionBlur);
 
