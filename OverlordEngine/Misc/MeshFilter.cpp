@@ -199,11 +199,11 @@ const VertexBufferData& MeshFilter::GetVertexBufferData(UINT inputLayoutId, UINT
 	return m_Meshes[subMeshId].buffers.vertexbuffers[possibleBuffer];
 }
 
-const VertexBufferData& MeshFilter::GetVertexBufferData(const SceneContext& sceneContext, BaseMaterial* pMaterial, UINT8 subMeshId, UINT8 techIndex)
+const VertexBufferData& MeshFilter::GetVertexBufferData(const SceneContext& sceneContext, BaseMaterial* pMaterial, UINT8 subMeshId)
 {
 	ASSERT_IF_(subMeshId >= m_Meshes.size())
 
-	auto& techniqueContext = pMaterial->GetTechniqueContext(techIndex);
+	auto& techniqueContext = pMaterial->GetTechniqueContext();
 	const int possibleBuffer = GetVertexBufferId(techniqueContext.inputLayoutID, subMeshId);
 
 	if (possibleBuffer < 0)

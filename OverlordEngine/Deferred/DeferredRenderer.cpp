@@ -35,7 +35,7 @@ void DeferredRenderer::Initialize()
 	for (size_t i = 0; i < RT_COUNT; i++)
 		m_RenderTargetViews[i] = m_GBuffer[i]->GetRenderTargetView();
 
-	//Collect SRVs (Ambient/Diffuse/Specular/Normal) + DepthSRV
+	//Collect SRVs (Ambient/Diffuse/Specular/Normal/Mask) + DepthSRV
 	for (size_t i = 0; i < SRV_COUNT - 1; i++)
 		m_ShaderResourceViews[i] = m_GBuffer[i]->GetColorShaderResourceView();
 
@@ -104,12 +104,12 @@ void DeferredRenderer::End(const SceneContext& sceneContext) const
 	//4. Volumetric Light Pass
 	m_pLightPassRenderer->VolumetricLightPass(sceneContext, m_ShaderResourceViews, m_pDefaultRenderTargetView);
 
-	//5. Unbind G-Buffer SRVs (Diffuse, Specular, Normal & Depth)
-	ID3D11ShaderResourceView* pSRV[SRV_COUNT - 1]{ nullptr };
-	pDeviceContext->PSSetShaderResources(0, SRV_COUNT - 1, pSRV);
+	//5. Unbind G-Buffer SRVs (Diffuse, Specular, Normal, Mask & Depth)
+	ID3D11ShaderResourceView* pSRV[SRV_COUNT]{ nullptr };
+	pDeviceContext->PSSetShaderResources(0, SRV_COUNT, pSRV);
 
 	//6. Reset Game RenderTarget (back to normal)
-	m_GameContext.pGame->SetRenderTarget(m_GBuffer[int(eGBufferId::LightAccumulation)]);
+	m_GameContext.pGame->SetRenderTarget(nullptr);
 
 	//DEBUG >> Visualize GBUFFER
 	//Draw ImGui (to default RT)

@@ -64,6 +64,8 @@ void VO_GameScene::Initialize()
 	m_pCamera->SetLookAhead(m_CameraLookAhead);
 	m_pCamera->SetOffsetDistance(m_CameraDistance);
 
+	m_pFreeCamera = AddChild(new FreeCamera());
+
 	// PARTICLE SYSTEMS
 	m_EmitterSettings.velocity = { 0.f, 2.f, 0.f };
 	m_EmitterSettings.minSize = { 0.3f, 1.2f };
@@ -155,6 +157,16 @@ void VO_GameScene::OnGUI()
 	// CAMERA SETTINGS
 	if(ImGui::CollapsingHeader("Camera Settings"))
 	{
+		if (ImGui::Button("Switch camera"))
+		{
+			isFreeCamActive = !isFreeCamActive;
+			m_pCamera->GetComponent<CameraComponent>()->SetActive(!isFreeCamActive);
+			m_pFreeCamera->GetComponent<CameraComponent>()->SetActive(isFreeCamActive);
+			m_pTimer->EnableDrawing(false);
+			m_pBannerLap->SetActive(false);
+			m_pBannerBest->SetActive(false);
+		}
+
 		ImGui::SliderFloat("Pitch", &m_CameraPitch, 0.f, 90.f);
 		// m_pCamera->SetPitch(m_CameraPitch);
 
@@ -398,7 +410,7 @@ void VO_GameScene::InitializeLighting()
 	light.intensity = 1.f;
 	light.range = 20.0f;
 	light.type = LightType::Point;
-	m_SceneContext.pLights->AddLight(light);
+	// m_SceneContext.pLights->AddLight(light);
 }
 
 void VO_GameScene::UpdateLighting()

@@ -87,6 +87,8 @@ private:
 	float m_CameraDistance{ 40.f };
 	float m_CameraPitch{ 40.f };
 	FollowCamera* m_pCamera{ nullptr };
+	FreeCamera* m_pFreeCamera{ nullptr };
+	bool isFreeCamActive{ false };
 #pragma endregion
 	
 #pragma region Vehicle Settings
