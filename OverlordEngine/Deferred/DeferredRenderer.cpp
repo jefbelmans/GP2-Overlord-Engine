@@ -29,6 +29,7 @@ void DeferredRenderer::Initialize()
 	m_GBuffer[int(eGBufferId::Diffuse)] = CreateRenderTarget(w, h, DXGI_FORMAT_R8G8B8A8_UNORM);
 	m_GBuffer[int(eGBufferId::Specular)] = CreateRenderTarget(w, h, DXGI_FORMAT_R8G8B8A8_UNORM); 
 	m_GBuffer[int(eGBufferId::Normal)] = CreateRenderTarget(w, h, DXGI_FORMAT_R32G32B32A32_FLOAT);
+	m_GBuffer[int(eGBufferId::Mask)] = CreateRenderTarget(w, h, DXGI_FORMAT_R16_UNORM);
 
 	//Collect References of RTVs
 	for (size_t i = 0; i < RT_COUNT; i++)
@@ -108,7 +109,7 @@ void DeferredRenderer::End(const SceneContext& sceneContext) const
 	pDeviceContext->PSSetShaderResources(0, SRV_COUNT - 1, pSRV);
 
 	//6. Reset Game RenderTarget (back to normal)
-	m_GameContext.pGame->SetRenderTarget(nullptr);
+	m_GameContext.pGame->SetRenderTarget(m_GBuffer[int(eGBufferId::LightAccumulation)]);
 
 	//DEBUG >> Visualize GBUFFER
 	//Draw ImGui (to default RT)

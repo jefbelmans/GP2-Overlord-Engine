@@ -2,11 +2,12 @@
 
 Texture2D gColorTexture;
 Texture2D gDepthTexture;
+Texture2D gMaskTexture;
 
 float4x4 gInverseViewProj;
 float4x4 gPreviousViewProj;
 
-int gNumSamples = 6;
+int gNumSamples = 2;
 
 SamplerState samPoint
 {
@@ -17,7 +18,7 @@ SamplerState samPoint
 
 DepthStencilState depthEnabled
 {
-    DepthEnable = true;
+    DepthEnable = TRUE;
     DepthWriteMask = ALL;
     DepthFunc = LESS_EQUAL;
 };
@@ -66,10 +67,17 @@ PS_INPUT VS(VS_INPUT input)
 //PIXEL SHADER
 //------------
 float4 PS(PS_INPUT input) : SV_Target
-{
+{    
+    float mask = gMaskTexture.Sample(samPoint, input.TexCoord).r;
+    float4 maskColor = float4(0, 0, 0, 1);
+    if (mask == 0.0f)
+    {
+        maskColor.xyz = gColorTexture.Sample(samPoint, input.TexCoord).xyz;
+    }
+        
     // Get the depth buffer value at this pixel.
-    float depth = gDepthTexture.Sample(samPoint, input.TexCoord);
-    
+    float depth = gDepthTexture.Sample(samPoint, input.TexCoord).r;
+   
     // H is the viewport position at this pixel in the range -1 to 1.    
     float4 H = float4(input.TexCoord.x * 2 - 1, (1 - input.TexCoord.y) * 2 - 1, depth, 1);
     
@@ -94,18 +102,29 @@ float4 PS(PS_INPUT input) : SV_Target
     float4 color = float4(0, 0, 0, 1);
     for(int i = 0; i < gNumSamples; ++i)
     { 
-        // Sample the color buffer along the velocity vector and add to color
-        color.xyz += gColorTexture.Sample(samPoint, input.TexCoord + velocity * i).xyz;
+        if (gMaskTexture.Sample(samPoint, input.TexCoord + velocity * i).r == 0.0f)
+        {
+            color.xyz += gColorTexture.Sample(samPoint, input.TexCoord).xyz;
+        }
+        else
+        {
+            // Sample the color buffer along the velocity vector and add to color
+            color.xyz += gColorTexture.Sample(samPoint, input.TexCoord + velocity * i).xyz;
+        }
     }
     
     color.xyz /= gNumSamples;
-    return color;
+    
+    if(mask == 1.0f)
+        return color;
+    else
+        return maskColor;
 }
 
 
 //TECHNIQUE
 //---------
-technique11 Grayscale
+technique11 MotionBlur
 {
     pass P0
     {

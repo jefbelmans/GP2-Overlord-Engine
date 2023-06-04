@@ -6,6 +6,7 @@
 #include "Materials/Shadow/DiffuseMaterial_Shadow_Skinned.h"
 #include "Materials/Post/PostMotionBlur.h"
 #include "Materials/BasicMaterial_Deferred.h"
+#include "Materials/BasicMaterial_DeferredStencil.h"
 
 float gSteerVsForwardSpeedData[2 * 8] =
 {
@@ -395,8 +396,8 @@ void VO_GameScene::InitializeLighting()
 	light.direction = { 0.f,0.f,1.f,0.f };
 	light.color = { 1.f, 0.1f, 0.1f, 1.f };
 	light.intensity = 1.f;
-	light.range = 5.0f;
-	light.type = LightType::Spot;
+	light.range = 20.0f;
+	light.type = LightType::Point;
 	m_SceneContext.pLights->AddLight(light);
 }
 
@@ -412,7 +413,7 @@ void VO_GameScene::ConstructScene()
 	auto pConeMaterial = PhysXManager::Get()->GetPhysics()->createMaterial(0.7f, 0.7f, 0.4f);
 
 	// MATERIALS
-	auto pVehicleMat = MaterialManager::Get()->CreateMaterial<BasicMaterial_Deferred>();
+	auto pVehicleMat = MaterialManager::Get()->CreateMaterial<BasicMaterial_DeferredStencil>();
 	pVehicleMat->SetDiffuseMap(L"Textures/F1_Car.png");
 
 	auto pTrackMat = MaterialManager::Get()->CreateMaterial<BasicMaterial_Deferred>();

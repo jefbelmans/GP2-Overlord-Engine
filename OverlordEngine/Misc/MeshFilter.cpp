@@ -160,6 +160,16 @@ void MeshFilter::BuildVertexBuffer(const SceneContext& sceneContext, BaseMateria
 	BuildVertexBuffer(sceneContext.d3dContext, pMaterial, subMeshId);
 }
 
+void MeshFilter::BuildVertexBuffer(const SceneContext& sceneContext, BaseMaterial* pMaterial, UINT8 subMeshId, UINT8 techIndex)
+{
+	auto& techiqueContext = pMaterial->GetTechniqueContext(techIndex);
+	if (techIndex == 1)
+	{
+
+	}
+	BuildVertexBuffer(sceneContext.d3dContext, techiqueContext.inputLayoutID, techiqueContext.inputLayoutSize, techiqueContext.pInputLayoutDescriptions, subMeshId);
+}
+
 void MeshFilter::BuildVertexBuffer(const D3D11Context& d3dContext, BaseMaterial* pMaterial, UINT8 subMeshId)
 {
 	auto& techiqueContext = pMaterial->GetTechniqueContext();
@@ -189,11 +199,11 @@ const VertexBufferData& MeshFilter::GetVertexBufferData(UINT inputLayoutId, UINT
 	return m_Meshes[subMeshId].buffers.vertexbuffers[possibleBuffer];
 }
 
-const VertexBufferData& MeshFilter::GetVertexBufferData(const SceneContext& sceneContext, BaseMaterial* pMaterial, UINT8 subMeshId)
+const VertexBufferData& MeshFilter::GetVertexBufferData(const SceneContext& sceneContext, BaseMaterial* pMaterial, UINT8 subMeshId, UINT8 techIndex)
 {
 	ASSERT_IF_(subMeshId >= m_Meshes.size())
 
-	auto& techniqueContext = pMaterial->GetTechniqueContext();
+	auto& techniqueContext = pMaterial->GetTechniqueContext(techIndex);
 	const int possibleBuffer = GetVertexBufferId(techniqueContext.inputLayoutID, subMeshId);
 
 	if (possibleBuffer < 0)

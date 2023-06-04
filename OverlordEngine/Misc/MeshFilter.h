@@ -155,7 +155,7 @@ public:
 	void BuildIndexBuffer(const SceneContext& sceneContext);
 	void BuildIndexBuffer(const D3D11Context& d3dContext);
 
-	const VertexBufferData& GetVertexBufferData(const SceneContext& sceneContext, BaseMaterial* pMaterial, UINT8 subMeshId = 0);
+	const VertexBufferData& GetVertexBufferData(const SceneContext& sceneContext, BaseMaterial* pMaterial, UINT8 subMeshId = 0, UINT8 techIndex = 0);
 	const VertexBufferData& GetVertexBufferData(UINT inputLayoutId, UINT8 subMeshId = 0) const;
 	ID3D11Buffer* GetIndexBuffer(UINT8 subMeshId = 0) const;
 
@@ -168,6 +168,7 @@ private:
 	friend class ModelAnimator;
 
 	void BuildVertexBuffer(const SceneContext& sceneContext, BaseMaterial* pMaterial, UINT8 subMeshId);
+	void BuildVertexBuffer(const SceneContext& sceneContext, BaseMaterial* pMaterial, UINT8 subMeshId, UINT8 techIndex);
 	void BuildVertexBuffer(const D3D11Context& d3dContext, BaseMaterial* pMaterial, UINT8 subMeshId);
 
 	void BuildVertexBuffer(const SceneContext& sceneContext, UINT inputLayoutID, UINT inputLayoutSize, const std::vector<ILDescription>& inputLayoutDescriptions, UINT8 subMeshId);

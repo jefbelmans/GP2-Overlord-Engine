@@ -223,7 +223,7 @@ void GameScene::RootDraw()
 		for (int i = 0; i < m_PostProcessingMaterials.size(); i++)
 		{
 			if (!m_PostProcessingMaterials[i]->IsEnabled()) continue;
-
+			
 			m_PostProcessingMaterials[i]->Draw(m_SceneContext, PREV_RT);
 			PREV_RT = m_PostProcessingMaterials[i]->GetOutput();
 		}
