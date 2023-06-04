@@ -7,7 +7,7 @@ Texture2D gMaskTexture;
 float4x4 gInverseViewProj;
 float4x4 gPreviousViewProj;
 
-int gNumSamples = 2;
+int gNumSamples = 32;
 
 SamplerState samPoint
 {
@@ -74,7 +74,7 @@ float4 PS(PS_INPUT input) : SV_Target
     {
         maskColor.xyz = gColorTexture.Sample(samPoint, input.TexCoord).xyz;
     }
-        
+    
     // Get the depth buffer value at this pixel.
     float depth = gDepthTexture.Sample(samPoint, input.TexCoord).r;
    
@@ -97,10 +97,10 @@ float4 PS(PS_INPUT input) : SV_Target
     previousPos /= previousPos.w;
     
     // Use this frame's position and last frame's to compute the pixel velocity.
-    float2 velocity = ((currentPos - previousPos) * 0.5f);
+    float2 velocity = ((currentPos - previousPos) * 0.5f) * 0.2f;
     
     float4 color = float4(0, 0, 0, 1);
-    for(int i = 0; i < gNumSamples; ++i)
+    for (int i = 0; i < gNumSamples; ++i)
     { 
         if (gMaskTexture.Sample(samPoint, input.TexCoord + velocity * i).r == 0.0f)
         {

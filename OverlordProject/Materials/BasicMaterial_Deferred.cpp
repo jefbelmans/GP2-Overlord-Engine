@@ -46,6 +46,11 @@ void BasicMaterial_Deferred::UseTransparency(bool /*enable*/)
 	//SetTechnique(enable ? L"Default_Alpha" : L"Default");
 }
 
+void BasicMaterial_Deferred::WriteToMask(bool enable)
+{
+	SetVariable_Scalar(L"gWriteToMask", enable);
+}
+
 void BasicMaterial_Deferred::InitializeEffectVariables()
 {
 }

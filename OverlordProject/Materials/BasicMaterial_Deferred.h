@@ -20,6 +20,7 @@ public:
 	void SetSpecularMap(TextureData* pTextureData);
 
 	void UseTransparency(bool enable);
+	void WriteToMask(bool enable);
 
 protected:
 	void InitializeEffectVariables() override;

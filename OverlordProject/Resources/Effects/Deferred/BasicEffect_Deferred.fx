@@ -21,6 +21,7 @@ float4x4 gWorldViewProj : WORLDVIEWPROJECTION;
 float4x4 gViewInverse : VIEWINVERSE;
 // The World Matrix
 float4x4 gWorld : WORLD;
+bool gWriteToMask = true;
 
 //STATES
 //******
@@ -256,8 +257,7 @@ PS_Output MainPS(VS_Output input){
 	
 	// MASK
 	//*****
-	
-    output.Mask = 1.0f;
+    output.Mask = gWriteToMask;
 	
 	return output;
 }
